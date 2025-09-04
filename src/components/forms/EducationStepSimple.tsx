@@ -256,17 +256,23 @@ export default function EducationStep() {
                       </Button>
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-3">
                       {watchedEducation[index]?.achievements?.map((achievement: string, achievementIndex: number) => (
-                        <Badge
-                          key={achievementIndex}
-                          variant="secondary"
-                          className="text-sm py-1 px-3 cursor-pointer hover:bg-red-100"
-                          onClick={() => removeAchievement(index, achievementIndex)}
-                        >
-                          {achievement}
-                          <span className="ml-2 text-red-500">×</span>
-                        </Badge>
+                        <div key={achievementIndex} className="flex items-center gap-1">
+                          <Badge
+                            variant="secondary"
+                            className="text-sm py-1 px-3"
+                          >
+                            {achievement}
+                          </Badge>
+                          <button
+                            type="button"
+                            onClick={() => removeAchievement(index, achievementIndex)}
+                            className="text-red-500 hover:text-red-700 text-lg leading-none"
+                          >
+                            ×
+                          </button>
+                        </div>
                       ))}
                     </div>
                   </div>
