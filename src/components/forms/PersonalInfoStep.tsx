@@ -362,7 +362,7 @@ export const PersonalInfoStep: React.FC = () => {
               <Input
                 label="البريد الإلكتروني"
                 type="email"
-                placeholder="ahmed@example.com"
+                placeholder="ali@example.com"
                 error={errors.email?.message}
                 required
                 {...register('email')}
@@ -370,7 +370,6 @@ export const PersonalInfoStep: React.FC = () => {
               <Input
                 label="رقم الهاتف"
                 type="tel"
-                placeholder="+966 50 123 4567"
                 error={errors.phone?.message}
                 required
                 {...register('phone')}

@@ -376,7 +376,6 @@ export default function AdditionalInfoStep() {
                           id={`reference-phone-${reference.id}`}
                           value={reference.phone}
                           onChange={(e) => handleUpdateReference(reference.id, 'phone', e.target.value)}
-                          placeholder="+966 50 123 4567"
                         />
                       </div>
 

@@ -390,7 +390,7 @@ export function parseFullName(fullName: string): { firstName: string; lastName: 
 /**
  * تنسيق رقم الهاتف
  */
-export function formatPhoneNumber(phone: string, countryCode: string = '+966'): string {
+export function formatPhoneNumber(phone: string, countryCode: string = ''): string {
   const cleaned = phone.replace(/\D/g, '');
   
   if (cleaned.length === 9 && !phone.startsWith('+')) {
