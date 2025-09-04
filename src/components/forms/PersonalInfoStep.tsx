@@ -457,7 +457,7 @@ export const PersonalInfoStep: React.FC = () => {
                     />
                   )}
                 </div>
-                <div className="sm:col-span-7">
+                <div className="sm:col-span-7 w-full">
                   {field.type === 'select' ? (
                     <select
                       value={field.value}
@@ -477,6 +477,7 @@ export const PersonalInfoStep: React.FC = () => {
                       type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
                       value={field.value}
                       onChange={(e) => handleUpdateCustomField(field.id, 'value', e.target.value)}
+                      className="w-full"
                     />
                   )}
                 </div>
