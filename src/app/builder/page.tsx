@@ -7,7 +7,11 @@ import { PersonalInfoStep } from '@/components/forms/PersonalInfoStep';
 import EducationStepSimple from '@/components/forms/EducationStepSimple';
 import ExperienceStep from '@/components/forms/ExperienceStep';
 import SkillsStepSimple from '@/components/forms/SkillsStepSimple';
+import LanguagesStep from '@/components/forms/LanguagesStep';
+import HobbiesStep from '@/components/forms/HobbiesStep';
+import AdditionalInfoStep from '@/components/forms/AdditionalInfoStep';
 import ReviewStep from '@/components/forms/ReviewStep';
+import ResumeTemplate from '@/components/resume/ResumeTemplate';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -46,21 +50,21 @@ const STEPS = [
     id: 'languages',
     title: 'اللغات',
     description: 'أضف اللغات التي تتقنها',
-    component: () => <div className="p-8 text-center">قريباً - قسم اللغات</div>,
+    component: LanguagesStep,
     icon: '🌐'
   },
   {
     id: 'hobbies',
     title: 'الهوايات',
     description: 'أضف هواياتك واهتماماتك',
-    component: () => <div className="p-8 text-center">قريباً - قسم الهوايات</div>,
+    component: HobbiesStep,
     icon: '🎯'
   },
   {
     id: 'additional',
     title: 'معلومات إضافية',
     description: 'أضف الدورات والإنجازات',
-    component: () => <div className="p-8 text-center">قريباً - قسم المعلومات الإضافية</div>,
+    component: AdditionalInfoStep,
     icon: '⭐'
   },
   {
@@ -141,7 +145,6 @@ const StepNavigation: React.FC<{
 // Resume Preview component (placeholder)
 const ResumePreview: React.FC = () => {
   const { formData } = useResumeStore();
-  const personalInfo = formData.data.personalInfo;
 
   return (
     <Card className="h-full">
@@ -152,80 +155,9 @@ const ResumePreview: React.FC = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {/* Mock CV Preview */}
-          <div className="bg-white border rounded-lg p-6 shadow-sm">
-            <div className="space-y-4">
-              {/* Header */}
-              <div className="text-center border-b pb-4">
-                {personalInfo?.profileImage && (
-                  <div className="w-20 h-20 mx-auto rounded-full overflow-hidden mb-3">
-                    <img 
-                      src={personalInfo.profileImage} 
-                      alt="صورة شخصية" 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {personalInfo?.firstName || 'الاسم الأول'} {personalInfo?.lastName || 'اسم العائلة'}
-                </h1>
-                <p className="text-gray-600">
-                  {personalInfo?.jobTitle || 'الوظيفة المطلوبة'}
-                </p>
-              </div>
-
-              {/* Contact Info */}
-              <div className="space-y-2">
-                <h2 className="font-semibold text-gray-900">معلومات الاتصال</h2>
-                <div className="grid grid-cols-1 gap-1 text-sm text-gray-600">
-                  {personalInfo?.email && (
-                    <div>📧 {personalInfo.email}</div>
-                  )}
-                  {personalInfo?.phone && (
-                    <div>📱 {personalInfo.phone}</div>
-                  )}
-                  {personalInfo?.address && (
-                    <div>📍 {personalInfo.address}</div>
-                  )}
-                  {personalInfo?.city && (
-                    <div>🏙️ {personalInfo.city}</div>
-                  )}
-                </div>
-              </div>
-
-              {/* Additional Info */}
-              {(personalInfo?.dateOfBirth || personalInfo?.nationality || personalInfo?.maritalStatus) && (
-                <div className="space-y-2">
-                  <h2 className="font-semibold text-gray-900">معلومات شخصية</h2>
-                  <div className="grid grid-cols-1 gap-1 text-sm text-gray-600">
-                    {personalInfo?.dateOfBirth && (
-                      <div>🎂 تاريخ الميلاد: {personalInfo.dateOfBirth}</div>
-                    )}
-                    {personalInfo?.nationality && (
-                      <div>🏁 الجنسية: {personalInfo.nationality}</div>
-                    )}
-                    {personalInfo?.maritalStatus && (
-                      <div>💍 الحالة الاجتماعية: {personalInfo.maritalStatus}</div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Custom Fields */}
-              {personalInfo?.customFields && personalInfo.customFields.length > 0 && (
-                <div className="space-y-2">
-                  <h2 className="font-semibold text-gray-900">معلومات إضافية</h2>
-                  <div className="space-y-1">
-                    {personalInfo.customFields.map((field) => (
-                      <div key={field.id} className="text-sm text-gray-600">
-                        <span className="font-medium">{field.label}:</span> {field.value}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+        <div className="border rounded-lg overflow-hidden bg-white max-h-[600px] overflow-y-auto">
+          <div style={{ transform: 'scale(0.6)', transformOrigin: 'top left', width: '166.67%' }}>
+            <ResumeTemplate resume={formData.data as any} />
           </div>
         </div>
       </CardContent>

@@ -1,22 +1,36 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useResumeStore } from '@/store/resumeStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import ResumeTemplate from '@/components/resume/ResumeTemplate';
+import { PDFExportService } from '@/utils/pdfExport';
 
 export default function ReviewStep() {
   const { formData } = useResumeStore();
   const [isGenerating, setIsGenerating] = useState(false);
+  const resumeRef = useRef<HTMLDivElement>(null);
 
   const generatePDF = async () => {
+    if (!resumeRef.current) {
+      console.error('Resume reference not found');
+      return;
+    }
+
     setIsGenerating(true);
     try {
-      // Here we would implement PDF generation
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate processing
-      console.log('PDF generated successfully');
+      // Prepare the element for export
+      await PDFExportService.prepareElementForExport(resumeRef.current);
+      
+      // Get optimal settings
+      const settings = PDFExportService.getOptimalSettings(formData.data as any);
+      
+      // Export to PDF
+      await PDFExportService.exportResumeToPDF(resumeRef.current, settings);
+      
     } catch (error) {
       console.error('Error generating PDF:', error);
     } finally {
@@ -47,100 +61,148 @@ export default function ReviewStep() {
         <p className="text-gray-600">راجع معلوماتك وقم بتصدير سيرتك الذاتية</p>
       </div>
 
-      {/* Personal Info Summary */}
-      {formData.data.personalInfo && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <span>👤</span>
-              المعلومات الشخصية
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <strong>الاسم:</strong> {formData.data.personalInfo.firstName} {formData.data.personalInfo.lastName}
-              </div>
-              <div>
-                <strong>المسمى الوظيفي:</strong> {formData.data.personalInfo.jobTitle}
-              </div>
-              <div>
-                <strong>البريد الإلكتروني:</strong> {formData.data.personalInfo.email}
-              </div>
-              <div>
-                <strong>الهاتف:</strong> {formData.data.personalInfo.phone}
-              </div>
+      {/* Live Resume Preview */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <span>�️</span>
+            معاينة حية للسيرة الذاتية
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="border rounded-lg overflow-hidden bg-white">
+            <div ref={resumeRef} style={{ transform: 'scale(0.8)', transformOrigin: 'top left', width: '125%' }}>
+              <ResumeTemplate resume={formData.data as any} />
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Education Summary */}
-      {formData.data.education && formData.data.education.length > 0 && (
+      {/* Quick Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Personal Info Summary */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <span>🎓</span>
-              التعليم ({formData.data.education.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {formData.data.education.map((edu, index) => (
-                <div key={index} className="p-3 bg-gray-50 rounded-lg">
-                  <div className="font-medium">{edu.degree} في {edu.field || edu.institution}</div>
-                  <div className="text-sm text-gray-600">{edu.institution}</div>
-                  <div className="text-sm text-gray-500">{edu.startDate} - {edu.endDate || 'الحاضر'}</div>
+          <CardContent className="pt-6">
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <span className="text-2xl">👤</span>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {formData.data.personalInfo ? '✓' : '✗'}
                 </div>
-              ))}
+                <p className="text-xs text-gray-600">المعلومات الشخصية</p>
+              </div>
             </div>
           </CardContent>
         </Card>
-      )}
 
-      {/* Experience Summary */}
-      {formData.data.experience && formData.data.experience.length > 0 && (
+        {/* Experience Summary */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <span>💼</span>
-              الخبرة المهنية ({formData.data.experience.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {formData.data.experience.map((exp, index) => (
-                <div key={index} className="p-3 bg-gray-50 rounded-lg">
-                  <div className="font-medium">{exp.position || exp.jobTitle} - {exp.company}</div>
-                  <div className="text-sm text-gray-600">{exp.city || exp.location}</div>
-                  <div className="text-sm text-gray-500">{exp.startDate} - {exp.endDate || 'الحاضر'}</div>
+          <CardContent className="pt-6">
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <span className="text-2xl">💼</span>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {formData.data.experience?.length || 0}
                 </div>
-              ))}
+                <p className="text-xs text-gray-600">خبرة مهنية</p>
+              </div>
             </div>
           </CardContent>
         </Card>
-      )}
 
-      {/* Skills Summary */}
-      {formData.data.skills && formData.data.skills.length > 0 && (
+        {/* Education Summary */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <span>🛠️</span>
-              المهارات ({formData.data.skills.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {formData.data.skills.map((skill, index) => (
-                <Badge key={index} variant="secondary" className="text-sm">
-                  {skill.name} ({skill.level})
-                </Badge>
-              ))}
+          <CardContent className="pt-6">
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <span className="text-2xl">🎓</span>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {formData.data.education?.length || 0}
+                </div>
+                <p className="text-xs text-gray-600">مؤهل دراسي</p>
+              </div>
             </div>
           </CardContent>
         </Card>
-      )}
+
+        {/* Skills Summary */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <span className="text-2xl">🛠️</span>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {formData.data.skills?.length || 0}
+                </div>
+                <p className="text-xs text-gray-600">مهارة</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Additional Sections Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Languages */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <span className="text-2xl">🌐</span>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {formData.data.languages?.length || 0}
+                </div>
+                <p className="text-xs text-gray-600">لغة</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Hobbies */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <span className="text-2xl">🎯</span>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {formData.data.hobbies?.length || 0}
+                </div>
+                <p className="text-xs text-gray-600">هواية</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Courses */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <span className="text-2xl">�</span>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {formData.data.courses?.length || 0}
+                </div>
+                <p className="text-xs text-gray-600">دورة تدريبية</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Achievements */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <span className="text-2xl">🏆</span>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {formData.data.achievements?.length || 0}
+                </div>
+                <p className="text-xs text-gray-600">إنجاز</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Export Options */}
       <Card>
@@ -156,16 +218,17 @@ export default function ReviewStep() {
               onClick={generatePDF}
               disabled={isGenerating}
               size="lg"
-              className="w-full"
+              className="w-full h-16 text-lg"
             >
               {isGenerating ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                   جاري إنشاء PDF...
                 </>
               ) : (
                 <>
-                  📄 تحميل PDF
+                  <span className="text-2xl mr-2">📄</span>
+                  تحميل PDF عالي الجودة
                 </>
               )}
             </Button>
@@ -174,14 +237,15 @@ export default function ReviewStep() {
               onClick={downloadJSON}
               variant="outline"
               size="lg"
-              className="w-full"
+              className="w-full h-16 text-lg"
             >
-              💾 حفظ البيانات (JSON)
+              <span className="text-2xl mr-2">💾</span>
+              حفظ البيانات (JSON)
             </Button>
           </div>
           
-          <div className="text-sm text-gray-600 text-center">
-            يمكنك تحميل سيرتك الذاتية بصيغة PDF أو حفظ البيانات لاستخدامها لاحقاً
+          <div className="text-sm text-gray-600 text-center p-4 bg-gray-50 rounded-lg">
+            💡 يمكنك تحميل سيرتك الذاتية بصيغة PDF عالية الجودة أو حفظ البيانات لاستخدامها لاحقاً
           </div>
         </CardContent>
       </Card>
@@ -198,6 +262,7 @@ export default function ReviewStep() {
           <ul className="space-y-2 text-sm text-gray-600">
             <li>• تأكد من مراجعة جميع المعلومات قبل التصدير</li>
             <li>• يمكنك العودة لأي خطوة لتعديل المعلومات</li>
+            <li>• ملف PDF سيكون بجودة عالية ومناسب للطباعة</li>
             <li>• احفظ نسخة من البيانات لاستخدامها مستقبلاً</li>
             <li>• يمكنك إنشاء عدة سير ذاتية بقوالب مختلفة</li>
           </ul>
