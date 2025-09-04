@@ -443,21 +443,33 @@ export const PersonalInfoStep: React.FC = () => {
               </Button>
             </div>
             {personalInfo.customFields?.map((field) => (
-              <div key={field.id} className="flex flex-col sm:grid sm:grid-cols-12 gap-4 items-start">
-                <div className="sm:col-span-4">
-                  {field.key ? (
-                    <div>
-                      <p className="text-base font-semibold">{field.label}</p>
-                    </div>
-                  ) : (
-                    <Input
-                      placeholder="اسم الحقل"
-                      value={field.label}
-                      onChange={(e) => handleUpdateCustomField(field.id, 'label', e.target.value)}
-                    />
-                  )}
+              <div key={field.id} className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    {field.key ? (
+                      <div>
+                        <p className="text-base font-semibold">{field.label}</p>
+                      </div>
+                    ) : (
+                      <Input
+                        placeholder="اسم الحقل"
+                        value={field.label}
+                        onChange={(e) => handleUpdateCustomField(field.id, 'label', e.target.value)}
+                      />
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => handleRemoveCustomField(field.id)}
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </Button>
                 </div>
-                <div className="sm:col-span-7 w-full">
+                <div className="w-full">
                   {field.type === 'select' ? (
                     <select
                       value={field.value}
@@ -480,18 +492,6 @@ export const PersonalInfoStep: React.FC = () => {
                       className="w-full"
                     />
                   )}
-                </div>
-                <div className="flex justify-center sm:col-span-1 sm:justify-end">
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => handleRemoveCustomField(field.id)}
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </Button>
                 </div>
               </div>
             ))}
