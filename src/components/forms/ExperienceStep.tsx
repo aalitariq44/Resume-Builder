@@ -18,7 +18,7 @@ type ExperienceFormData = {
 export default function ExperienceStep() {
   const { 
     formData, 
-    updateFormData, 
+    updateResume,
     addExperience, 
     updateExperience, 
     removeExperience 
@@ -29,7 +29,7 @@ export default function ExperienceStep() {
 
   const { register, control, handleSubmit, watch, setValue } = useForm<ExperienceFormData>({
     defaultValues: {
-      experience: formData.data.experience.length > 0 ? formData.data.experience : [{
+      experience: (formData.data.experience && formData.data.experience.length > 0) ? formData.data.experience : [{
         id: Date.now().toString(),
         jobTitle: '',
         company: '',
@@ -97,11 +97,8 @@ export default function ExperienceStep() {
   };
 
   const onSubmit = (data: ExperienceFormData) => {
-    updateFormData({
-      data: {
-        ...formData.data,
-        experience: data.experience
-      }
+    updateResume({
+      experience: data.experience
     });
   };
 
@@ -175,14 +172,14 @@ export default function ExperienceStep() {
 
                     <Input
                       label="تاريخ البداية *"
-                      type="month"
+                      type="date"
                       {...register(`experience.${index}.startDate`)}
                     />
 
                     <div>
                       <Input
                         label="تاريخ النهاية"
-                        type="month"
+                        type="date"
                         disabled={watchedExperience[index]?.isCurrentJob}
                         {...register(`experience.${index}.endDate`)}
                       />
