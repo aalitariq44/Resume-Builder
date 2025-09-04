@@ -26,6 +26,7 @@ export interface PersonalInfo {
 
 export interface CustomField {
   id: string;
+  key?: string; // للحقول الشائعة
   label: string;
   value: string;
   type: 'text' | 'number' | 'date' | 'select';

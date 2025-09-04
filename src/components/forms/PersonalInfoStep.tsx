@@ -266,6 +266,7 @@ export const PersonalInfoStep: React.FC = () => {
     if (field) {
       const newField = {
         id: generateId(),
+        key: field.key,
         label: field.label,
         value: '',
         type: field.type,
@@ -443,35 +444,35 @@ export const PersonalInfoStep: React.FC = () => {
             {personalInfo.customFields?.map((field) => (
               <div key={field.id} className="flex flex-col sm:grid sm:grid-cols-12 gap-4 items-start border rounded-lg p-4 bg-muted/20">
                 <div className="sm:col-span-4">
-                  <Input
-                    label="اسم الحقل"
-                    value={field.label}
-                    onChange={(e) => handleUpdateCustomField(field.id, 'label', e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    النوع: {field.type === 'text' ? 'نص' : field.type === 'number' ? 'رقم' : field.type === 'date' ? 'تاريخ' : 'قائمة'}
-                  </p>
-                </div>
-                <div className="sm:col-span-7">
-                  {field.type === 'select' ? (
+                  {field.key ? (
                     <div>
-                      <label className="text-sm font-medium mb-2 block">القيمة</label>
-                      <select
-                        value={field.value}
-                        onChange={(e) => handleUpdateCustomField(field.id, 'value', e.target.value)}
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      >
-                        <option value="">اختر قيمة</option>
-                        {getDisplayOptions(field).map((option: string, index: number) => (
-                          <option key={index} value={field.options?.[index] || option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
+                      <p className="text-base font-semibold">{field.label}</p>
                     </div>
                   ) : (
                     <Input
-                      label="القيمة"
+                      placeholder="اسم الحقل"
+                      value={field.label}
+                      onChange={(e) => handleUpdateCustomField(field.id, 'label', e.target.value)}
+                    />
+                  )}
+                </div>
+                <div className="sm:col-span-7">
+                  {field.type === 'select' ? (
+                    <select
+                      value={field.value}
+                      onChange={(e) => handleUpdateCustomField(field.id, 'value', e.target.value)}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      <option value="">اختر قيمة</option>
+                      {getDisplayOptions(field).map((option: string, index: number) => (
+                        <option key={index} value={field.options?.[index] || option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <Input
+                      placeholder="القيمة"
                       type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
                       value={field.value}
                       onChange={(e) => handleUpdateCustomField(field.id, 'value', e.target.value)}
