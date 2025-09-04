@@ -82,19 +82,25 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
 
           {/* Cropper */}
           <div className="relative">
-            <Cropper
-              ref={cropperRef}
-              src={imageSrc}
-              style={{ height: 400, width: '100%' }}
-              aspectRatio={1}
-              guides={true}
-              viewMode={1}
-              dragMode="move"
-              scalable={true}
-              cropBoxMovable={true}
-              cropBoxResizable={true}
-              background={false}
-            />
+            {imageSrc ? (
+              <Cropper
+                ref={cropperRef}
+                src={imageSrc}
+                style={{ height: 400, width: '100%' }}
+                aspectRatio={1}
+                guides={true}
+                viewMode={1}
+                dragMode="move"
+                scalable={true}
+                cropBoxMovable={true}
+                cropBoxResizable={true}
+                background={false}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-96 bg-muted rounded-lg">
+                <p className="text-muted-foreground">جاري تحميل الصورة...</p>
+              </div>
+            )}
           </div>
 
           <p className="text-sm text-muted-foreground text-center">
