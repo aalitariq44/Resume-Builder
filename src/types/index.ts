@@ -30,6 +30,7 @@ export interface CustomField {
   value: string;
   type: 'text' | 'number' | 'date' | 'select';
   options?: string[]; // للحقول من نوع select
+  displayOptions?: string[]; // لعرض الخيارات باللغة المحلية
 }
 
 export interface Education {

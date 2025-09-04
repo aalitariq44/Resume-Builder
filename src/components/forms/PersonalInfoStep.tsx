@@ -11,8 +11,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { cn, isValidEmail, isValidPhone, compressImage, createImageUrl } from '@/lib/utils';
+import { cn, isValidEmail, isValidPhone, compressImage, createImageUrl, generateId } from '@/lib/utils';
 import { ImageCropModal } from './ImageCropModal';
+
+// قائمة الحقول المخصصة الشائعة
+const COMMON_CUSTOM_FIELDS = [
+  { label: 'تاريخ الميلاد', type: 'date' as const, key: 'dateOfBirth' },
+  { label: 'محل الميلاد', type: 'text' as const, key: 'placeOfBirth' },
+  { label: 'الجنس', type: 'select' as const, key: 'gender', options: ['male', 'female', 'prefer-not-to-say'], displayOptions: ['ذكر', 'أنثى', 'أفضل عدم الإفصاح'] },
+  { label: 'الجنسية', type: 'text' as const, key: 'nationality' },
+  { label: 'الحالة الاجتماعية', type: 'select' as const, key: 'maritalStatus', options: ['single', 'married', 'divorced', 'widowed'], displayOptions: ['أعزب', 'متزوج', 'مطلق', 'أرمل'] },
+  { label: 'رخصة القيادة', type: 'select' as const, key: 'drivingLicense', options: ['true', 'false'], displayOptions: ['نعم', 'لا'] }
+];
 
 // Schema validation
 const personalInfoSchema = yup.object({
@@ -24,13 +34,7 @@ const personalInfoSchema = yup.object({
   address: yup.string().required('العنوان مطلوب'),
   city: yup.string().required('المدينة مطلوبة'),
   postalCode: yup.string(),
-  profileImage: yup.string(),
-  dateOfBirth: yup.string(),
-  placeOfBirth: yup.string(),
-  drivingLicense: yup.boolean(),
-  gender: yup.string().oneOf(['male', 'female', 'prefer-not-to-say']),
-  nationality: yup.string(),
-  maritalStatus: yup.string().oneOf(['single', 'married', 'divorced', 'widowed'])
+  profileImage: yup.string()
 });
 
 interface ImageCropperProps {
@@ -227,6 +231,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ image, onImageChange }) => 
 export const PersonalInfoStep: React.FC = () => {
   const { formData, updatePersonalInfo, addCustomField, updateCustomField, removeCustomField } = useResumeStore();
   const personalInfo = formData.data.personalInfo!;
+  const [selectedField, setSelectedField] = useState<string>('');
 
   const {
     register,
@@ -253,12 +258,41 @@ export const PersonalInfoStep: React.FC = () => {
     addCustomField();
   };
 
+  const handleAddCommonField = (fieldKey: string) => {
+    const field = COMMON_CUSTOM_FIELDS.find(f => f.key === fieldKey);
+    if (field) {
+      const newField = {
+        id: generateId(),
+        label: field.label,
+        value: '',
+        type: field.type,
+        options: field.options,
+        displayOptions: field.displayOptions
+      };
+      const updatedFields = [...(personalInfo.customFields || []), newField];
+      updatePersonalInfo({ customFields: updatedFields });
+      setSelectedField('');
+    }
+  };
+
   const handleUpdateCustomField = (id: string, field: string, value: any) => {
     updateCustomField(id, { [field]: value });
   };
 
   const handleRemoveCustomField = (id: string) => {
     removeCustomField(id);
+  };
+
+  const getDisplayValue = (field: any) => {
+    if (field.type === 'select' && field.options && field.displayOptions) {
+      const index = field.options.indexOf(field.value);
+      return index >= 0 ? field.displayOptions[index] : field.value;
+    }
+    return field.value;
+  };
+
+  const getDisplayOptions = (field: any) => {
+    return field.displayOptions || field.options || [];
   };
 
   // Watch form changes and update store
@@ -366,90 +400,36 @@ export const PersonalInfoStep: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Additional Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">معلومات إضافية (اختيارية)</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="تاريخ الميلاد"
-                type="date"
-                error={errors.dateOfBirth?.message}
-                {...register('dateOfBirth')}
-              />
-              <Input
-                label="محل الميلاد"
-                placeholder="الرياض، المملكة العربية السعودية"
-                error={errors.placeOfBirth?.message}
-                {...register('placeOfBirth')}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">الجنس</label>
-                <select
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  {...register('gender')}
-                >
-                  <option value="">اختر الجنس</option>
-                  <option value="male">ذكر</option>
-                  <option value="female">أنثى</option>
-                  <option value="prefer-not-to-say">أفضل عدم الإفصاح</option>
-                </select>
-              </div>
-
-              <Input
-                label="الجنسية"
-                placeholder="سعودي"
-                error={errors.nationality?.message}
-                {...register('nationality')}
-              />
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">الحالة الاجتماعية</label>
-                <select
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  {...register('maritalStatus')}
-                >
-                  <option value="">اختر الحالة</option>
-                  <option value="single">أعزب</option>
-                  <option value="married">متزوج</option>
-                  <option value="divorced">مطلق</option>
-                  <option value="widowed">أرمل</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <input
-                type="checkbox"
-                id="drivingLicense"
-                className="h-4 w-4 rounded border-gray-300"
-                {...register('drivingLicense')}
-              />
-              <label htmlFor="drivingLicense" className="text-sm font-medium">
-                يوجد رخصة قيادة
-              </label>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Custom Fields */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center justify-between">
               حقول مخصصة
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleAddCustomField}
-              >
-                إضافة حقل
-              </Button>
+              <div className="flex gap-2">
+                <select
+                  value={selectedField}
+                  onChange={(e) => setSelectedField(e.target.value)}
+                  className="flex h-9 w-48 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <option value="">اختر حقل شائع</option>
+                  {COMMON_CUSTOM_FIELDS
+                    .filter(field => !personalInfo.customFields?.some(cf => cf.label === field.label))
+                    .map((field) => (
+                      <option key={field.key} value={field.key}>
+                        {field.label}
+                      </option>
+                    ))}
+                </select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => selectedField ? handleAddCommonField(selectedField) : handleAddCustomField()}
+                  disabled={!selectedField && false}
+                >
+                  {selectedField ? 'إضافة الحقل المختار' : 'إضافة حقل مخصص'}
+                </Button>
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -478,12 +458,19 @@ export const PersonalInfoStep: React.FC = () => {
                 <div className="col-span-6">
                   {field.type === 'select' ? (
                     <div>
-                      <label className="text-sm font-medium mb-2 block">الخيارات (مفصولة بفاصلة)</label>
-                      <Input
-                        value={field.options?.join(', ') || ''}
-                        onChange={(e) => handleUpdateCustomField(field.id, 'options', e.target.value.split(', ').filter(Boolean))}
-                        placeholder="خيار 1, خيار 2, خيار 3"
-                      />
+                      <label className="text-sm font-medium mb-2 block">القيمة</label>
+                      <select
+                        value={field.value}
+                        onChange={(e) => handleUpdateCustomField(field.id, 'value', e.target.value)}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      >
+                        <option value="">اختر قيمة</option>
+                        {getDisplayOptions(field).map((option: string, index: number) => (
+                          <option key={index} value={field.options?.[index] || option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   ) : (
                     <Input
@@ -512,7 +499,7 @@ export const PersonalInfoStep: React.FC = () => {
             {(!personalInfo.customFields || personalInfo.customFields.length === 0) && (
               <div className="text-center py-8 text-muted-foreground">
                 <p>لا توجد حقول مخصصة</p>
-                <p className="text-sm">انقر على "إضافة حقل" لإضافة معلومات إضافية</p>
+                <p className="text-sm">اختر حقل شائع من القائمة أو انقر على "إضافة حقل مخصص" لإضافة معلومات إضافية</p>
               </div>
             )}
           </CardContent>
