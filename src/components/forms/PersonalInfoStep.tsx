@@ -407,34 +407,39 @@ export const PersonalInfoStep: React.FC = () => {
           <CardHeader>
             <CardTitle className="text-lg flex items-center justify-between">
               حقول مخصصة
-              <div className="flex gap-2">
-                <select
-                  value={selectedField}
-                  onChange={(e) => setSelectedField(e.target.value)}
-                  className="flex h-9 w-48 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                >
-                  <option value="">اختر حقل شائع</option>
-                  {COMMON_CUSTOM_FIELDS
-                    .filter(field => !personalInfo.customFields?.some(cf => cf.label === field.label))
-                    .map((field) => (
-                      <option key={field.key} value={field.key}>
-                        {field.label}
-                      </option>
-                    ))}
-                </select>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => selectedField ? handleAddCommonField(selectedField) : handleAddCustomField()}
-                  disabled={!selectedField && false}
-                >
-                  {selectedField ? 'إضافة الحقل المختار' : 'إضافة حقل مخصص'}
-                </Button>
-              </div>
+              <select
+                value={selectedField}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSelectedField(value);
+                  if (value) {
+                    handleAddCommonField(value);
+                  }
+                }}
+                className="flex h-9 w-48 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <option value="">اختر حقل شائع لإضافته</option>
+                {COMMON_CUSTOM_FIELDS
+                  .filter(field => !personalInfo.customFields?.some(cf => cf.label === field.label))
+                  .map((field) => (
+                    <option key={field.key} value={field.key}>
+                      {field.label}
+                    </option>
+                  ))}
+              </select>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAddCustomField}
+              >
+                إضافة حقل مخصص
+              </Button>
+            </div>
             {personalInfo.customFields?.map((field) => (
               <div key={field.id} className="grid grid-cols-12 gap-2 items-end">
                 <div className="col-span-3">
