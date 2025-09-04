@@ -442,7 +442,7 @@ export const PersonalInfoStep: React.FC = () => {
               </Button>
             </div>
             {personalInfo.customFields?.map((field) => (
-              <div key={field.id} className="flex flex-col sm:grid sm:grid-cols-12 gap-4 items-start border rounded-lg p-4 bg-muted/20">
+              <div key={field.id} className="flex flex-col sm:grid sm:grid-cols-12 gap-4 items-start">
                 <div className="sm:col-span-4">
                   {field.key ? (
                     <div>
