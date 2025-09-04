@@ -181,14 +181,14 @@ export default function EducationStep() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Input
                       label="تاريخ البداية *"
-                      type="month"
+                      type="date"
                       {...register(`education.${index}.startDate`)}
                     />
 
                     <div>
                       <Input
                         label="تاريخ النهاية"
-                        type="month"
+                        type="date"
                         disabled={watchedEducation[index]?.isCurrentlyStudying}
                         {...register(`education.${index}.endDate`)}
                       />
