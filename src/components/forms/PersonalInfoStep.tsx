@@ -431,11 +431,12 @@ export const PersonalInfoStep: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex justify-end">
+            <div className="flex justify-center sm:justify-end">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={handleAddCustomField}
               >
                 إضافة حقل مخصص
