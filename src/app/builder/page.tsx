@@ -308,7 +308,7 @@ export default function BuilderPage() {
           </div>
 
           {/* Preview Panel */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 hidden lg:block">
             <ResumePreview />
           </div>
         </div>
