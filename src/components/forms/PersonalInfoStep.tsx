@@ -150,11 +150,12 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ image, onImageChange }) => 
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="text-center mt-2 space-x-2 space-x-reverse">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-2 mt-2">
             <Button
               type="button"
               variant="outline"
               size="sm"
+              className="w-full sm:w-auto"
               onClick={handleChangeImage}
             >
               تغيير الصورة
@@ -163,6 +164,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ image, onImageChange }) => 
               type="button"
               variant="outline"
               size="sm"
+              className="w-full sm:w-auto"
               onClick={handleEditImage}
             >
               تعديل الصورة
@@ -171,6 +173,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ image, onImageChange }) => 
               type="button"
               variant="outline"
               size="sm"
+              className="w-full sm:w-auto"
               onClick={removeImage}
             >
               حذف الصورة
