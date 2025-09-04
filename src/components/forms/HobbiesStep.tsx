@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Hobby } from '@/types';
 
 export default function HobbiesStep() {
@@ -91,11 +91,16 @@ export default function HobbiesStep() {
                         value={hobby.level}
                         onValueChange={(value) => handleUpdateHobby(hobby.id, 'level', value)}
                       >
-                        {hobbyLevelOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر المستوى" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {hobbyLevelOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
                       </Select>
                     </div>
                   </div>
