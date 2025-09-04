@@ -27,17 +27,52 @@ export class PDFExportService {
       // Show loading indicator
       const loadingElement = this.showLoadingIndicator();
       
+      // Inject CSS to handle unsupported color functions
+      const styleElement = this.injectColorFallbackCSS(resumeElement);
+      
       // Configure html2canvas options for better quality
-      const canvas = await html2canvas(resumeElement, {
-        scale: 2, // Higher resolution
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        width: resumeElement.scrollWidth,
-        height: resumeElement.scrollHeight,
-        scrollX: 0,
-        scrollY: 0,
-      });
+      let canvas: HTMLCanvasElement;
+      try {
+        canvas = await html2canvas(resumeElement, {
+          scale: 2, // Higher resolution
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          width: resumeElement.scrollWidth,
+          height: resumeElement.scrollHeight,
+          scrollX: 0,
+          scrollY: 0,
+          ignoreElements: (element) => {
+            // Ignore elements with unsupported CSS
+            const computedStyle = window.getComputedStyle(element);
+            const color = computedStyle.color;
+            const backgroundColor = computedStyle.backgroundColor;
+            
+            // Check for unsupported color functions
+            const unsupportedColors = ['lab(', 'lch(', 'oklab(', 'oklch(', 'color(', 'hwb('];
+            const hasUnsupportedColor = unsupportedColors.some(func => 
+              color.includes(func) || backgroundColor.includes(func)
+            );
+            
+            return hasUnsupportedColor;
+          }
+        });
+      } catch (canvasError) {
+        console.warn('html2canvas failed with advanced options, trying fallback:', canvasError);
+        
+        // Fallback with simpler options
+        canvas = await html2canvas(resumeElement, {
+          scale: 1.5,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+        });
+      }
+
+      // Remove the injected style element
+      if (styleElement && styleElement.parentNode) {
+        styleElement.parentNode.removeChild(styleElement);
+      }
 
       // Calculate PDF dimensions
       const imgWidth = finalOptions.format === 'A4' ? 210 : 216; // mm
@@ -104,6 +139,9 @@ export class PDFExportService {
     try {
       const loadingElement = this.showLoadingIndicator();
       
+      // Inject CSS to handle unsupported color functions
+      const styleElement = this.injectColorFallbackCSS(resumeElement);
+      
       // Create a clone of the element for manipulation
       const clonedElement = resumeElement.cloneNode(true) as HTMLElement;
       clonedElement.style.position = 'absolute';
@@ -136,17 +174,49 @@ export class PDFExportService {
         }
 
         // Capture the current section
-        const canvas = await html2canvas(clonedElement, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#ffffff',
-          y: currentY,
-          height: Math.min(pageHeightPx, elementHeight - currentY),
-          width: clonedElement.scrollWidth,
-          scrollX: 0,
-          scrollY: currentY,
-        });
+        let canvas: HTMLCanvasElement;
+        try {
+          canvas = await html2canvas(clonedElement, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            y: currentY,
+            height: Math.min(pageHeightPx, elementHeight - currentY),
+            width: clonedElement.scrollWidth,
+            scrollX: 0,
+            scrollY: currentY,
+            ignoreElements: (element) => {
+              // Ignore elements with unsupported CSS
+              const computedStyle = window.getComputedStyle(element);
+              const color = computedStyle.color;
+              const backgroundColor = computedStyle.backgroundColor;
+              
+              // Check for unsupported color functions
+              const unsupportedColors = ['lab(', 'lch(', 'oklab(', 'oklch(', 'color(', 'hwb('];
+              const hasUnsupportedColor = unsupportedColors.some(func => 
+                color.includes(func) || backgroundColor.includes(func)
+              );
+              
+              return hasUnsupportedColor;
+            }
+          });
+        } catch (canvasError) {
+          console.warn('html2canvas failed for page section, trying fallback:', canvasError);
+          
+          // Fallback with simpler options
+          canvas = await html2canvas(clonedElement, {
+            scale: 1.5,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            y: currentY,
+            height: Math.min(pageHeightPx, elementHeight - currentY),
+            width: clonedElement.scrollWidth,
+            scrollX: 0,
+            scrollY: currentY,
+          });
+        }
 
         const imgData = canvas.toDataURL('image/png', finalOptions.quality);
         const imgHeight = (canvas.height * 0.264583); // Convert px to mm
@@ -159,6 +229,11 @@ export class PDFExportService {
 
       // Remove the cloned element
       document.body.removeChild(clonedElement);
+
+      // Remove the injected style element
+      if (styleElement && styleElement.parentNode) {
+        styleElement.parentNode.removeChild(styleElement);
+      }
 
       // Add metadata
       pdf.setProperties({
@@ -315,21 +390,81 @@ export class PDFExportService {
   }
 
   // Helper method to prepare element for PDF export
-  static prepareElementForExport(element: HTMLElement): void {
+  static prepareElementForExport(element: HTMLElement): Promise<void> {
     // Ensure all images are loaded
     const images = element.querySelectorAll('img');
     const imagePromises = Array.from(images).map(img => {
-      return new Promise((resolve) => {
+      return new Promise<void>((resolve, reject) => {
         if (img.complete) {
-          resolve(true);
+          resolve();
         } else {
-          img.onload = () => resolve(true);
-          img.onerror = () => resolve(false);
+          img.onload = () => resolve();
+          img.onerror = () => resolve(); // Continue even if image fails to load
+          // Set a timeout to avoid hanging
+          setTimeout(() => resolve(), 5000);
         }
       });
     });
 
-    return Promise.all(imagePromises) as any;
+    return Promise.all(imagePromises).then(() => undefined);
+  }
+
+  // Helper method to inject CSS for unsupported color functions
+  // This fixes the "Attempting to parse an unsupported color function" error
+  // that occurs when html2canvas encounters newer CSS color functions like lab(), lch(), etc.
+  private static injectColorFallbackCSS(element: HTMLElement): HTMLElement | null {
+    const style = document.createElement('style');
+    style.textContent = `
+      /* Fallback for unsupported color functions */
+      * {
+        --fallback-black: #000000;
+        --fallback-white: #ffffff;
+        --fallback-gray: #666666;
+      }
+
+      /* Override any lab, lch, oklab, oklch, color, hwb colors with fallbacks */
+      [style*="lab("],
+      [style*="lch("],
+      [style*="oklab("],
+      [style*="oklch("],
+      [style*="color("],
+      [style*="hwb("] {
+        color: var(--fallback-black) !important;
+        background-color: var(--fallback-white) !important;
+        border-color: var(--fallback-gray) !important;
+      }
+
+      /* Ensure all text elements have readable colors */
+      p, span, div, h1, h2, h3, h4, h5, h6, li, td, th, label {
+        color: var(--fallback-black) !important;
+      }
+
+      /* Handle background colors */
+      body, section, article, header, footer, main {
+        background-color: var(--fallback-white) !important;
+      }
+
+      /* Handle borders and outlines */
+      * {
+        border-color: var(--fallback-gray) !important;
+        outline-color: var(--fallback-gray) !important;
+      }
+
+      /* Handle box shadows and text shadows */
+      * {
+        box-shadow: none !important;
+        text-shadow: none !important;
+      }
+    `;
+
+    // Insert the style at the beginning of the head
+    const head = document.head || document.getElementsByTagName('head')[0];
+    if (head) {
+      head.insertBefore(style, head.firstChild);
+      return style;
+    }
+
+    return null;
   }
 
   // Method to get optimal export settings based on content
