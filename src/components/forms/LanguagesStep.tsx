@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useResumeStore } from '@/store/resumeStore';
@@ -7,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Language } from '@/types';
 
 export default function LanguagesStep() {
@@ -28,30 +26,12 @@ export default function LanguagesStep() {
     { value: 'C2', label: 'C2 - مستوى متقن' }
   ];
 
-  const skillLevelOptions = [
-    { value: 'poor', label: 'ضعيف' },
-    { value: 'fair', label: 'مقبول' },
-    { value: 'good', label: 'جيد' },
-    { value: 'excellent', label: 'ممتاز' }
-  ];
-
   const handleAddLanguage = () => {
     addLanguage();
   };
 
   const handleUpdateLanguage = (id: string, field: keyof Language, value: any) => {
     updateLanguage(id, { [field]: value });
-  };
-
-  const handleUpdateSkill = (id: string, skillType: string, value: string) => {
-    const language = languages.find(lang => lang.id === id);
-    if (language) {
-      const updatedSkills = {
-        ...language.skills,
-        [skillType]: value
-      };
-      updateLanguage(id, { skills: updatedSkills });
-    }
   };
 
   const handleRemoveLanguage = (id: string) => {
@@ -117,83 +97,17 @@ export default function LanguagesStep() {
                         value={language.level}
                         onValueChange={(value) => handleUpdateLanguage(language.id, 'level', value)}
                       >
-                        <option value="">اختر المستوى</option>
-                        {languageLevelOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر المستوى" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {languageLevelOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
                       </Select>
-                    </div>
-                  </div>
-
-                  {/* Detailed Skills (Optional) */}
-                  <div className="space-y-3">
-                    <Label className="text-sm font-medium">تفاصيل المهارات (اختياري)</Label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {/* Reading */}
-                      <div className="space-y-1">
-                        <Label className="text-xs">القراءة</Label>
-                        <Select
-                          value={language.skills?.reading || ''}
-                          onValueChange={(value) => handleUpdateSkill(language.id, 'reading', value)}
-                        >
-                          <option value="">غير محدد</option>
-                          {skillLevelOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </Select>
-                      </div>
-
-                      {/* Writing */}
-                      <div className="space-y-1">
-                        <Label className="text-xs">الكتابة</Label>
-                        <Select
-                          value={language.skills?.writing || ''}
-                          onValueChange={(value) => handleUpdateSkill(language.id, 'writing', value)}
-                        >
-                          <option value="">غير محدد</option>
-                          {skillLevelOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </Select>
-                      </div>
-
-                      {/* Speaking */}
-                      <div className="space-y-1">
-                        <Label className="text-xs">التحدث</Label>
-                        <Select
-                          value={language.skills?.speaking || ''}
-                          onValueChange={(value) => handleUpdateSkill(language.id, 'speaking', value)}
-                        >
-                          <option value="">غير محدد</option>
-                          {skillLevelOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </Select>
-                      </div>
-
-                      {/* Listening */}
-                      <div className="space-y-1">
-                        <Label className="text-xs">الاستماع</Label>
-                        <Select
-                          value={language.skills?.listening || ''}
-                          onValueChange={(value) => handleUpdateSkill(language.id, 'listening', value)}
-                        >
-                          <option value="">غير محدد</option>
-                          {skillLevelOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </Select>
-                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -227,7 +141,6 @@ export default function LanguagesStep() {
             <li>• أضف لغتك الأم أولاً</li>
             <li>• استخدم المستويات المعيارية (A1-C2) للغات الأجنبية</li>
             <li>• كن صادقاً في تقييم مستواك</li>
-            <li>• يمكنك إضافة تفاصيل المهارات للغات المهمة فقط</li>
           </ul>
         </CardContent>
       </Card>
