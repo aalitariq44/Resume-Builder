@@ -135,6 +135,23 @@ body {
   background: hsl(var(--muted-foreground));
 }
 
+/* Move default date picker icon to the right */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 10px;
+  left: auto;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+input[type="date"]::-moz-calendar-picker-indicator {
+  position: absolute;
+  right: 10px;
+  left: auto;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 /* Animations */
 @keyframes fadeIn {
   from { opacity: 0; }
