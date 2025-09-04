@@ -129,7 +129,7 @@ interface ResumeStore extends AppState {
   removeLanguage: (id: string) => void;
   
   // Actions for Hobbies
-  addHobby: () => void;
+  addHobby: (initialData?: Partial<Hobby>) => void;
   updateHobby: (id: string, updates: Partial<Hobby>) => void;
   removeHobby: (id: string) => void;
   
@@ -189,6 +189,9 @@ interface ResumeStore extends AppState {
 
 // Helper function to reorder arrays
 const reorder = <T>(list: T[], startIndex: number, endIndex: number): T[] => {
+  if (list.length === 0 || startIndex < 0 || startIndex >= list.length || endIndex < 0 || endIndex >= list.length) {
+    return list;
+  }
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
   result.splice(endIndex, 0, removed);
@@ -537,11 +540,12 @@ export const useResumeStore = create<ResumeStore>()(
       })),
 
       // Hobbies Actions
-      addHobby: () => set((state) => {
+      addHobby: (initialData = {}) => set((state) => {
         const newHobby: Hobby = {
           id: generateId(),
           name: '',
-          level: 'hobby'
+          level: 'hobby',
+          ...initialData
         };
         return {
           formData: {
@@ -807,7 +811,7 @@ export const useResumeStore = create<ResumeStore>()(
           ...state.formData,
           data: {
             ...state.formData.data,
-            theme: { ...state.formData.data.theme, ...theme }
+            theme: { ...createDefaultResume().theme, ...(state.formData.data.theme || {}), ...theme }
           },
           isDirty: true
         }
@@ -815,7 +819,7 @@ export const useResumeStore = create<ResumeStore>()(
 
       // Sections Actions
       toggleSection: (sectionId) => set((state) => {
-        const hiddenSections = state.formData.data.hiddenSections;
+        const hiddenSections = state.formData.data.hiddenSections || [];
         const newHiddenSections = hiddenSections.includes(sectionId)
           ? hiddenSections.filter(id => id !== sectionId)
           : [...hiddenSections, sectionId];
@@ -837,7 +841,7 @@ export const useResumeStore = create<ResumeStore>()(
           ...state.formData,
           data: {
             ...state.formData.data,
-            sectionOrder: reorder(state.formData.data.sectionOrder, startIndex, endIndex)
+            sectionOrder: reorder(state.formData.data.sectionOrder || [], startIndex, endIndex)
           },
           isDirty: true
         }

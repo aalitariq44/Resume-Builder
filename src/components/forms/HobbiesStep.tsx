@@ -152,15 +152,13 @@ export default function HobbiesStep() {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  addHobby();
-                  // Update the last added hobby with the suggestion
-                  setTimeout(() => {
-                    const newHobbies = formData.data.hobbies || [];
-                    if (newHobbies.length > 0) {
-                      const lastHobby = newHobbies[newHobbies.length - 1];
-                      updateHobby(lastHobby.id, { name: suggestion });
-                    }
-                  }, 100);
+                  const existingHobbies = formData.data.hobbies || [];
+                  const emptyHobby = existingHobbies.find(hobby => !hobby.name || hobby.name.trim() === '');
+                  if (emptyHobby) {
+                    updateHobby(emptyHobby.id, { name: suggestion });
+                  } else {
+                    addHobby({ name: suggestion });
+                  }
                 }}
                 className="justify-start text-xs p-2 h-auto"
               >
