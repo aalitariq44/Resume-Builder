@@ -272,24 +272,10 @@ const ResumePreview: React.FC = () => {
 
 export default function BuilderPage() {
   const { formData, setCurrentStep, nextStep, prevStep } = useResumeStore();
-  const [isAutoSaving, setIsAutoSaving] = useState(false);
 
   const currentStep = formData.currentStep;
   const totalSteps = STEPS.length;
   const CurrentStepComponent = STEPS[currentStep]?.component;
-
-  // Auto-save functionality
-  useEffect(() => {
-    if (formData.isDirty) {
-      setIsAutoSaving(true);
-      const timer = setTimeout(() => {
-        // Here you would save to localStorage or API
-        setIsAutoSaving(false);
-      }, 1000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [formData.isDirty]);
 
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
@@ -322,19 +308,6 @@ export default function BuilderPage() {
           </div>
 
           <div className="flex items-center space-x-4 space-x-reverse">
-            {isAutoSaving && (
-              <div className="flex items-center space-x-2 space-x-reverse text-sm text-muted-foreground">
-                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                <span>جاري الحفظ...</span>
-              </div>
-            )}
-            <div className="hidden md:flex items-center space-x-2 space-x-reverse text-sm text-muted-foreground">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span>تم الحفظ</span>
-            </div>
-            <Button variant="outline" size="sm">
-              حفظ ومتابعة لاحقاً
-            </Button>
             <Button size="sm">
               تصدير PDF
             </Button>
@@ -392,10 +365,7 @@ export default function BuilderPage() {
                       السابق
                     </Button>
 
-                    <div className="flex space-x-2 space-x-reverse">
-                      <Button variant="outline">
-                        حفظ كمسودة
-                      </Button>
+                    <div className="flex justify-end">
                       <Button
                         onClick={handleNext}
                         disabled={currentStep === totalSteps - 1}

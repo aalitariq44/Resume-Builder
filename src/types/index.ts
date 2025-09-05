@@ -245,7 +245,6 @@ export interface AppState {
   templates: Template[];
   currentTemplate: Template | null;
   isLoading: boolean;
-  isSaving: boolean;
   error: string | null;
   language: 'ar' | 'en';
   direction: 'rtl' | 'ltr';

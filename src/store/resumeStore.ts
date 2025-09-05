@@ -192,7 +192,6 @@ interface ResumeStore extends AppState {
   
   // Actions for App State
   setLoading: (loading: boolean) => void;
-  setSaving: (saving: boolean) => void;
   setError: (error: string | null) => void;
   setLanguage: (language: 'ar' | 'en') => void;
   setDirection: (direction: 'rtl' | 'ltr') => void;
@@ -224,7 +223,6 @@ export const useResumeStore = create<ResumeStore>()(
       templates: [],
       currentTemplate: null,
       isLoading: false,
-      isSaving: false,
       error: null,
       language: 'ar',
       direction: 'rtl',
@@ -866,22 +864,19 @@ export const useResumeStore = create<ResumeStore>()(
 
       // App State Actions
       setLoading: (loading) => set({ isLoading: loading }),
-      setSaving: (saving) => set({ isSaving: saving }),
       setError: (error) => set({ error }),
-      setLanguage: (language) => set({ language, direction: language === 'ar' ? 'rtl' : 'ltr' }),
+      setLanguage: (language: 'ar' | 'en') => set({ language, direction: language === 'ar' ? 'rtl' : 'ltr' }),
       setDirection: (direction) => set({ direction }),
       setAppTheme: (theme) => set({ theme }),
 
-      // Utility Actions
-      autoSave: () => {
-        const state = get();
-        if (state.formData.isDirty && !state.isSaving) {
-          // هنا يمكن إضافة منطق الحفظ التلقائي
-          state.markFormClean();
-        }
-      },
-
-      exportToJSON: () => {
+  // Utility Actions
+  autoSave: () => {
+    const state = get();
+    if (state.formData.isDirty) {
+      // هنا يمكن إضافة منطق الحفظ التلقائي
+      state.markFormClean();
+    }
+  },      exportToJSON: () => {
         const state = get();
         return JSON.stringify(state.formData.data, null, 2);
       },
