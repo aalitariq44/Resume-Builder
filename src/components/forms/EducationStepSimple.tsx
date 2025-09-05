@@ -293,11 +293,6 @@ export default function EducationStep() {
           </Button>
         </div>
 
-        <div className="flex justify-end pt-6">
-          <Button type="submit" size="lg" className="px-8">
-            حفظ والمتابعة
-          </Button>
-        </div>
       </form>
     </motion.div>
   );

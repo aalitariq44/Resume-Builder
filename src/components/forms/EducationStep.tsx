@@ -17,22 +17,19 @@ import { Badge } from '@/components/ui/badge';
 const educationSchema = yup.object().shape({
   education: yup.array().of(
     yup.object().shape({
+      id: yup.string().required(),
       degree: yup.string().required('الدرجة العلمية مطلوبة'),
       field: yup.string().required('مجال الدراسة مطلوب'),
       institution: yup.string().required('اسم المؤسسة التعليمية مطلوب'),
       location: yup.string().required('الموقع مطلوب'),
       startDate: yup.string().required('تاريخ البداية مطلوب'),
-      endDate: yup.string().when('isCurrentlyStudying', {
-        is: false,
-        then: (schema) => schema.required('تاريخ النهاية مطلوب'),
-        otherwise: (schema) => schema.notRequired(),
-      }),
-      isCurrentlyStudying: yup.boolean(),
+      endDate: yup.string().required('تاريخ النهاية مطلوب'),
+      isCurrentlyStudying: yup.boolean().required(),
       gpa: yup.string(),
       coursework: yup.string(),
-      achievements: yup.array().of(yup.string()),
+      achievements: yup.array().of(yup.string().required()),
     })
-  ),
+  ).required(),
 });
 
 type EducationFormData = {
@@ -321,11 +318,6 @@ export default function EducationStep() {
           </Button>
         </div>
 
-        <div className="flex justify-end pt-6">
-          <Button type="submit" size="lg" className="px-8">
-            حفظ والمتابعة
-          </Button>
-        </div>
       </form>
     </motion.div>
   );

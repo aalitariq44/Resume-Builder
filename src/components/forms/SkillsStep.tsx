@@ -16,26 +16,26 @@ type SkillsFormData = {
 };
 
 const skillCategories = [
-  'تقنية',
-  'لغات البرمجة',
-  'أدوات التطوير',
-  'إدارية',
-  'قيادية',
-  'تواصل',
-  'إبداعية',
-  'تحليلية',
-  'أخرى'
+  { value: 'technical', label: 'تقنية' },
+  { value: 'communication', label: 'تواصل' },
+  { value: 'time-management', label: 'إدارة الوقت' },
+  { value: 'problem-solving', label: 'حل المشكلات' },
+  { value: 'critical-thinking', label: 'التفكير النقدي' },
+  { value: 'leadership', label: 'قيادة' },
+  { value: 'personal', label: 'شخصية' },
+  { value: 'custom', label: 'أخرى' }
 ];
 
 const skillLevels = [
   { value: 'beginner', label: 'مبتدئ' },
   { value: 'intermediate', label: 'متوسط' },
-  { value: 'advanced', label: 'متقدم' },
-  { value: 'expert', label: 'خبير' }
+  { value: 'good', label: 'جيد' },
+  { value: 'very-good', label: 'جيد جداً' },
+  { value: 'excellent', label: 'ممتاز' }
 ];
 
 export default function SkillsStep() {
-  const { formData, updateFormData } = useResumeStore();
+  const { formData, updateResume } = useResumeStore();
 
   const { register, control, handleSubmit, watch, setValue } = useForm<SkillsFormData>({
     defaultValues: {
@@ -54,18 +54,15 @@ export default function SkillsStep() {
     append({
       id: Date.now().toString(),
       name: '',
-      category: 'تقنية',
+      category: 'technical',
       level: 'intermediate',
       yearsOfExperience: 1,
     });
   };
 
   const onSubmit = (data: SkillsFormData) => {
-    updateFormData({
-      data: {
-        ...formData.data,
-        skills: data.skills
-      }
+    updateResume({
+      skills: data.skills
     });
   };
 
@@ -122,15 +119,15 @@ export default function SkillsStep() {
                       </label>
                       <Select
                         value={watchedSkills[index]?.category}
-                        onValueChange={(value) => setValue(`skills.${index}.category`, value)}
+                        onValueChange={(value) => setValue(`skills.${index}.category`, value as Skill['category'])}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="اختر فئة المهارة" />
                         </SelectTrigger>
                         <SelectContent>
                           {skillCategories.map((category) => (
-                            <SelectItem key={category} value={category}>
-                              {category}
+                            <SelectItem key={category.value} value={category.value}>
+                              {category.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -145,7 +142,7 @@ export default function SkillsStep() {
                       </label>
                       <Select
                         value={watchedSkills[index]?.level}
-                        onValueChange={(value) => setValue(`skills.${index}.level`, value)}
+                        onValueChange={(value) => setValue(`skills.${index}.level`, value as Skill['level'])}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="اختر مستوى الإتقان" />
@@ -182,9 +179,10 @@ export default function SkillsStep() {
                         const currentLevel = watchedSkills[index]?.level;
                         const levelNumber = 
                           currentLevel === 'beginner' ? 1 :
-                          currentLevel === 'intermediate' ? 3 :
-                          currentLevel === 'advanced' ? 4 :
-                          currentLevel === 'expert' ? 5 : 3;
+                          currentLevel === 'intermediate' ? 2 :
+                          currentLevel === 'good' ? 3 :
+                          currentLevel === 'very-good' ? 4 :
+                          currentLevel === 'excellent' ? 5 : 3;
                         
                         return (
                           <div
@@ -216,11 +214,6 @@ export default function SkillsStep() {
           </Button>
         </div>
 
-        <div className="flex justify-end pt-6">
-          <Button type="submit" size="lg" className="px-8">
-            حفظ والمتابعة
-          </Button>
-        </div>
       </form>
     </motion.div>
   );
