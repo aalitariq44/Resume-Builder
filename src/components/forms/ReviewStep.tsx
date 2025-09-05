@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useResumeStore } from '@/store/resumeStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import PDFControlsSimple from '@/components/ui/PDFControlsSimple';
 
 export default function ReviewStep() {
   const { formData } = useResumeStore();
@@ -28,7 +29,15 @@ export default function ReviewStep() {
     >
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-bold text-gray-900">مراجعة السيرة الذاتية</h2>
-        <p className="text-gray-600">راجع معلوماتك وقم بحفظ البيانات</p>
+        <p className="text-gray-600">راجع معلوماتك وقم بتصدير السيرة الذاتية بصيغة PDF</p>
+      </div>
+
+      {/* PDF Export Section */}
+      <div className="mb-8">
+        <PDFControlsSimple 
+          resume={formData.data as any} 
+          showSystemInfo={false}
+        />
       </div>
 
       {/* Quick Summary */}

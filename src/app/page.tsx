@@ -92,6 +92,9 @@ export default function HomePage() {
             <Link href="#features" className="text-sm font-medium hover:text-primary transition-colors">
               المميزات
             </Link>
+            <Link href="/pdf-test" className="text-sm font-medium hover:text-primary transition-colors">
+              اختبار PDF
+            </Link>
             <Link href="#about" className="text-sm font-medium hover:text-primary transition-colors">
               حول
             </Link>
