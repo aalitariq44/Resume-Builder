@@ -3,6 +3,8 @@ import { ResumeService, ResumeMetadata } from '@/lib/firestore';
 import { Resume, PersonalInfo, Education, Experience, Skill, Language, Hobby, Course, Reference, Achievement, CustomSection } from '@/types';
 import { useResumeStore } from '@/store/resumeStore';
 import { toast } from 'sonner';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 // Hook لإدارة السير الذاتية مع Firebase
 export const useFirebaseResumes = (userId?: string) => {
@@ -11,6 +13,7 @@ export const useFirebaseResumes = (userId?: string) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [unsubscribe, setUnsubscribe] = useState<(() => void) | null>(null);
 
   // جلب جميع السير الذاتية للمستخدم
   const fetchResumes = useCallback(async () => {
@@ -49,6 +52,54 @@ export const useFirebaseResumes = (userId?: string) => {
       setLoading(false);
     }
   }, [userId]);
+
+  // الاستماع إلى تغييرات سيرة ذاتية واحدة في real-time
+  const subscribeToResume = useCallback((resumeId: string) => {
+    if (!userId) return;
+
+    // إلغاء الاشتراك السابق إذا كان موجوداً
+    if (unsubscribe) {
+      unsubscribe();
+    }
+
+    const resumeRef = doc(db, 'resumes', resumeId);
+    
+    const unsubscribeFn = onSnapshot(
+      resumeRef,
+      (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const data = docSnapshot.data();
+          
+          // التحقق من الصلاحية
+          if (data.userId !== userId) {
+            setError('غير مسموح بعرض هذه السيرة الذاتية');
+            return;
+          }
+
+          // تحويل البيانات من FirestoreResume إلى Resume
+          const { userId: _, createdAt, updatedAt, ...resumeData } = data;
+          const resume: Resume = {
+            ...resumeData,
+            id: docSnapshot.id,
+            createdAt: createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+            updatedAt: updatedAt?.toDate?.()?.toISOString() || new Date().toISOString()
+          };
+
+          setCurrentResume(resume);
+          setError(null);
+        } else {
+          setCurrentResume(null);
+          setError('السيرة الذاتية غير موجودة');
+        }
+      },
+      (error) => {
+        console.error('خطأ في الاستماع للتغييرات:', error);
+        setError('خطأ في تحديث البيانات');
+      }
+    );
+
+    setUnsubscribe(() => unsubscribeFn);
+  }, [userId, unsubscribe]);
 
   // إنشاء سيرة ذاتية جديدة
   const createResume = useCallback(async (resumeData: Omit<Resume, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -158,6 +209,15 @@ export const useFirebaseResumes = (userId?: string) => {
     fetchResumes();
   }, [fetchResumes]);
 
+  // تنظيف الـ listener عند الخروج
+  useEffect(() => {
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, [unsubscribe]);
+
   return {
     resumes,
     currentResume,
@@ -166,6 +226,7 @@ export const useFirebaseResumes = (userId?: string) => {
     saving,
     fetchResumes,
     fetchResume,
+    subscribeToResume,
     createResume,
     updateResume,
     deleteResume,

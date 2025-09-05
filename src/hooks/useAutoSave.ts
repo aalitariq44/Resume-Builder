@@ -11,7 +11,7 @@ import { useFirebaseStore } from '@/store/firebaseStore';
  */
 export const useAutoSave = (data: any, delay: number = 1000) => {
   const { autoSave, markFormDirty } = useResumeStore();
-  const { saveEducationToFirebase, saveExperienceToFirebase } = useFirebaseStore();
+  const { saveEducationToFirebase, saveExperienceToFirebase, saveSkillsToFirebase } = useFirebaseStore();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dataRef = useRef(data);
 
@@ -47,6 +47,9 @@ export const useAutoSave = (data: any, delay: number = 1000) => {
           } else if (cleanData[0]?.jobTitle) {
             // بيانات الخبرات العملية
             saveExperienceToFirebase(cleanData).catch(console.error);
+          } else if (cleanData[0]?.name && cleanData[0]?.level) {
+            // بيانات المهارات
+            saveSkillsToFirebase(cleanData).catch(console.error);
           }
         }
       }, delay);
@@ -79,6 +82,9 @@ export const useAutoSave = (data: any, delay: number = 1000) => {
           } else if (cleanData[0]?.jobTitle) {
             // بيانات الخبرات العملية
             saveExperienceToFirebase(cleanData).catch(console.error);
+          } else if (cleanData[0]?.name && cleanData[0]?.level) {
+            // بيانات المهارات
+            saveSkillsToFirebase(cleanData).catch(console.error);
           }
         }
       }

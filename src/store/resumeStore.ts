@@ -124,6 +124,7 @@ interface ResumeStore extends AppState {
   updateSkill: (id: string, updates: Partial<Skill>) => void;
   removeSkill: (id: string) => void;
   reorderSkills: (startIndex: number, endIndex: number) => void;
+  setSkills: (skills: Skill[]) => void;
   
   // Actions for Languages
   addLanguage: () => void;
@@ -631,6 +632,24 @@ export const useResumeStore = create<ResumeStore>()(
         });
         // حفظ تلقائي
         setTimeout(() => state.autoSave(), 100);
+      },
+
+      setSkills: (skills: Skill[]) => {
+        set({ 
+          formData: {
+            ...get().formData,
+            data: {
+              ...get().formData.data,
+              skills: skills
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        
+        // حفظ في Firebase
+        const firebaseStore = useFirebaseStore.getState();
+        firebaseStore.saveSkillsToFirebase(skills).catch(console.error);
       },
 
       // Languages Actions

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useResumeStore } from '@/store/resumeStore';
@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useAutoSave } from '@/hooks/useAutoSave';
 
 type SkillsFormData = {
   skills: Skill[];
@@ -35,7 +36,7 @@ const skillLevels = [
 ];
 
 export default function SkillsStep() {
-  const { formData, updateResume } = useResumeStore();
+  const { formData, updateResume, setSkills } = useResumeStore();
 
   const { register, control, handleSubmit, watch, setValue } = useForm<SkillsFormData>({
     defaultValues: {
@@ -49,6 +50,16 @@ export default function SkillsStep() {
   });
 
   const watchedSkills = watch('skills');
+
+  // حفظ تلقائي للتغييرات
+  useAutoSave(watchedSkills, 500);
+
+  // تحديث الـ store عند تغيير البيانات
+  useEffect(() => {
+    if (watchedSkills && watchedSkills.length > 0) {
+      setSkills(watchedSkills);
+    }
+  }, [watchedSkills, setSkills]);
 
   const addSkill = () => {
     append({
