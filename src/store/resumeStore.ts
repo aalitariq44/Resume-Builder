@@ -336,7 +336,26 @@ export const useResumeStore = create<ResumeStore>()(
       },
 
       // Education Actions
-      setEducation: (education) => set({ education }),
+      setEducation: (education) => {
+        set({ education });
+        
+        // حفظ في Firebase
+        const firebaseStore = useFirebaseStore.getState();
+        firebaseStore.saveEducationToFirebase(education).catch(console.error);
+        
+        // تحديث البيانات في formData
+        set((state) => ({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              education: education
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        }));
+      },
       
       addEducation: () => {
         const state = get();

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useResumeStore } from '@/store/resumeStore';
+import { useFirebaseStore } from '@/store/firebaseStore';
 
 /**
  * Hook لحفظ التغييرات تلقائياً مع debounce
@@ -10,6 +11,7 @@ import { useResumeStore } from '@/store/resumeStore';
  */
 export const useAutoSave = (data: any, delay: number = 1000) => {
   const { autoSave, markFormDirty } = useResumeStore();
+  const { saveEducationToFirebase } = useFirebaseStore();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dataRef = useRef(data);
 
@@ -36,6 +38,14 @@ export const useAutoSave = (data: any, delay: number = 1000) => {
       // جدولة حفظ جديد
       timeoutRef.current = setTimeout(() => {
         autoSave();
+        
+        // حفظ في Firebase حسب نوع البيانات
+        if (Array.isArray(cleanData) && cleanData.length > 0) {
+          if (cleanData[0]?.degree) {
+            // بيانات التعليم
+            saveEducationToFirebase(cleanData).catch(console.error);
+          }
+        }
       }, delay);
     }
 
@@ -44,7 +54,7 @@ export const useAutoSave = (data: any, delay: number = 1000) => {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [data, delay, autoSave, markFormDirty]);
+  }, [data, delay, autoSave, markFormDirty, saveEducationToFirebase]);
 
   // حفظ فوري عند إلغاء تحميل المكون
   useEffect(() => {
@@ -52,9 +62,22 @@ export const useAutoSave = (data: any, delay: number = 1000) => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         autoSave();
+        
+        // حفظ في Firebase عند إلغاء التحميل
+        const cleanData = data && typeof data === 'object' 
+          ? Object.fromEntries(
+              Object.entries(data).filter(([_, v]) => v !== undefined)
+            )
+          : data;
+        if (Array.isArray(cleanData) && cleanData.length > 0) {
+          if (cleanData[0]?.degree) {
+            // بيانات التعليم
+            saveEducationToFirebase(cleanData).catch(console.error);
+          }
+        }
       }
     };
-  }, [autoSave]);
+  }, [autoSave, saveEducationToFirebase, data]);
 };
 
 /**

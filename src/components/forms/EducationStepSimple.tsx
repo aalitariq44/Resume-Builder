@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useResumeStore } from '@/store/resumeStore';
@@ -31,7 +31,8 @@ export default function EducationStep() {
     formData, 
     addEducation, 
     updateEducation, 
-    removeEducation 
+    removeEducation,
+    setEducation
   } = useResumeStore();
   const [newAchievement, setNewAchievement] = useState('');
 
@@ -62,6 +63,13 @@ export default function EducationStep() {
 
   // حفظ تلقائي للتغييرات
   useAutoSave(watchedEducation, 500);
+
+  // تحديث الـ store عند تغيير البيانات
+  useEffect(() => {
+    if (watchedEducation && watchedEducation.length > 0) {
+      setEducation(watchedEducation);
+    }
+  }, [watchedEducation, setEducation]);
 
   const handleAddEducation = () => {
     const newEdu = {
