@@ -1,0 +1,14 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow all operations for resumes collection during development
+    match /resumes/{resumeId} {
+      allow read, write: if true;
+    }
+    
+    // Allow all operations for users collection during development
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+  }
+}
