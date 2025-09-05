@@ -51,7 +51,7 @@ export class PDFExportService {
   };
 
   private static readonly FONTS = {
-    arabic: 'assets/fonts/Cairo-Regular.ttf',
+    arabic: '/fonts/Cairo-Regular.ttf',
     english: 'Helvetica'
   };
 
@@ -80,13 +80,22 @@ export class PDFExportService {
         }
       });
 
+      // Register Arabic font if available
+      try {
+        const fontResponse = await fetch('/fonts/Cairo-Regular.ttf');
+        if (fontResponse.ok) {
+          const fontBuffer = await fontResponse.arrayBuffer();
+          doc.registerFont('Arabic', fontBuffer);
+          if (finalOptions.language === 'ar') {
+            doc.font('Arabic');
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to load Arabic font:', error);
+      }
+
       // Create blob stream
       const stream = doc.pipe(blobStream());
-
-      // Set document direction for Arabic
-      if (finalOptions.language === 'ar') {
-        doc.initForm();
-      }
 
       // Generate PDF content based on template
       await this.generatePDFContent(doc, resumeData, finalOptions);
@@ -184,6 +193,39 @@ export class PDFExportService {
     width: number
   ): Promise<number> {
     let currentY = y;
+
+    // Add profile image if available
+    if (personalInfo.profileImage) {
+      try {
+        // Convert base64 to buffer if it's a data URL
+        let imageBuffer: Buffer;
+        if (personalInfo.profileImage.startsWith('data:image/')) {
+          const base64Data = personalInfo.profileImage.split(',')[1];
+          imageBuffer = Buffer.from(base64Data, 'base64');
+        } else {
+          // If it's a URL, fetch it
+          const response = await fetch(personalInfo.profileImage);
+          const arrayBuffer = await response.arrayBuffer();
+          imageBuffer = Buffer.from(arrayBuffer);
+        }
+
+        // Calculate image dimensions (keep aspect ratio, max 80x80)
+        const imageSize = 80;
+        const imageX = x + width - imageSize; // Position on the right
+
+        // Add image
+        doc.image(imageBuffer, imageX, currentY, {
+          width: imageSize,
+          height: imageSize,
+          align: 'right'
+        });
+
+        // Adjust text width to leave space for image
+        width = width - imageSize - 20;
+      } catch (error) {
+        console.warn('Failed to add profile image to PDF:', error);
+      }
+    }
 
     // Name
     const fullName = `${personalInfo.firstName || ''} ${personalInfo.lastName || ''}`.trim();

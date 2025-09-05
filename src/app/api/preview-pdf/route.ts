@@ -27,6 +27,7 @@ interface ExtendedPersonalInfo {
   location?: string;
   address?: string;
   website?: string;
+  profileImage?: string;
 }
 
 export class PDFPreviewService {
@@ -159,6 +160,28 @@ export class PDFPreviewService {
     width: number
   ): number {
     let currentY = y;
+
+    // Add profile image if available
+    if ((personalInfo as any).profileImage) {
+      try {
+        const profileImage = (personalInfo as any).profileImage;
+        
+        // If it's a data URL, add it directly
+        if (profileImage.startsWith('data:image/')) {
+          // Calculate image dimensions (keep aspect ratio, max 25mm x 25mm)
+          const imageSize = 25;
+          const imageX = x + width - imageSize; // Position on the right
+
+          // Add image
+          doc.addImage(profileImage, 'JPEG', imageX, currentY, imageSize, imageSize);
+          
+          // Adjust text width to leave space for image
+          width = width - imageSize - 5;
+        }
+      } catch (error) {
+        console.warn('Failed to add profile image to PDF preview:', error);
+      }
+    }
 
     // Name
     const firstName = personalInfo?.firstName || '';

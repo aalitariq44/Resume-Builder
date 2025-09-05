@@ -21,8 +21,26 @@ export default function ReviewStep() {
   }, []);
 
   const generatePreview = async () => {
-    if (!formData.data?.personalInfo?.firstName) {
-      setPreviewError('يرجى إدخال المعلومات الشخصية أولاً');
+    const personalInfo = formData.data?.personalInfo;
+    
+    if (!personalInfo) {
+      setPreviewError('المعلومات الشخصية مطلوبة. يرجى العودة إلى الخطوة الأولى وإدخال بياناتك');
+      return;
+    }
+
+    const missingFields = [];
+    if (!personalInfo.firstName || personalInfo.firstName.trim() === '') {
+      missingFields.push('الاسم الأول');
+    }
+    if (!personalInfo.lastName || personalInfo.lastName.trim() === '') {
+      missingFields.push('الاسم الأخير');
+    }
+    if (!personalInfo.email || personalInfo.email.trim() === '') {
+      missingFields.push('البريد الإلكتروني');
+    }
+
+    if (missingFields.length > 0) {
+      setPreviewError(`يرجى إدخال المعلومات التالية: ${missingFields.join('، ')}`);
       return;
     }
 
@@ -30,20 +48,11 @@ export default function ReviewStep() {
     setPreviewError(null);
 
     try {
-      const response = await fetch('/api/preview-pdf', {
+      // Use export-pdf endpoint (PDFKit with Arabic support) for preview
+      const response = await fetch('/api/export-pdf', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          resumeData: formData.data,
-          options: {
-            format: 'A4',
-            orientation: 'portrait',
-            language: 'ar',
-            template: 'modern'
-          }
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resumeData: formData.data, options: { format: 'A4', orientation: 'portrait', language: 'ar', template: 'modern' } }),
       });
 
       if (!response.ok) {
@@ -51,8 +60,10 @@ export default function ReviewStep() {
         throw new Error(errorData.error || 'فشل في إنشاء معاينة PDF');
       }
 
-      const result = await response.json();
-      setPdfDataUri(result.pdfDataUri);
+  // Convert ArrayBuffer to blob URL for iframe
+  const arrayBuffer = await response.arrayBuffer();
+  const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+  setPdfDataUri(URL.createObjectURL(blob));
     } catch (err) {
       console.error('Error generating preview:', err);
       setPreviewError(err instanceof Error ? err.message : 'حدث خطأ غير متوقع');
@@ -62,6 +73,29 @@ export default function ReviewStep() {
   };
 
   const generatePDF = async () => {
+    const personalInfo = formData.data?.personalInfo;
+    
+    if (!personalInfo) {
+      showErrorMessage('المعلومات الشخصية مطلوبة. يرجى العودة إلى الخطوة الأولى وإدخال بياناتك');
+      return;
+    }
+
+    const missingFields = [];
+    if (!personalInfo.firstName || personalInfo.firstName.trim() === '') {
+      missingFields.push('الاسم الأول');
+    }
+    if (!personalInfo.lastName || personalInfo.lastName.trim() === '') {
+      missingFields.push('الاسم الأخير');
+    }
+    if (!personalInfo.email || personalInfo.email.trim() === '') {
+      missingFields.push('البريد الإلكتروني');
+    }
+
+    if (missingFields.length > 0) {
+      showErrorMessage(`يرجى إدخال المعلومات التالية: ${missingFields.join('، ')}`);
+      return;
+    }
+
     setIsGenerating(true);
     try {
       // Get optimal settings
@@ -183,9 +217,20 @@ export default function ReviewStep() {
               <div className="flex items-center justify-center h-64">
                 <div className="text-center text-red-600">
                   <p className="mb-4">❌ {previewError}</p>
-                  <Button onClick={generatePreview} variant="outline" size="sm">
-                    إعادة المحاولة
-                  </Button>
+                  <div className="space-y-2">
+                    <Button onClick={generatePreview} variant="outline" size="sm">
+                      إعادة المحاولة
+                    </Button>
+                    <br />
+                    <Button 
+                      onClick={() => window.location.href = '/builder'} 
+                      variant="outline" 
+                      size="sm"
+                      className="mt-2"
+                    >
+                      العودة لإدخال البيانات
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
