@@ -72,9 +72,9 @@ export default function ResumeTemplate({ resume: propResume, className = '' }: R
   return (
     <div className={`bg-white shadow-lg ${className}`} style={{ fontFamily: 'Cairo, sans-serif' }}>
       {/* Header Section */}
-      <div className="bg-gray-50 p-8 text-center border-b">
+      <div className="bg-gray-50 p-6 text-center border-b">
         {personalInfo.profileImage && (
-          <div className="w-24 h-24 mx-auto rounded-full overflow-hidden mb-4 border-4 border-white shadow-md">
+          <div className="w-20 h-20 mx-auto rounded-full overflow-hidden mb-3 border-4 border-white shadow-md">
             <img 
               src={personalInfo.profileImage} 
               alt="صورة شخصية" 
@@ -83,16 +83,16 @@ export default function ResumeTemplate({ resume: propResume, className = '' }: R
           </div>
         )}
         
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
           {personalInfo.firstName} {personalInfo.lastName}
         </h1>
         
         {personalInfo.jobTitle && (
-          <p className="text-xl text-gray-600 mb-4">{personalInfo.jobTitle}</p>
+          <p className="text-lg text-gray-600 mb-3">{personalInfo.jobTitle}</p>
         )}
 
         {/* Contact Information */}
-        <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-600">
+        <div className="flex flex-wrap justify-center gap-3 text-sm text-gray-600">
           {personalInfo.email && (
             <div className="flex items-center gap-1">
               <span>📧</span>
@@ -120,7 +120,7 @@ export default function ResumeTemplate({ resume: propResume, className = '' }: R
         </div>
       </div>
 
-      <div className="p-8 space-y-8">
+      <div className="p-6 space-y-6">
         {/* Personal Information */}
         {(personalInfo.dateOfBirth || personalInfo.nationality || personalInfo.maritalStatus || 
           (personalInfo.customFields && personalInfo.customFields.length > 0)) && (

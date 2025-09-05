@@ -1,24 +1,62 @@
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-import { Resume } from '@/types';
+// Dynamic imports for server-side only
+let PDFDocument: any;
+let blobStream: any;
+
+if (typeof window === 'undefined') {
+  // Only import on server side
+  PDFDocument = require('pdfkit');
+  blobStream = require('blob-stream');
+}
+import { Resume, PersonalInfo } from '@/types';
 
 export interface PDFExportOptions {
   format?: 'A4' | 'Letter';
   orientation?: 'portrait' | 'landscape';
-  quality?: number;
+  margins?: {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  };
   filename?: string;
+  language?: 'ar' | 'en';
+  template?: 'modern' | 'classic' | 'minimal' | 'creative';
+}
+
+// Extend PersonalInfo type to include missing properties
+interface ExtendedPersonalInfo extends PersonalInfo {
+  summary?: string;
+  location?: string;
+  website?: string;
 }
 
 export class PDFExportService {
   private static defaultOptions: PDFExportOptions = {
     format: 'A4',
     orientation: 'portrait',
-    quality: 1.0,
-    filename: 'resume.pdf'
+    margins: { top: 50, bottom: 50, left: 50, right: 50 },
+    filename: 'resume.pdf',
+    language: 'ar',
+    template: 'modern'
+  };
+
+  private static readonly COLORS = {
+    primary: '#2563eb',
+    secondary: '#64748b',
+    accent: '#f59e0b',
+    text: '#1f2937',
+    lightGray: '#f3f4f6',
+    darkGray: '#374151',
+    white: '#ffffff'
+  };
+
+  private static readonly FONTS = {
+    arabic: 'assets/fonts/Cairo-Regular.ttf',
+    english: 'Helvetica'
   };
 
   static async exportResumeToPDF(
-    resumeElement: HTMLElement,
+    resumeData: Resume,
     options: PDFExportOptions = {}
   ): Promise<void> {
     const finalOptions = { ...this.defaultOptions, ...options };
@@ -27,101 +65,61 @@ export class PDFExportService {
       // Show loading indicator
       const loadingElement = this.showLoadingIndicator();
       
-      // Inject CSS to handle unsupported color functions
-      const styleElement = this.injectColorFallbackCSS(resumeElement);
-      
-      // Configure html2canvas options for better quality
-      let canvas: HTMLCanvasElement;
-      try {
-        canvas = await html2canvas(resumeElement, {
-          scale: 2, // Higher resolution
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#ffffff',
-          width: resumeElement.scrollWidth,
-          height: resumeElement.scrollHeight,
-          scrollX: 0,
-          scrollY: 0,
-          ignoreElements: (element) => {
-            // Ignore elements with unsupported CSS
-            const computedStyle = window.getComputedStyle(element);
-            const color = computedStyle.color;
-            const backgroundColor = computedStyle.backgroundColor;
-            
-            // Check for unsupported color functions
-            const unsupportedColors = ['lab(', 'lch(', 'oklab(', 'oklch(', 'color(', 'hwb('];
-            const hasUnsupportedColor = unsupportedColors.some(func => 
-              color.includes(func) || backgroundColor.includes(func)
-            );
-            
-            return hasUnsupportedColor;
-          }
-        });
-      } catch (canvasError) {
-        console.warn('html2canvas failed with advanced options, trying fallback:', canvasError);
+      // Create new PDF document
+      const doc = new PDFDocument({
+        size: finalOptions.format,
+        layout: finalOptions.orientation,
+        margins: finalOptions.margins,
+        info: {
+          Title: finalOptions.filename?.replace('.pdf', '') || 'Resume',
+          Author: `${resumeData.personalInfo?.firstName || ''} ${resumeData.personalInfo?.lastName || ''}`.trim(),
+          Subject: 'Resume/CV',
+          Creator: 'Resume Builder Professional',
+          Producer: 'PDFKit',
+          Keywords: 'resume, cv, professional, career'
+        }
+      });
+
+      // Create blob stream
+      const stream = doc.pipe(blobStream());
+
+      // Set document direction for Arabic
+      if (finalOptions.language === 'ar') {
+        doc.initForm();
+      }
+
+      // Generate PDF content based on template
+      await this.generatePDFContent(doc, resumeData, finalOptions);
+
+      // Finalize the PDF
+      doc.end();
+
+      // Handle the stream
+      stream.on('finish', () => {
+        const blob = stream.toBlob('application/pdf');
+        const url = URL.createObjectURL(blob);
         
-        // Fallback with simpler options
-        canvas = await html2canvas(resumeElement, {
-          scale: 1.5,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#ffffff',
-        });
-      }
-
-      // Remove the injected style element
-      if (styleElement && styleElement.parentNode) {
-        styleElement.parentNode.removeChild(styleElement);
-      }
-
-      // Calculate PDF dimensions
-      const imgWidth = finalOptions.format === 'A4' ? 210 : 216; // mm
-      const imgHeight = finalOptions.format === 'A4' ? 297 : 279; // mm
-      
-      const canvasWidth = canvas.width;
-      const canvasHeight = canvas.height;
-      
-      // Calculate scaling to fit the page
-      const ratio = Math.min(
-        imgWidth / (canvasWidth * 0.264583), // Convert px to mm
-        imgHeight / (canvasHeight * 0.264583)
-      );
-      
-      const scaledWidth = (canvasWidth * 0.264583) * ratio;
-      const scaledHeight = (canvasHeight * 0.264583) * ratio;
-
-      // Create PDF
-      const pdf = new jsPDF({
-        orientation: finalOptions.orientation,
-        unit: 'mm',
-        format: finalOptions.format?.toLowerCase() as 'a4' | 'letter'
+        // Create download link
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = finalOptions.filename || 'resume.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Cleanup
+        URL.revokeObjectURL(url);
+        
+        // Hide loading indicator and show success
+        this.hideLoadingIndicator(loadingElement);
+        this.showSuccessMessage();
       });
 
-      // Add the image to PDF
-      const imgData = canvas.toDataURL('image/png', finalOptions.quality);
-      
-      // Center the image on the page
-      const x = (imgWidth - scaledWidth) / 2;
-      const y = (imgHeight - scaledHeight) / 2;
-      
-      pdf.addImage(imgData, 'PNG', x, y, scaledWidth, scaledHeight);
-
-      // Add metadata
-      pdf.setProperties({
-        title: finalOptions.filename?.replace('.pdf', '') || 'Resume',
-        subject: 'Resume/CV',
-        author: 'Resume Builder',
-        creator: 'Resume Builder App'
+      stream.on('error', (error: any) => {
+        console.error('PDF generation error:', error);
+        this.hideLoadingIndicator(loadingElement);
+        this.showErrorMessage();
       });
-
-      // Save the PDF
-      pdf.save(finalOptions.filename || 'resume.pdf');
-      
-      // Hide loading indicator
-      this.hideLoadingIndicator(loadingElement);
-      
-      // Show success message
-      this.showSuccessMessage();
       
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -130,133 +128,328 @@ export class PDFExportService {
     }
   }
 
-  static async exportMultiPageResumeToPDF(
-    resumeElement: HTMLElement,
-    options: PDFExportOptions = {}
+  private static async generatePDFContent(
+    doc: InstanceType<typeof PDFDocument>,
+    resumeData: Resume,
+    options: PDFExportOptions
   ): Promise<void> {
-    const finalOptions = { ...this.defaultOptions, ...options };
-    
-    try {
-      const loadingElement = this.showLoadingIndicator();
-      
-      // Inject CSS to handle unsupported color functions
-      const styleElement = this.injectColorFallbackCSS(resumeElement);
-      
-      // Create a clone of the element for manipulation
-      const clonedElement = resumeElement.cloneNode(true) as HTMLElement;
-      clonedElement.style.position = 'absolute';
-      clonedElement.style.left = '-9999px';
-      clonedElement.style.top = '0';
-      clonedElement.style.width = '794px'; // A4 width in pixels at 96 DPI
-      document.body.appendChild(clonedElement);
+    const { margins } = options;
+    let currentY = margins?.top || 50;
+    const pageWidth = doc.page.width;
+    const contentWidth = pageWidth - (margins?.left || 50) - (margins?.right || 50);
+    const leftMargin = margins?.left || 50;
 
-      // Create PDF
-      const pdf = new jsPDF({
-        orientation: finalOptions.orientation,
-        unit: 'mm',
-        format: finalOptions.format?.toLowerCase() as 'a4' | 'letter'
-      });
+    // Header Section - Personal Information
+    if (resumeData.personalInfo) {
+      currentY = await this.addPersonalInfo(doc, resumeData.personalInfo, leftMargin, currentY, contentWidth);
+      currentY += 30;
+    }
 
-      const pageHeight = finalOptions.format === 'A4' ? 297 : 279; // mm
-      const pageWidth = finalOptions.format === 'A4' ? 210 : 216; // mm
-      
-      // Calculate how many pages we need
-      const elementHeight = clonedElement.scrollHeight;
-      const pixelsPerMM = 3.7795275591; // 96 DPI conversion
-      const pageHeightPx = pageHeight * pixelsPerMM;
-      
-      let currentY = 0;
-      let pageIndex = 0;
+    // Professional Summary
+    const extendedPersonalInfo = resumeData.personalInfo as ExtendedPersonalInfo;
+    if (extendedPersonalInfo?.summary) {
+      currentY = await this.addSection(doc, 'الملخص المهني', extendedPersonalInfo.summary, leftMargin, currentY, contentWidth);
+      currentY += 25;
+    }
 
-      while (currentY < elementHeight) {
-        if (pageIndex > 0) {
-          pdf.addPage();
-        }
+    // Experience Section
+    if (resumeData.experience && resumeData.experience.length > 0) {
+      currentY = await this.addExperienceSection(doc, resumeData.experience, leftMargin, currentY, contentWidth);
+      currentY += 25;
+    }
 
-        // Capture the current section
-        let canvas: HTMLCanvasElement;
-        try {
-          canvas = await html2canvas(clonedElement, {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: '#ffffff',
-            y: currentY,
-            height: Math.min(pageHeightPx, elementHeight - currentY),
-            width: clonedElement.scrollWidth,
-            scrollX: 0,
-            scrollY: currentY,
-            ignoreElements: (element) => {
-              // Ignore elements with unsupported CSS
-              const computedStyle = window.getComputedStyle(element);
-              const color = computedStyle.color;
-              const backgroundColor = computedStyle.backgroundColor;
-              
-              // Check for unsupported color functions
-              const unsupportedColors = ['lab(', 'lch(', 'oklab(', 'oklch(', 'color(', 'hwb('];
-              const hasUnsupportedColor = unsupportedColors.some(func => 
-                color.includes(func) || backgroundColor.includes(func)
-              );
-              
-              return hasUnsupportedColor;
-            }
-          });
-        } catch (canvasError) {
-          console.warn('html2canvas failed for page section, trying fallback:', canvasError);
-          
-          // Fallback with simpler options
-          canvas = await html2canvas(clonedElement, {
-            scale: 1.5,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: '#ffffff',
-            y: currentY,
-            height: Math.min(pageHeightPx, elementHeight - currentY),
-            width: clonedElement.scrollWidth,
-            scrollX: 0,
-            scrollY: currentY,
-          });
-        }
+    // Education Section
+    if (resumeData.education && resumeData.education.length > 0) {
+      currentY = await this.addEducationSection(doc, resumeData.education, leftMargin, currentY, contentWidth);
+      currentY += 25;
+    }
 
-        const imgData = canvas.toDataURL('image/png', finalOptions.quality);
-        const imgHeight = (canvas.height * 0.264583); // Convert px to mm
-        
-        pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, Math.min(pageHeight, imgHeight));
-        
-        currentY += pageHeightPx;
-        pageIndex++;
-      }
+    // Skills Section
+    if (resumeData.skills && resumeData.skills.length > 0) {
+      currentY = await this.addSkillsSection(doc, resumeData.skills, leftMargin, currentY, contentWidth);
+      currentY += 25;
+    }
 
-      // Remove the cloned element
-      document.body.removeChild(clonedElement);
-
-      // Remove the injected style element
-      if (styleElement && styleElement.parentNode) {
-        styleElement.parentNode.removeChild(styleElement);
-      }
-
-      // Add metadata
-      pdf.setProperties({
-        title: finalOptions.filename?.replace('.pdf', '') || 'Resume',
-        subject: 'Resume/CV',
-        author: 'Resume Builder',
-        creator: 'Resume Builder App'
-      });
-
-      // Save the PDF
-      pdf.save(finalOptions.filename || 'resume.pdf');
-      
-      this.hideLoadingIndicator(loadingElement);
-      this.showSuccessMessage();
-      
-    } catch (error) {
-      console.error('Error generating multi-page PDF:', error);
-      this.showErrorMessage();
-      throw error;
+    // Languages Section
+    if (resumeData.languages && resumeData.languages.length > 0) {
+      currentY = await this.addLanguagesSection(doc, resumeData.languages, leftMargin, currentY, contentWidth);
     }
   }
 
-  static generateFilename(personalInfo: any): string {
+  private static async addPersonalInfo(
+    doc: InstanceType<typeof PDFDocument>,
+    personalInfo: ExtendedPersonalInfo,
+    x: number,
+    y: number,
+    width: number
+  ): Promise<number> {
+    let currentY = y;
+
+    // Name
+    const fullName = `${personalInfo.firstName || ''} ${personalInfo.lastName || ''}`.trim();
+    if (fullName) {
+      doc.fontSize(24)
+         .fillColor(this.COLORS.text)
+         .text(fullName, x, currentY, { width, align: 'right' });
+      currentY += 35;
+    }
+
+    // Job Title
+    if (personalInfo.jobTitle) {
+      doc.fontSize(16)
+         .fillColor(this.COLORS.primary)
+         .text(personalInfo.jobTitle, x, currentY, { width, align: 'right' });
+      currentY += 25;
+    }
+
+    // Contact Information
+    const contactInfo = [];
+    if (personalInfo.email) contactInfo.push(`📧 ${personalInfo.email}`);
+    if (personalInfo.phone) contactInfo.push(`📱 ${personalInfo.phone}`);
+    if (personalInfo.location) contactInfo.push(`📍 ${personalInfo.location}`);
+    if (personalInfo.website) contactInfo.push(`🌐 ${personalInfo.website}`);
+
+    if (contactInfo.length > 0) {
+      doc.fontSize(10)
+         .fillColor(this.COLORS.secondary);
+      
+      contactInfo.forEach(info => {
+        doc.text(info, x, currentY, { width, align: 'right' });
+        currentY += 15;
+      });
+    }
+
+    // Add separator line
+    doc.strokeColor(this.COLORS.lightGray)
+       .lineWidth(1)
+       .moveTo(x, currentY + 10)
+       .lineTo(x + width, currentY + 10)
+       .stroke();
+
+    return currentY + 20;
+  }
+
+  private static async addSection(
+    doc: InstanceType<typeof PDFDocument>,
+    title: string,
+    content: string,
+    x: number,
+    y: number,
+    width: number
+  ): Promise<number> {
+    let currentY = y;
+
+    // Section Title
+    doc.fontSize(14)
+       .fillColor(this.COLORS.primary)
+       .text(title, x, currentY, { width, align: 'right' });
+    currentY += 20;
+
+    // Content
+    doc.fontSize(10)
+       .fillColor(this.COLORS.text)
+       .text(content, x, currentY, { width, align: 'right' });
+    
+    const textHeight = doc.heightOfString(content, { width, align: 'right' });
+    return currentY + textHeight + 10;
+  }
+
+  private static async addExperienceSection(
+    doc: InstanceType<typeof PDFDocument>,
+    experiences: any[],
+    x: number,
+    y: number,
+    width: number
+  ): Promise<number> {
+    let currentY = y;
+
+    // Section Title
+    doc.fontSize(14)
+       .fillColor(this.COLORS.primary)
+       .text('الخبرات المهنية', x, currentY, { width, align: 'right' });
+    currentY += 25;
+
+    experiences.forEach(exp => {
+      // Job Title and Company
+      const jobInfo = `${exp.position || ''} - ${exp.company || ''}`;
+      doc.fontSize(12)
+         .fillColor(this.COLORS.text)
+         .text(jobInfo, x, currentY, { width, align: 'right' });
+      currentY += 18;
+
+      // Duration and Location
+      const duration = `${exp.startDate || ''} - ${exp.endDate || exp.current ? 'حتى الآن' : ''}`;
+      if (exp.location) {
+        doc.fontSize(9)
+           .fillColor(this.COLORS.secondary)
+           .text(`${duration} | ${exp.location}`, x, currentY, { width, align: 'right' });
+      } else {
+        doc.fontSize(9)
+           .fillColor(this.COLORS.secondary)
+           .text(duration, x, currentY, { width, align: 'right' });
+      }
+      currentY += 15;
+
+      // Description
+      if (exp.description) {
+        doc.fontSize(9)
+           .fillColor(this.COLORS.text)
+           .text(exp.description, x, currentY, { width, align: 'right' });
+        
+        const textHeight = doc.heightOfString(exp.description, { width, align: 'right' });
+        currentY += textHeight + 15;
+      } else {
+        currentY += 10;
+      }
+    });
+
+    return currentY;
+  }
+
+  private static async addEducationSection(
+    doc: InstanceType<typeof PDFDocument>,
+    education: any[],
+    x: number,
+    y: number,
+    width: number
+  ): Promise<number> {
+    let currentY = y;
+
+    // Section Title
+    doc.fontSize(14)
+       .fillColor(this.COLORS.primary)
+       .text('التعليم', x, currentY, { width, align: 'right' });
+    currentY += 25;
+
+    education.forEach(edu => {
+      // Degree and Institution
+      const eduInfo = `${edu.degree || ''} - ${edu.institution || ''}`;
+      doc.fontSize(12)
+         .fillColor(this.COLORS.text)
+         .text(eduInfo, x, currentY, { width, align: 'right' });
+      currentY += 18;
+
+      // Duration and Location
+      const duration = `${edu.startDate || ''} - ${edu.endDate || edu.current ? 'حتى الآن' : ''}`;
+      if (edu.location) {
+        doc.fontSize(9)
+           .fillColor(this.COLORS.secondary)
+           .text(`${duration} | ${edu.location}`, x, currentY, { width, align: 'right' });
+      } else {
+        doc.fontSize(9)
+           .fillColor(this.COLORS.secondary)
+           .text(duration, x, currentY, { width, align: 'right' });
+      }
+      currentY += 15;
+
+      // Grade/GPA
+      if (edu.grade || edu.gpa) {
+        const gradeInfo = edu.grade ? `التقدير: ${edu.grade}` : `المعدل: ${edu.gpa}`;
+        doc.fontSize(9)
+           .fillColor(this.COLORS.secondary)
+           .text(gradeInfo, x, currentY, { width, align: 'right' });
+        currentY += 15;
+      }
+
+      currentY += 10;
+    });
+
+    return currentY;
+  }
+
+  private static async addSkillsSection(
+    doc: InstanceType<typeof PDFDocument>,
+    skills: any[],
+    x: number,
+    y: number,
+    width: number
+  ): Promise<number> {
+    let currentY = y;
+
+    // Section Title
+    doc.fontSize(14)
+       .fillColor(this.COLORS.primary)
+       .text('المهارات', x, currentY, { width, align: 'right' });
+    currentY += 25;
+
+    // Group skills by category if available
+    const groupedSkills: { [key: string]: any[] } = {};
+    skills.forEach(skill => {
+      const category = skill.category || 'عام';
+      if (!groupedSkills[category]) {
+        groupedSkills[category] = [];
+      }
+      groupedSkills[category].push(skill);
+    });
+
+    Object.entries(groupedSkills).forEach(([category, categorySkills]) => {
+      // Category title
+      if (Object.keys(groupedSkills).length > 1) {
+        doc.fontSize(11)
+           .fillColor(this.COLORS.secondary)
+           .text(category, x, currentY, { width, align: 'right' });
+        currentY += 15;
+      }
+
+      // Skills in this category
+      const skillNames = categorySkills.map(skill => {
+        if (skill.level) {
+          const levelMap: { [key: string]: string } = {
+            'beginner': 'مبتدئ',
+            'intermediate': 'متوسط',
+            'advanced': 'متقدم',
+            'expert': 'خبير'
+          };
+          return `${skill.name} (${levelMap[skill.level] || skill.level})`;
+        }
+        return skill.name;
+      }).join(' • ');
+
+      doc.fontSize(10)
+         .fillColor(this.COLORS.text)
+         .text(skillNames, x, currentY, { width, align: 'right' });
+      
+      const textHeight = doc.heightOfString(skillNames, { width, align: 'right' });
+      currentY += textHeight + 15;
+    });
+
+    return currentY;
+  }
+
+  private static async addLanguagesSection(
+    doc: InstanceType<typeof PDFDocument>,
+    languages: any[],
+    x: number,
+    y: number,
+    width: number
+  ): Promise<number> {
+    let currentY = y;
+
+    // Section Title
+    doc.fontSize(14)
+       .fillColor(this.COLORS.primary)
+       .text('اللغات', x, currentY, { width, align: 'right' });
+    currentY += 25;
+
+    languages.forEach(lang => {
+      const levelMap: { [key: string]: string } = {
+        'native': 'لغة أم',
+        'fluent': 'طلاقة',
+        'intermediate': 'متوسط',
+        'basic': 'أساسي'
+      };
+      
+      const langInfo = `${lang.name} - ${levelMap[lang.level] || lang.level}`;
+      doc.fontSize(10)
+         .fillColor(this.COLORS.text)
+         .text(langInfo, x, currentY, { width, align: 'right' });
+      currentY += 15;
+    });
+
+    return currentY;
+  }
+
+  static generateFilename(personalInfo: ExtendedPersonalInfo): string {
     const firstName = personalInfo?.firstName || 'Resume';
     const lastName = personalInfo?.lastName || '';
     const jobTitle = personalInfo?.jobTitle || '';
@@ -298,9 +491,9 @@ export class PDFExportService {
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
           "></div>
-          <div style="font-size: 18px;">جاري إنشاء ملف PDF...</div>
+          <div style="font-size: 18px;">جاري إنشاء ملف PDF احترافي...</div>
           <div style="font-size: 14px; margin-top: 10px; opacity: 0.8;">
-            يرجى الانتظار، قد يستغرق هذا بضع ثوانٍ
+            يرجى الانتظار، يتم تحويل السيرة الذاتية إلى PDF عالي الجودة
           </div>
         </div>
       </div>
@@ -328,16 +521,23 @@ export class PDFExportService {
         position: fixed;
         top: 20px;
         right: 20px;
-        background: #4CAF50;
+        background: #10b981;
         color: white;
         padding: 15px 20px;
-        border-radius: 5px;
+        border-radius: 8px;
         font-family: Cairo, sans-serif;
         z-index: 10000;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         animation: slideIn 0.3s ease-out;
+        max-width: 350px;
       ">
-        ✅ تم تصدير ملف PDF بنجاح!
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="font-size: 20px;">✅</div>
+          <div>
+            <div style="font-weight: bold; margin-bottom: 5px;">تم تصدير PDF بنجاح!</div>
+            <div style="font-size: 12px; opacity: 0.9;">تم إنشاء ملف PDF احترافي بجودة عالية</div>
+          </div>
+        </div>
       </div>
       <style>
         @keyframes slideIn {
@@ -352,7 +552,7 @@ export class PDFExportService {
       if (toast.parentNode) {
         toast.parentNode.removeChild(toast);
       }
-    }, 3000);
+    }, 4000);
   }
 
   private static showErrorMessage(): void {
@@ -362,16 +562,23 @@ export class PDFExportService {
         position: fixed;
         top: 20px;
         right: 20px;
-        background: #f44336;
+        background: #ef4444;
         color: white;
         padding: 15px 20px;
-        border-radius: 5px;
+        border-radius: 8px;
         font-family: Cairo, sans-serif;
         z-index: 10000;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         animation: slideIn 0.3s ease-out;
+        max-width: 350px;
       ">
-        ❌ حدث خطأ في تصدير ملف PDF
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="font-size: 20px;">❌</div>
+          <div>
+            <div style="font-weight: bold; margin-bottom: 5px;">فشل في تصدير PDF</div>
+            <div style="font-size: 12px; opacity: 0.9;">حدث خطأ أثناء إنشاء الملف، يرجى المحاولة مرة أخرى</div>
+          </div>
+        </div>
       </div>
       <style>
         @keyframes slideIn {
@@ -386,85 +593,7 @@ export class PDFExportService {
       if (toast.parentNode) {
         toast.parentNode.removeChild(toast);
       }
-    }, 5000);
-  }
-
-  // Helper method to prepare element for PDF export
-  static prepareElementForExport(element: HTMLElement): Promise<void> {
-    // Ensure all images are loaded
-    const images = element.querySelectorAll('img');
-    const imagePromises = Array.from(images).map(img => {
-      return new Promise<void>((resolve, reject) => {
-        if (img.complete) {
-          resolve();
-        } else {
-          img.onload = () => resolve();
-          img.onerror = () => resolve(); // Continue even if image fails to load
-          // Set a timeout to avoid hanging
-          setTimeout(() => resolve(), 5000);
-        }
-      });
-    });
-
-    return Promise.all(imagePromises).then(() => undefined);
-  }
-
-  // Helper method to inject CSS for unsupported color functions
-  // This fixes the "Attempting to parse an unsupported color function" error
-  // that occurs when html2canvas encounters newer CSS color functions like lab(), lch(), etc.
-  private static injectColorFallbackCSS(element: HTMLElement): HTMLElement | null {
-    const style = document.createElement('style');
-    style.textContent = `
-      /* Fallback for unsupported color functions */
-      * {
-        --fallback-black: #000000;
-        --fallback-white: #ffffff;
-        --fallback-gray: #666666;
-      }
-
-      /* Override any lab, lch, oklab, oklch, color, hwb colors with fallbacks */
-      [style*="lab("],
-      [style*="lch("],
-      [style*="oklab("],
-      [style*="oklch("],
-      [style*="color("],
-      [style*="hwb("] {
-        color: var(--fallback-black) !important;
-        background-color: var(--fallback-white) !important;
-        border-color: var(--fallback-gray) !important;
-      }
-
-      /* Ensure all text elements have readable colors */
-      p, span, div, h1, h2, h3, h4, h5, h6, li, td, th, label {
-        color: var(--fallback-black) !important;
-      }
-
-      /* Handle background colors */
-      body, section, article, header, footer, main {
-        background-color: var(--fallback-white) !important;
-      }
-
-      /* Handle borders and outlines */
-      * {
-        border-color: var(--fallback-gray) !important;
-        outline-color: var(--fallback-gray) !important;
-      }
-
-      /* Handle box shadows and text shadows */
-      * {
-        box-shadow: none !important;
-        text-shadow: none !important;
-      }
-    `;
-
-    // Insert the style at the beginning of the head
-    const head = document.head || document.getElementsByTagName('head')[0];
-    if (head) {
-      head.insertBefore(style, head.firstChild);
-      return style;
-    }
-
-    return null;
+    }, 6000);
   }
 
   // Method to get optimal export settings based on content
@@ -478,8 +607,47 @@ export class PDFExportService {
     return {
       format: 'A4',
       orientation: 'portrait',
-      quality: hasLongContent ? 0.9 : 1.0,
-      filename: this.generateFilename(resume.personalInfo)
+      filename: this.generateFilename(resume.personalInfo as ExtendedPersonalInfo),
+      language: 'ar',
+      template: hasLongContent ? 'minimal' : 'modern'
+    };
+  }
+
+  // Alternative method for simple PDF export without templates
+  static async exportSimplePDF(
+    resumeData: Resume,
+    options: PDFExportOptions = {}
+  ): Promise<void> {
+    const finalOptions: PDFExportOptions = { 
+      ...this.defaultOptions, 
+      ...options,
+      template: 'minimal' as const
+    };
+    
+    return this.exportResumeToPDF(resumeData, finalOptions);
+  }
+
+  // Method to validate resume data before export
+  static validateResumeData(resumeData: Resume): { isValid: boolean; errors: string[] } {
+    const errors: string[] = [];
+    
+    if (!resumeData.personalInfo?.firstName) {
+      errors.push('الاسم الأول مطلوب');
+    }
+    
+    if (!resumeData.personalInfo?.lastName) {
+      errors.push('الاسم الأخير مطلوب');
+    }
+    
+    if (!resumeData.personalInfo?.email) {
+      errors.push('البريد الإلكتروني مطلوب');
+    }
+    
+    // Removed experience validation to allow export with incomplete data
+    
+    return {
+      isValid: errors.length === 0,
+      errors
     };
   }
 }

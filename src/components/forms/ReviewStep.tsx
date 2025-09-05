@@ -1,38 +1,125 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useResumeStore } from '@/store/resumeStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import ResumeTemplate from '@/components/resume/ResumeTemplate';
-import { PDFExportService } from '@/utils/pdfExport';
+import { getOptimalSettings, showSuccessMessage, showErrorMessage } from '@/utils/pdfUtils';
 
 export default function ReviewStep() {
   const { formData } = useResumeStore();
   const [isGenerating, setIsGenerating] = useState(false);
-  const resumeRef = useRef<HTMLDivElement>(null);
+  const [pdfDataUri, setPdfDataUri] = useState<string | null>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
 
-  const generatePDF = async () => {
-    if (!resumeRef.current) {
-      console.error('Resume reference not found');
+  // Generate PDF preview on component mount
+  useEffect(() => {
+    generatePreview();
+  }, []);
+
+  const generatePreview = async () => {
+    if (!formData.data?.personalInfo?.firstName) {
+      setPreviewError('يرجى إدخال المعلومات الشخصية أولاً');
       return;
     }
 
+    setIsLoadingPreview(true);
+    setPreviewError(null);
+
+    try {
+      const response = await fetch('/api/preview-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          resumeData: formData.data,
+          options: {
+            format: 'A4',
+            orientation: 'portrait',
+            language: 'ar',
+            template: 'modern'
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'فشل في إنشاء معاينة PDF');
+      }
+
+      const result = await response.json();
+      setPdfDataUri(result.pdfDataUri);
+    } catch (err) {
+      console.error('Error generating preview:', err);
+      setPreviewError(err instanceof Error ? err.message : 'حدث خطأ غير متوقع');
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  };
+
+  const generatePDF = async () => {
     setIsGenerating(true);
     try {
-      // Prepare the element for export
-      await PDFExportService.prepareElementForExport(resumeRef.current);
-      
       // Get optimal settings
-      const settings = PDFExportService.getOptimalSettings(formData.data as any);
+      const settings = getOptimalSettings(formData.data as any);
       
-      // Export to PDF
-      await PDFExportService.exportResumeToPDF(resumeRef.current, settings);
+      // Call the API to generate PDF
+      const response = await fetch('/api/export-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          resumeData: formData.data,
+          options: settings,
+        }),
+      });
+
+      if (!response.ok) {
+        let errorMessage = 'Failed to generate PDF';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+          if (errorData.details && Array.isArray(errorData.details)) {
+            console.error('PDF Generation Details:', errorData.details);
+            // Show specific validation errors
+            const validationErrors = errorData.details.join('\n• ');
+            errorMessage += `\n\nالأخطاء:\n• ${validationErrors}`;
+          }
+        } catch (parseError) {
+          // If response is not JSON, get text content
+          const textContent = await response.text();
+          console.error('Non-JSON error response:', textContent);
+          errorMessage = `Server error: ${response.status} ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      // Create download link from the response
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = settings.filename || 'resume.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Cleanup
+      URL.revokeObjectURL(url);
+      
+      // Show success message
+      showSuccessMessage();
       
     } catch (error) {
       console.error('Error generating PDF:', error);
+      // Show detailed error message
+      const errorMessage = error instanceof Error ? error.message : 'حدث خطأ غير متوقع';
+      showErrorMessage(errorMessage);
     } finally {
       setIsGenerating(false);
     }
@@ -65,15 +152,59 @@ export default function ReviewStep() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <span>�️</span>
-            معاينة حية للسيرة الذاتية
+            <span>👁️</span>
+            معاينة PDF الحقيقية
+            <Button
+              onClick={generatePreview}
+              variant="outline"
+              size="sm"
+              disabled={isLoadingPreview}
+            >
+              {isLoadingPreview ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+              ) : (
+                '🔄 تحديث'
+              )}
+            </Button>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="border rounded-lg overflow-hidden bg-white">
-            <div ref={resumeRef} style={{ transform: 'scale(0.8)', transformOrigin: 'top left', width: '125%' }}>
-              <ResumeTemplate resume={formData.data as any} />
-            </div>
+          <div className="border rounded-lg overflow-hidden bg-white max-h-[800px]">
+            {isLoadingPreview && (
+              <div className="flex items-center justify-center h-64">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                  <p className="text-gray-600">جاري إنشاء معاينة PDF...</p>
+                </div>
+              </div>
+            )}
+
+            {previewError && (
+              <div className="flex items-center justify-center h-64">
+                <div className="text-center text-red-600">
+                  <p className="mb-4">❌ {previewError}</p>
+                  <Button onClick={generatePreview} variant="outline" size="sm">
+                    إعادة المحاولة
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {!isLoadingPreview && !previewError && pdfDataUri && (
+              <iframe
+                src={pdfDataUri}
+                className="w-full h-[700px] border-0"
+                title="معاينة السيرة الذاتية PDF"
+              />
+            )}
+
+            {!isLoadingPreview && !previewError && !pdfDataUri && (
+              <div className="flex items-center justify-center h-64">
+                <div className="text-center text-gray-500">
+                  <p>📄 أدخل معلوماتك لعرض معاينة PDF</p>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

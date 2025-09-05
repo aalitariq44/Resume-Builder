@@ -6,13 +6,13 @@ import { generateId } from '@/lib/utils';
 // إنشاء قيم افتراضية
 const createDefaultPersonalInfo = (): PersonalInfo => ({
   id: generateId(),
-  firstName: '',
-  lastName: '',
-  jobTitle: '',
-  email: '',
-  phone: '',
-  address: '',
-  city: '',
+  firstName: 'أحمد',
+  lastName: 'محمد',
+  jobTitle: 'مطور برمجيات',
+  email: 'ahmed.mohamed@example.com',
+  phone: '+966501234567',
+  address: 'الرياض، المملكة العربية السعودية',
+  city: 'الرياض',
   customFields: []
 });
 
@@ -21,7 +21,24 @@ const createDefaultResume = (): Resume => ({
   title: 'سيرة ذاتية جديدة',
   personalInfo: createDefaultPersonalInfo(),
   education: [],
-  experience: [],
+  experience: [
+    {
+      id: generateId(),
+      jobTitle: 'مطور برمجيات',
+      position: 'مطور برمجيات',
+      company: 'شركة تقنية',
+      location: 'الرياض',
+      startDate: '2022-01-01',
+      endDate: '',
+      isCurrentJob: true,
+      isCurrentlyWorking: true,
+      employmentType: 'full-time',
+      description: 'تطوير وصيانة التطبيقات الويب باستخدام React وNode.js',
+      responsibilities: [],
+      achievements: [],
+      skills: []
+    }
+  ],
   skills: [],
   languages: [],
   hobbies: [],

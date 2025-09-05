@@ -11,7 +11,6 @@ import LanguagesStep from '@/components/forms/LanguagesStep';
 import HobbiesStep from '@/components/forms/HobbiesStep';
 import AdditionalInfoStep from '@/components/forms/AdditionalInfoStep';
 import ReviewStep from '@/components/forms/ReviewStep';
-import ResumeTemplate from '@/components/resume/ResumeTemplate';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -145,21 +144,127 @@ const StepNavigation: React.FC<{
 // Resume Preview component (placeholder)
 const ResumePreview: React.FC = () => {
   const { formData } = useResumeStore();
+  const [pdfDataUri, setPdfDataUri] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const generatePreview = async () => {
+    if (!formData.data?.personalInfo?.firstName) {
+      setError('يرجى إدخال المعلومات الشخصية أولاً');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/preview-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          resumeData: formData.data,
+          options: {
+            format: 'A4',
+            orientation: 'portrait',
+            language: 'ar',
+            template: 'modern'
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'فشل في إنشاء معاينة PDF');
+      }
+
+      const result = await response.json();
+      setPdfDataUri(result.pdfDataUri);
+    } catch (err) {
+      console.error('Error generating preview:', err);
+      setError(err instanceof Error ? err.message : 'حدث خطأ غير متوقع');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Auto-generate preview when data changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (formData.data?.personalInfo?.firstName) {
+        generatePreview();
+      }
+    }, 1000); // Debounce for 1 second
+
+    return () => clearTimeout(timer);
+  }, [formData.data]);
 
   return (
     <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center space-x-2 space-x-reverse">
-          <span>معاينة السيرة الذاتية</span>
+          <span>👁️</span>
+          <span>معاينة PDF الحقيقية</span>
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="border rounded-lg overflow-hidden bg-white max-h-[600px] overflow-y-auto">
-          <div style={{ transform: 'scale(0.6)', transformOrigin: 'top left', width: '166.67%' }}>
-            <ResumeTemplate resume={formData.data as any} />
-          </div>
+        <div className="border rounded-lg overflow-hidden bg-white max-h-[600px]">
+          {isLoading && (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-gray-600">جاري إنشاء معاينة PDF...</p>
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center text-red-600">
+                <p className="mb-4">❌ {error}</p>
+                <Button onClick={generatePreview} variant="outline" size="sm">
+                  إعادة المحاولة
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {!isLoading && !error && pdfDataUri && (
+            <iframe
+              src={pdfDataUri}
+              className="w-full h-[600px] border-0"
+              title="معاينة السيرة الذاتية PDF"
+            />
+          )}
+
+          {!isLoading && !error && !pdfDataUri && (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center text-gray-500">
+                <p>📄 أدخل معلوماتك لعرض معاينة PDF</p>
+              </div>
+            </div>
+          )}
         </div>
+
+        {pdfDataUri && (
+          <div className="mt-4 flex justify-center">
+            <Button
+              onClick={() => {
+                const link = document.createElement('a');
+                link.href = pdfDataUri;
+                link.download = 'resume-preview.pdf';
+                link.click();
+              }}
+              variant="outline"
+              size="sm"
+            >
+              <span className="ml-2">⬇️</span>
+              تحميل المعاينة
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
