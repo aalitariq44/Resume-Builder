@@ -13,6 +13,8 @@ import AdditionalInfoStep from '@/components/forms/AdditionalInfoStep';
 import ReviewStep from '@/components/forms/ReviewStep';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { SaveStatus } from '@/components/ui';
+import { useAutoSaveOnNavigation, usePeriodicAutoSave } from '@/hooks/useAutoSave';
 import { cn } from '@/lib/utils';
 
 // Steps configuration
@@ -230,27 +232,63 @@ const ResumeInfo: React.FC = () => {
 };
 
 export default function BuilderPage() {
-  const { formData, setCurrentStep, nextStep, prevStep } = useResumeStore();
+  const { formData, setCurrentStep, nextStep, prevStep, autoSave, restoreFromBackup } = useResumeStore();
+
+  // استخدام hooks الحفظ التلقائي
+  useAutoSaveOnNavigation(); // حفظ عند التنقل
+  usePeriodicAutoSave(30000); // حفظ كل 30 ثانية
 
   const currentStep = formData.currentStep;
   const totalSteps = STEPS.length;
   const CurrentStepComponent = STEPS[currentStep]?.component;
 
+  // استعادة البيانات عند تحميل الصفحة
+  React.useEffect(() => {
+    const restored = restoreFromBackup();
+    if (restored) {
+      console.log('تم استعادة البيانات من النسخة الاحتياطية');
+    }
+  }, [restoreFromBackup]);
+
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
+      // حفظ تلقائي قبل الانتقال
+      autoSave();
       nextStep();
     }
   };
 
   const handlePrev = () => {
     if (currentStep > 0) {
+      // حفظ تلقائي قبل الانتقال
+      autoSave();
       prevStep();
     }
   };
 
   const handleStepChange = (step: number) => {
+    // حفظ تلقائي قبل تغيير الخطوة
+    autoSave();
     setCurrentStep(step);
   };
+
+  // حفظ تلقائي عند إغلاق النافذة أو إعادة التحميل
+  React.useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      autoSave();
+      const saveStatus = formData.isDirty;
+      if (saveStatus) {
+        e.preventDefault();
+        e.returnValue = 'لديك تغييرات غير محفوظة. هل تريد المغادرة؟';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [autoSave, formData.isDirty]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -267,6 +305,7 @@ export default function BuilderPage() {
           </div>
 
           <div className="flex items-center space-x-4 space-x-reverse">
+            <SaveStatus />
             <span className="text-sm text-gray-600">معاينة مباشرة للبيانات</span>
           </div>
         </div>

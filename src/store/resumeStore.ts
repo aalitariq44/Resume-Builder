@@ -199,6 +199,8 @@ interface ResumeStore extends AppState {
   
   // Utility Actions
   autoSave: () => void;
+  restoreFromBackup: () => boolean;
+  getSaveStatus: () => { isDirty: boolean; lastSaved?: string; hasUnsavedChanges: boolean };
   exportToJSON: () => string;
   importFromJSON: (json: string) => void;
 }
@@ -246,29 +248,32 @@ export const useResumeStore = create<ResumeStore>()(
         formData: createDefaultFormData()
       }),
 
-      // Personal Info Actions
-      updatePersonalInfo: (info) => set((state) => {
-        const currentPersonalInfo = state.formData.data.personalInfo || createDefaultPersonalInfo();
-        const updatedPersonalInfo = { ...currentPersonalInfo, ...info };
-        return {
-          formData: {
-            ...state.formData,
-            data: {
-              ...state.formData.data,
-              personalInfo: updatedPersonalInfo,
-              updatedAt: new Date().toISOString()
-            },
-            isDirty: true
-          },
-          resume: state.resume ? {
-            ...state.resume,
-            personalInfo: updatedPersonalInfo,
-            updatedAt: new Date().toISOString()
-          } : null
-        };
-      }),
-
-      addCustomField: () => set((state) => {
+  // Personal Info Actions
+  updatePersonalInfo: (info) => {
+    const state = get();
+    const currentPersonalInfo = state.formData.data.personalInfo || createDefaultPersonalInfo();
+    const updatedPersonalInfo = { ...currentPersonalInfo, ...info };
+    set({
+      formData: {
+        ...state.formData,
+        data: {
+          ...state.formData.data,
+          personalInfo: updatedPersonalInfo,
+          updatedAt: new Date().toISOString()
+        },
+        isDirty: true,
+        lastSaved: new Date().toISOString()
+      },
+      resume: state.resume ? {
+        ...state.resume,
+        personalInfo: updatedPersonalInfo,
+        updatedAt: new Date().toISOString()
+      } : null
+    });
+    // حفظ تلقائي عند تحديث المعلومات الشخصية
+    setTimeout(() => state.autoSave(), 100);
+  },      addCustomField: () => {
+        const state = get();
         const newField = {
           id: generateId(),
           label: 'حقل جديد',
@@ -277,7 +282,7 @@ export const useResumeStore = create<ResumeStore>()(
         };
         const currentPersonalInfo = state.formData.data.personalInfo || createDefaultPersonalInfo();
         const updatedFields = [...(currentPersonalInfo.customFields || []), newField];
-        return {
+        set({
           formData: {
             ...state.formData,
             data: {
@@ -287,17 +292,21 @@ export const useResumeStore = create<ResumeStore>()(
                 customFields: updatedFields
               }
             },
-            isDirty: true
+            isDirty: true,
+            lastSaved: new Date().toISOString()
           }
-        };
-      }),
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      updateCustomField: (id, updates) => set((state) => {
+      updateCustomField: (id, updates) => {
+        const state = get();
         const currentPersonalInfo = state.formData.data.personalInfo || createDefaultPersonalInfo();
         const updatedFields = (currentPersonalInfo.customFields || []).map(field =>
           field.id === id ? { ...field, ...updates } : field
         );
-        return {
+        set({
           formData: {
             ...state.formData,
             data: {
@@ -307,15 +316,19 @@ export const useResumeStore = create<ResumeStore>()(
                 customFields: updatedFields
               }
             },
-            isDirty: true
+            isDirty: true,
+            lastSaved: new Date().toISOString()
           }
-        };
-      }),
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      removeCustomField: (id) => set((state) => {
+      removeCustomField: (id) => {
+        const state = get();
         const currentPersonalInfo = state.formData.data.personalInfo || createDefaultPersonalInfo();
         const updatedFields = (currentPersonalInfo.customFields || []).filter(field => field.id !== id);
-        return {
+        set({
           formData: {
             ...state.formData,
             data: {
@@ -325,15 +338,19 @@ export const useResumeStore = create<ResumeStore>()(
                 customFields: updatedFields
               }
             },
-            isDirty: true
+            isDirty: true,
+            lastSaved: new Date().toISOString()
           }
-        };
-      }),
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
       // Education Actions
       setEducation: (education) => set({ education }),
       
-      addEducation: () => set((state) => {
+      addEducation: () => {
+        const state = get();
         const newEducation: Education = {
           id: generateId(),
           degree: '',
@@ -345,55 +362,77 @@ export const useResumeStore = create<ResumeStore>()(
           isCurrentlyStudying: false,
           achievements: []
         };
-        return {
+        set({
           formData: {
             ...state.formData,
             data: {
               ...state.formData.data,
               education: [...(state.formData.data.education || []), newEducation]
             },
-            isDirty: true
+            isDirty: true,
+            lastSaved: new Date().toISOString()
           }
-        };
-      }),
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      updateEducation: (id, updates) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            education: (state.formData.data.education || []).map(edu =>
-              edu.id === id ? { ...edu, ...updates } : edu
-            )
-          },
-          isDirty: true
-        }
-      })),
+      updateEducation: (id, updates) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              education: (state.formData.data.education || []).map(edu =>
+                edu.id === id ? { ...edu, ...updates } : edu
+              )
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      removeEducation: (id) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            education: (state.formData.data.education || []).filter(edu => edu.id !== id)
-          },
-          isDirty: true
-        }
-      })),
+      removeEducation: (id) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              education: (state.formData.data.education || []).filter(edu => edu.id !== id)
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      reorderEducation: (startIndex, endIndex) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            education: reorder(state.formData.data.education || [], startIndex, endIndex)
-          },
-          isDirty: true
-        }
-      })),
+      reorderEducation: (startIndex, endIndex) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              education: reorder(state.formData.data.education || [], startIndex, endIndex)
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
       // Experience Actions
-      addExperience: () => set((state) => {
+      addExperience: () => {
+        const state = get();
         const newExperience: Experience = {
           id: generateId(),
           jobTitle: '',
@@ -409,241 +448,333 @@ export const useResumeStore = create<ResumeStore>()(
           achievements: [],
           skills: []
         };
-        return {
+        set({
           formData: {
             ...state.formData,
             data: {
               ...state.formData.data,
               experience: [...(state.formData.data.experience || []), newExperience]
             },
-            isDirty: true
+            isDirty: true,
+            lastSaved: new Date().toISOString()
           }
-        };
-      }),
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      updateExperience: (id, updates) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            experience: (state.formData.data.experience || []).map(exp =>
-              exp.id === id ? { ...exp, ...updates } : exp
-            )
-          },
-          isDirty: true
-        }
-      })),
+      updateExperience: (id, updates) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              experience: (state.formData.data.experience || []).map(exp =>
+                exp.id === id ? { ...exp, ...updates } : exp
+              )
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      removeExperience: (id) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            experience: (state.formData.data.experience || []).filter(exp => exp.id !== id)
-          },
-          isDirty: true
-        }
-      })),
+      removeExperience: (id) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              experience: (state.formData.data.experience || []).filter(exp => exp.id !== id)
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      reorderExperience: (startIndex, endIndex) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            experience: reorder(state.formData.data.experience || [], startIndex, endIndex)
-          },
-          isDirty: true
-        }
-      })),
+      reorderExperience: (startIndex, endIndex) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              experience: reorder(state.formData.data.experience || [], startIndex, endIndex)
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
       // Skills Actions
-      addSkill: () => set((state) => {
+      addSkill: () => {
+        const state = get();
         const newSkill: Skill = {
           id: generateId(),
           name: '',
           level: 'intermediate',
           category: 'technical'
         };
-        return {
+        set({
           formData: {
             ...state.formData,
             data: {
               ...state.formData.data,
               skills: [...(state.formData.data.skills || []), newSkill]
             },
-            isDirty: true
+            isDirty: true,
+            lastSaved: new Date().toISOString()
           }
-        };
-      }),
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      updateSkill: (id, updates) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            skills: (state.formData.data.skills || []).map(skill =>
-              skill.id === id ? { ...skill, ...updates } : skill
-            )
-          },
-          isDirty: true
-        }
-      })),
+      updateSkill: (id, updates) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              skills: (state.formData.data.skills || []).map(skill =>
+                skill.id === id ? { ...skill, ...updates } : skill
+              )
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      removeSkill: (id) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            skills: (state.formData.data.skills || []).filter(skill => skill.id !== id)
-          },
-          isDirty: true
-        }
-      })),
+      removeSkill: (id) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              skills: (state.formData.data.skills || []).filter(skill => skill.id !== id)
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      reorderSkills: (startIndex, endIndex) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            skills: reorder(state.formData.data.skills || [], startIndex, endIndex)
-          },
-          isDirty: true
-        }
-      })),
+      reorderSkills: (startIndex, endIndex) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              skills: reorder(state.formData.data.skills || [], startIndex, endIndex)
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
       // Languages Actions
-      addLanguage: () => set((state) => {
+      addLanguage: () => {
+        const state = get();
         const newLanguage: Language = {
           id: generateId(),
           name: '',
           level: 'intermediate'
         };
-        return {
+        set({
           formData: {
             ...state.formData,
             data: {
               ...state.formData.data,
               languages: [...(state.formData.data.languages || []), newLanguage]
             },
-            isDirty: true
+            isDirty: true,
+            lastSaved: new Date().toISOString()
           }
-        };
-      }),
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      updateLanguage: (id, updates) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            languages: (state.formData.data.languages || []).map(lang =>
-              lang.id === id ? { ...lang, ...updates } : lang
-            )
-          },
-          isDirty: true
-        }
-      })),
+      updateLanguage: (id, updates) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              languages: (state.formData.data.languages || []).map(lang =>
+                lang.id === id ? { ...lang, ...updates } : lang
+              )
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      removeLanguage: (id) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            languages: (state.formData.data.languages || []).filter(lang => lang.id !== id)
-          },
-          isDirty: true
-        }
-      })),
+      removeLanguage: (id) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              languages: (state.formData.data.languages || []).filter(lang => lang.id !== id)
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
       // Hobbies Actions
-      addHobby: (initialData = {}) => set((state) => {
+      addHobby: (initialData = {}) => {
+        const state = get();
         const newHobby: Hobby = {
           id: generateId(),
           name: '',
           level: 'hobby',
           ...initialData
         };
-        return {
+        set({
           formData: {
             ...state.formData,
             data: {
               ...state.formData.data,
               hobbies: [...(state.formData.data.hobbies || []), newHobby]
             },
-            isDirty: true
+            isDirty: true,
+            lastSaved: new Date().toISOString()
           }
-        };
-      }),
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      updateHobby: (id, updates) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            hobbies: (state.formData.data.hobbies || []).map(hobby =>
-              hobby.id === id ? { ...hobby, ...updates } : hobby
-            )
-          },
-          isDirty: true
-        }
-      })),
+      updateHobby: (id, updates) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              hobbies: (state.formData.data.hobbies || []).map(hobby =>
+                hobby.id === id ? { ...hobby, ...updates } : hobby
+              )
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      removeHobby: (id) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            hobbies: (state.formData.data.hobbies || []).filter(hobby => hobby.id !== id)
-          },
-          isDirty: true
-        }
-      })),
+      removeHobby: (id) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              hobbies: (state.formData.data.hobbies || []).filter(hobby => hobby.id !== id)
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
       // Courses Actions
-      addCourse: () => set((state) => {
+      addCourse: () => {
+        const state = get();
         const newCourse: Course = {
           id: generateId(),
           name: '',
           provider: '',
           dateCompleted: ''
         };
-        return {
+        set({
           formData: {
             ...state.formData,
             data: {
               ...state.formData.data,
               courses: [...(state.formData.data.courses || []), newCourse]
             },
-            isDirty: true
+            isDirty: true,
+            lastSaved: new Date().toISOString()
           }
-        };
-      }),
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      updateCourse: (id, updates) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            courses: (state.formData.data.courses || []).map(course =>
-              course.id === id ? { ...course, ...updates } : course
-            )
-          },
-          isDirty: true
-        }
-      })),
+      updateCourse: (id, updates) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              courses: (state.formData.data.courses || []).map(course =>
+                course.id === id ? { ...course, ...updates } : course
+              )
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      removeCourse: (id) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            courses: (state.formData.data.courses || []).filter(course => course.id !== id)
-          },
-          isDirty: true
-        }
-      })),
+      removeCourse: (id) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              courses: (state.formData.data.courses || []).filter(course => course.id !== id)
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
       // References Actions
-      addReference: () => set((state) => {
+      addReference: () => {
+        const state = get();
         const newReference: Reference = {
           id: generateId(),
           name: '',
@@ -653,88 +784,120 @@ export const useResumeStore = create<ResumeStore>()(
           email: '',
           relationship: ''
         };
-        return {
+        set({
           formData: {
             ...state.formData,
             data: {
               ...state.formData.data,
               references: [...(state.formData.data.references || []), newReference]
             },
-            isDirty: true
+            isDirty: true,
+            lastSaved: new Date().toISOString()
           }
-        };
-      }),
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      updateReference: (id, updates) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            references: (state.formData.data.references || []).map(ref =>
-              ref.id === id ? { ...ref, ...updates } : ref
-            )
-          },
-          isDirty: true
-        }
-      })),
+      updateReference: (id, updates) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              references: (state.formData.data.references || []).map(ref =>
+                ref.id === id ? { ...ref, ...updates } : ref
+              )
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      removeReference: (id) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            references: (state.formData.data.references || []).filter(ref => ref.id !== id)
-          },
-          isDirty: true
-        }
-      })),
+      removeReference: (id) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              references: (state.formData.data.references || []).filter(ref => ref.id !== id)
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
       // Achievements Actions
-      addAchievement: () => set((state) => {
+      addAchievement: () => {
+        const state = get();
         const newAchievement: Achievement = {
           id: generateId(),
           title: '',
           provider: '',
           date: ''
         };
-        return {
+        set({
           formData: {
             ...state.formData,
             data: {
               ...state.formData.data,
               achievements: [...(state.formData.data.achievements || []), newAchievement]
             },
-            isDirty: true
+            isDirty: true,
+            lastSaved: new Date().toISOString()
           }
-        };
-      }),
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      updateAchievement: (id, updates) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            achievements: (state.formData.data.achievements || []).map(achievement =>
-              achievement.id === id ? { ...achievement, ...updates } : achievement
-            )
-          },
-          isDirty: true
-        }
-      })),
+      updateAchievement: (id, updates) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              achievements: (state.formData.data.achievements || []).map(achievement =>
+                achievement.id === id ? { ...achievement, ...updates } : achievement
+              )
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      removeAchievement: (id) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            achievements: (state.formData.data.achievements || []).filter(achievement => achievement.id !== id)
-          },
-          isDirty: true
-        }
-      })),
+      removeAchievement: (id) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              achievements: (state.formData.data.achievements || []).filter(achievement => achievement.id !== id)
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
       // Custom Sections Actions
-      addCustomSection: () => set((state) => {
+      addCustomSection: () => {
+        const state = get();
         const newSection: CustomSection = {
           id: generateId(),
           title: 'قسم جديد',
@@ -742,62 +905,98 @@ export const useResumeStore = create<ResumeStore>()(
           content: '',
           isVisible: true
         };
-        return {
+        set({
           formData: {
             ...state.formData,
             data: {
               ...state.formData.data,
               customSections: [...(state.formData.data.customSections || []), newSection]
             },
-            isDirty: true
+            isDirty: true,
+            lastSaved: new Date().toISOString()
           }
-        };
-      }),
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      updateCustomSection: (id, updates) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            customSections: (state.formData.data.customSections || []).map(section =>
-              section.id === id ? { ...section, ...updates } : section
-            )
-          },
-          isDirty: true
-        }
-      })),
+      updateCustomSection: (id, updates) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              customSections: (state.formData.data.customSections || []).map(section =>
+                section.id === id ? { ...section, ...updates } : section
+              )
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      removeCustomSection: (id) => set((state) => ({
-        formData: {
-          ...state.formData,
-          data: {
-            ...state.formData.data,
-            customSections: (state.formData.data.customSections || []).filter(section => section.id !== id)
-          },
-          isDirty: true
-        }
-      })),
+      removeCustomSection: (id) => {
+        const state = get();
+        set({
+          formData: {
+            ...state.formData,
+            data: {
+              ...state.formData.data,
+              customSections: (state.formData.data.customSections || []).filter(section => section.id !== id)
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        // حفظ تلقائي
+        setTimeout(() => state.autoSave(), 100);
+      },
 
-      // Form Actions
-      setCurrentStep: (step) => set((state) => ({
-        formData: { ...state.formData, currentStep: step }
-      })),
+  // Form Actions
+  setCurrentStep: (step) => {
+    const state = get();
+    set({
+      formData: { 
+        ...state.formData, 
+        currentStep: step,
+        lastSaved: new Date().toISOString()
+      }
+    });
+    // حفظ تلقائي عند تغيير الخطوة
+    state.autoSave();
+  },
 
-      nextStep: () => set((state) => ({
-        formData: {
-          ...state.formData,
-          currentStep: Math.min(state.formData.currentStep + 1, state.formData.totalSteps - 1)
-        }
-      })),
+  nextStep: () => {
+    const state = get();
+    const newStep = Math.min(state.formData.currentStep + 1, state.formData.totalSteps - 1);
+    set({
+      formData: {
+        ...state.formData,
+        currentStep: newStep,
+        lastSaved: new Date().toISOString()
+      }
+    });
+    // حفظ تلقائي عند الانتقال للخطوة التالية
+    state.autoSave();
+  },
 
-      prevStep: () => set((state) => ({
-        formData: {
-          ...state.formData,
-          currentStep: Math.max(state.formData.currentStep - 1, 0)
-        }
-      })),
-
-      setFormError: (field, errors) => set((state) => ({
+  prevStep: () => {
+    const state = get();
+    const newStep = Math.max(state.formData.currentStep - 1, 0);
+    set({
+      formData: {
+        ...state.formData,
+        currentStep: newStep,
+        lastSaved: new Date().toISOString()
+      }
+    });
+    // حفظ تلقائي عند الرجوع للخطوة السابقة
+    state.autoSave();
+  },      setFormError: (field, errors) => set((state) => ({
         formData: {
           ...state.formData,
           errors: { ...state.formData.errors, [field]: errors }
@@ -873,10 +1072,65 @@ export const useResumeStore = create<ResumeStore>()(
   autoSave: () => {
     const state = get();
     if (state.formData.isDirty) {
-      // هنا يمكن إضافة منطق الحفظ التلقائي
-      state.markFormClean();
+      try {
+        // تحديث وقت آخر حفظ
+        const now = new Date().toISOString();
+        set({
+          formData: {
+            ...state.formData,
+            lastSaved: now,
+            isDirty: false
+          }
+        });
+        
+        // حفظ في localStorage إضافي للتأكد
+        const dataToSave = {
+          formData: state.formData,
+          timestamp: now,
+          version: '1.0'
+        };
+        
+        localStorage.setItem('resume-backup', JSON.stringify(dataToSave));
+        
+        console.log('تم حفظ البيانات تلقائياً في:', now);
+      } catch (error) {
+        console.error('خطأ في الحفظ التلقائي:', error);
+        set({ error: 'فشل في حفظ البيانات' });
+      }
     }
-  },      exportToJSON: () => {
+  },
+
+      restoreFromBackup: () => {
+        try {
+          const backup = localStorage.getItem('resume-backup');
+          if (backup) {
+            const parsedBackup = JSON.parse(backup);
+            if (parsedBackup.formData) {
+              set({
+                formData: {
+                  ...parsedBackup.formData,
+                  lastSaved: new Date().toISOString()
+                }
+              });
+              return true;
+            }
+          }
+          return false;
+        } catch (error) {
+          console.error('خطأ في استعادة النسخة الاحتياطية:', error);
+          return false;
+        }
+      },
+
+      // دالة للتحقق من حالة الحفظ
+      getSaveStatus: () => {
+        const state = get();
+        return {
+          isDirty: state.formData.isDirty,
+          lastSaved: state.formData.lastSaved,
+          hasUnsavedChanges: state.formData.isDirty
+        };
+      },      exportToJSON: () => {
         const state = get();
         return JSON.stringify(state.formData.data, null, 2);
       },
