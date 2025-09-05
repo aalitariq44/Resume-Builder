@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ResumeService, ResumeMetadata } from '@/lib/firestore';
 import { Resume, PersonalInfo, Education, Experience, Skill, Language, Hobby, Course, Reference, Achievement, CustomSection } from '@/types';
 import { useResumeStore } from '@/store/resumeStore';
@@ -13,7 +13,8 @@ export const useFirebaseResumes = (userId?: string) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [unsubscribe, setUnsubscribe] = useState<(() => void) | null>(null);
+  // Ref to store unsubscribe function without causing rerenders
+  const unsubscribeRef = useRef<(() => void) | null>(null);
 
   // جلب جميع السير الذاتية للمستخدم
   const fetchResumes = useCallback(async () => {
@@ -58,13 +59,13 @@ export const useFirebaseResumes = (userId?: string) => {
     if (!userId) return;
 
     // إلغاء الاشتراك السابق إذا كان موجوداً
-    if (unsubscribe) {
-      unsubscribe();
+    if (unsubscribeRef.current) {
+      unsubscribeRef.current();
     }
 
     const resumeRef = doc(db, 'resumes', resumeId);
     
-    const unsubscribeFn = onSnapshot(
+  const unsubscribeFn = onSnapshot(
       resumeRef,
       (docSnapshot) => {
         if (docSnapshot.exists()) {
@@ -78,12 +79,12 @@ export const useFirebaseResumes = (userId?: string) => {
 
           // تحويل البيانات من FirestoreResume إلى Resume
           const { userId: _, createdAt, updatedAt, ...resumeData } = data;
-          const resume: Resume = {
+          const resume = {
             ...resumeData,
             id: docSnapshot.id,
             createdAt: createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
             updatedAt: updatedAt?.toDate?.()?.toISOString() || new Date().toISOString()
-          };
+          } as Resume;
 
           setCurrentResume(resume);
           setError(null);
@@ -98,8 +99,9 @@ export const useFirebaseResumes = (userId?: string) => {
       }
     );
 
-    setUnsubscribe(() => unsubscribeFn);
-  }, [userId, unsubscribe]);
+  // حفظ دالة إلغاء الاشتراك في الريف
+  unsubscribeRef.current = unsubscribeFn;
+  }, [userId]);
 
   // إنشاء سيرة ذاتية جديدة
   const createResume = useCallback(async (resumeData: Omit<Resume, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -212,11 +214,11 @@ export const useFirebaseResumes = (userId?: string) => {
   // تنظيف الـ listener عند الخروج
   useEffect(() => {
     return () => {
-      if (unsubscribe) {
-        unsubscribe();
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
       }
     };
-  }, [unsubscribe]);
+  }, []);
 
   return {
     resumes,
