@@ -94,7 +94,6 @@ const PDFControls: React.FC<PDFControlsProps> = ({
         await navigator.share({
           title: `${resume.personalInfo.firstName} ${resume.personalInfo.lastName} - سيرة ذاتية`,
           text: 'السيرة الذاتية',
-          url: dataURL,
         });
       } else {
         // نسخ الرابط إلى الحافظة
