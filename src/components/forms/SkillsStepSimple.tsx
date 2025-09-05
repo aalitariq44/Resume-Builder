@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAutoSave } from '@/hooks/useAutoSave';
 
 type SimpleSkill = {
   id: string;
@@ -38,7 +39,12 @@ const skillLevels = [
 ];
 
 export default function SkillsStepSimple() {
-  const { formData } = useResumeStore();
+  const { 
+    formData, 
+    addSkill, 
+    updateSkill, 
+    removeSkill 
+  } = useResumeStore();
 
   const { register, control, handleSubmit, watch, setValue } = useForm<SkillsFormData>({
     defaultValues: {
@@ -59,19 +65,24 @@ export default function SkillsStepSimple() {
 
   const watchedSkills = watch('skills');
 
-  const addSkill = () => {
-    append({
+  // حفظ تلقائي للتغييرات
+  useAutoSave(watchedSkills, 500);
+
+  const handleAddSkill = () => {
+    const newSkill = {
       id: Date.now().toString(),
       name: '',
       category: 'technical',
       level: 'intermediate',
       yearsOfExperience: 1,
-    });
+    };
+    append(newSkill);
+    addSkill();
   };
 
   const onSubmit = (data: SkillsFormData) => {
     console.log('Skills data:', data);
-    // Here we would save to store when it's properly configured
+    // البيانات تُحفظ تلقائياً عبر الـ store
   };
 
   return (

@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useAutoSave } from '@/hooks/useAutoSave';
 
 type EducationFormData = {
   education: Education[];
@@ -26,12 +27,17 @@ const degreeOptions = [
 ];
 
 export default function EducationStep() {
-  const { education, setEducation } = useResumeStore();
+  const { 
+    formData, 
+    addEducation, 
+    updateEducation, 
+    removeEducation 
+  } = useResumeStore();
   const [newAchievement, setNewAchievement] = useState('');
 
   const { register, control, handleSubmit, watch, setValue, formState: { errors } } = useForm<EducationFormData>({
     defaultValues: {
-      education: education.length > 0 ? education : [{
+      education: (formData.data.education && formData.data.education.length > 0) ? formData.data.education : [{
         id: Date.now().toString(),
         degree: '',
         field: '',
@@ -54,8 +60,11 @@ export default function EducationStep() {
 
   const watchedEducation = watch('education');
 
-  const addEducation = () => {
-    append({
+  // حفظ تلقائي للتغييرات
+  useAutoSave(watchedEducation, 500);
+
+  const handleAddEducation = () => {
+    const newEdu = {
       id: Date.now().toString(),
       degree: '',
       field: '',
@@ -67,7 +76,9 @@ export default function EducationStep() {
       gpa: '',
       coursework: '',
       achievements: [],
-    });
+    };
+    append(newEdu);
+    addEducation();
   };
 
   const addAchievement = (index: number) => {
@@ -85,7 +96,8 @@ export default function EducationStep() {
   };
 
   const onSubmit = (data: EducationFormData) => {
-    setEducation(data.education);
+    // البيانات تُحفظ تلقائياً عبر الـ store
+    console.log('Education data submitted:', data);
   };
 
   const handleCurrentlyStudyingChange = (index: number, isStudying: boolean) => {

@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useAutoSave } from '@/hooks/useAutoSave';
 
 type ExperienceFormData = {
   experience: Experience[];
@@ -51,6 +52,9 @@ export default function ExperienceStep() {
   });
 
   const watchedExperience = watch('experience');
+
+  // حفظ تلقائي للتغييرات
+  useAutoSave(watchedExperience, 500);
 
   const addExperienceItem = () => {
     append({
