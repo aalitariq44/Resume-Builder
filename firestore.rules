@@ -15,4 +15,9 @@ service cloud.firestore {
     match /test/{testId} {
       allow read, write: if true;
     }
+    
+    // Allow all operations for الاختبار collection during development
+    match /الاختبار/{testId} {
+      allow read, write: if true;
+    }
 }
