@@ -12,6 +12,11 @@ export const SaveStatus: React.FC<SaveStatusProps> = ({ className }) => {
   const { getSaveStatus } = useResumeStore();
   const [saveStatus, setSaveStatus] = useState(() => getSaveStatus());
   const [showSaveNotification, setShowSaveNotification] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -50,7 +55,9 @@ export const SaveStatus: React.FC<SaveStatusProps> = ({ className }) => {
   };
 
   const getStatusIcon = () => {
-    if (saveStatus.isDirty) {
+    const isDirty = isClient ? saveStatus.isDirty : false;
+    
+    if (isDirty) {
       return (
         <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
       );
@@ -62,6 +69,10 @@ export const SaveStatus: React.FC<SaveStatusProps> = ({ className }) => {
   };
 
   const getStatusText = () => {
+    if (!isClient) {
+      return 'جاهز للحفظ';
+    }
+    
     if (saveStatus.isDirty) {
       return 'تغييرات غير محفوظة';
     } else if (saveStatus.lastSaved) {
@@ -77,7 +88,7 @@ export const SaveStatus: React.FC<SaveStatusProps> = ({ className }) => {
       <span 
         className={cn(
           "transition-colors duration-200",
-          saveStatus.isDirty ? "text-yellow-600" : "text-green-600"
+          (isClient && saveStatus.isDirty) ? "text-yellow-600" : "text-green-600"
         )}
       >
         {getStatusText()}
