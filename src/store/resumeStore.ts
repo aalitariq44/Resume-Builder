@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { Resume, FormData, Template, ResumeTheme, AppState, PersonalInfo, Education, Experience, Skill, Language, Hobby, Course, Reference, Achievement, CustomSection } from '@/types';
 import { generateId } from '@/lib/utils';
+import { useFirebaseStore } from './firebaseStore';
 
 // إنشاء قيم افتراضية
 const createDefaultPersonalInfo = (): PersonalInfo => ({
@@ -253,7 +254,12 @@ export const useResumeStore = create<ResumeStore>()(
         updatedAt: new Date().toISOString()
       } : null
     });
-    // حفظ تلقائي عند تحديث المعلومات الشخصية
+    
+    // حفظ في Firebase
+    const firebaseStore = useFirebaseStore.getState();
+    firebaseStore.savePersonalInfoToFirebase(updatedPersonalInfo).catch(console.error);
+    
+    // حفظ تلقائي محلي عند تحديث المعلومات الشخصية
     setTimeout(() => state.autoSave(), 100);
   },      addCustomField: () => {
         const state = get();
@@ -362,19 +368,25 @@ export const useResumeStore = create<ResumeStore>()(
 
       updateEducation: (id, updates) => {
         const state = get();
+        const updatedEducation = (state.formData.data.education || []).map(edu =>
+          edu.id === id ? { ...edu, ...updates } : edu
+        );
         set({
           formData: {
             ...state.formData,
             data: {
               ...state.formData.data,
-              education: (state.formData.data.education || []).map(edu =>
-                edu.id === id ? { ...edu, ...updates } : edu
-              )
+              education: updatedEducation
             },
             isDirty: true,
             lastSaved: new Date().toISOString()
           }
         });
+        
+        // حفظ في Firebase
+        const firebaseStore = useFirebaseStore.getState();
+        firebaseStore.saveEducationToFirebase(updatedEducation).catch(console.error);
+        
         // حفظ تلقائي
         setTimeout(() => state.autoSave(), 100);
       },
@@ -448,19 +460,25 @@ export const useResumeStore = create<ResumeStore>()(
 
       updateExperience: (id, updates) => {
         const state = get();
+        const updatedExperience = (state.formData.data.experience || []).map(exp =>
+          exp.id === id ? { ...exp, ...updates } : exp
+        );
         set({
           formData: {
             ...state.formData,
             data: {
               ...state.formData.data,
-              experience: (state.formData.data.experience || []).map(exp =>
-                exp.id === id ? { ...exp, ...updates } : exp
-              )
+              experience: updatedExperience
             },
             isDirty: true,
             lastSaved: new Date().toISOString()
           }
         });
+        
+        // حفظ في Firebase
+        const firebaseStore = useFirebaseStore.getState();
+        firebaseStore.saveExperienceToFirebase(updatedExperience).catch(console.error);
+        
         // حفظ تلقائي
         setTimeout(() => state.autoSave(), 100);
       },
@@ -949,6 +967,11 @@ export const useResumeStore = create<ResumeStore>()(
         lastSaved: new Date().toISOString()
       }
     });
+    
+    // حفظ في Firebase عند تغيير الخطوة
+    const firebaseStore = useFirebaseStore.getState();
+    firebaseStore.handleStepChange(step).catch(console.error);
+    
     // حفظ تلقائي عند تغيير الخطوة
     state.autoSave();
   },
@@ -963,6 +986,11 @@ export const useResumeStore = create<ResumeStore>()(
         lastSaved: new Date().toISOString()
       }
     });
+    
+    // حفظ في Firebase عند الانتقال للخطوة التالية
+    const firebaseStore = useFirebaseStore.getState();
+    firebaseStore.handleStepChange(newStep).catch(console.error);
+    
     // حفظ تلقائي عند الانتقال للخطوة التالية
     state.autoSave();
   },
@@ -977,6 +1005,11 @@ export const useResumeStore = create<ResumeStore>()(
         lastSaved: new Date().toISOString()
       }
     });
+    
+    // حفظ في Firebase عند الرجوع للخطوة السابقة
+    const firebaseStore = useFirebaseStore.getState();
+    firebaseStore.handleStepChange(newStep).catch(console.error);
+    
     // حفظ تلقائي عند الرجوع للخطوة السابقة
     state.autoSave();
   },      setFormError: (field, errors) => set((state) => ({
