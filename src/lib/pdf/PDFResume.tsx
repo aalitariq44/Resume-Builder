@@ -34,19 +34,19 @@ const PersonalInfoSection: React.FC<{ resume: Resume; styles: any }> = ({ resume
       <View style={styles.contactInfo}>
         {personalInfo.email && (
           <View style={styles.contactItem}>
-            <Text style={styles.contactText}>📧 {personalInfo.email}</Text>
+            <Text style={styles.contactText}> {personalInfo.email}</Text>
           </View>
         )}
         
         {personalInfo.phone && (
           <View style={styles.contactItem}>
-            <Text style={styles.contactText}>📞 {personalInfo.phone}</Text>
+            <Text style={styles.contactText}> {personalInfo.phone}</Text>
           </View>
         )}
         
         {personalInfo.address && (
           <View style={styles.contactItem}>
-            <Text style={styles.contactText}>📍 {personalInfo.address}</Text>
+            <Text style={styles.contactText}> {personalInfo.address}</Text>
           </View>
         )}
       </View>

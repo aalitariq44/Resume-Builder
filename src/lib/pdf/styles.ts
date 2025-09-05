@@ -39,6 +39,12 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
       borderBottomWidth: theme.styles.headerStyle === 'minimal' ? 1 : 0,
       borderBottomColor: theme.colors.border,
       borderBottomStyle: 'solid',
+      borderWidth: 2,
+      borderColor: '#007bff',
+      borderStyle: 'solid',
+      borderRadius: 8,
+      padding: 15,
+      backgroundColor: theme.colors.background,
     },
 
     // صورة شخصية
@@ -71,6 +77,7 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
       color: theme.colors.secondary,
       textAlign: 'center',
       marginBottom: 15,
+      marginTop: 10,
       fontFamily,
     },
 
