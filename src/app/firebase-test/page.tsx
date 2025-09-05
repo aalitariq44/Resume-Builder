@@ -7,6 +7,7 @@ import { collection, addDoc, getDocs } from 'firebase/firestore';
 export default function FirebaseTestPage() {
   const [status, setStatus] = useState('جاري الاختبار...');
   const [testData, setTestData] = useState<any[]>([]);
+  const [testCollectionData, setTestCollectionData] = useState<any[]>([]);
 
   useEffect(() => {
     const testConnection = async () => {
@@ -26,7 +27,13 @@ export default function FirebaseTestPage() {
         setStatus('نجح الاتصال بفايربيس!');
       } catch (error) {
         console.error('خطأ في الاتصال:', error);
-        setStatus('فشل الاتصال بفايربيس: ' + (error instanceof Error ? error.message : 'خطأ غير معروف'));
+        const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
+        setStatus(`فشل الاتصال بفايربيس: ${errorMessage}`);
+
+        // إضافة معلومات إضافية للمساعدة في حل المشكلة
+        if (errorMessage.includes('Missing or insufficient permissions')) {
+          setStatus(prev => prev + '\n\n🔧 الحل: قم بنشر قواعد Firestore من خلال Firebase Console أو CLI');
+        }
       }
     };
 
