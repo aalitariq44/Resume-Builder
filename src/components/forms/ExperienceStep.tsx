@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useResumeStore } from '@/store/resumeStore';
@@ -22,7 +22,8 @@ export default function ExperienceStep() {
     updateResume,
     addExperience, 
     updateExperience, 
-    removeExperience 
+    removeExperience,
+    setExperience
   } = useResumeStore();
   
   const [newResponsibility, setNewResponsibility] = useState('');
@@ -55,6 +56,13 @@ export default function ExperienceStep() {
 
   // حفظ تلقائي للتغييرات
   useAutoSave(watchedExperience, 500);
+
+  // تحديث الـ store عند تغيير البيانات
+  useEffect(() => {
+    if (watchedExperience && watchedExperience.length > 0) {
+      setExperience(watchedExperience);
+    }
+  }, [watchedExperience, setExperience]);
 
   const addExperienceItem = () => {
     append({

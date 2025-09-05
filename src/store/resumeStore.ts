@@ -117,6 +117,7 @@ interface ResumeStore extends AppState {
   updateExperience: (id: string, updates: Partial<Experience>) => void;
   removeExperience: (id: string) => void;
   reorderExperience: (startIndex: number, endIndex: number) => void;
+  setExperience: (experience: Experience[]) => void;
   
   // Actions for Skills
   addSkill: () => void;
@@ -355,6 +356,25 @@ export const useResumeStore = create<ResumeStore>()(
             lastSaved: new Date().toISOString()
           }
         }));
+      },
+      
+      // Experience Actions
+      setExperience: (experience: Experience[]) => {
+        set({ 
+          formData: {
+            ...get().formData,
+            data: {
+              ...get().formData.data,
+              experience: experience
+            },
+            isDirty: true,
+            lastSaved: new Date().toISOString()
+          }
+        });
+        
+        // حفظ في Firebase
+        const firebaseStore = useFirebaseStore.getState();
+        firebaseStore.saveExperienceToFirebase(experience).catch(console.error);
       },
       
       addEducation: () => {
