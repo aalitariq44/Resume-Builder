@@ -74,8 +74,11 @@ export class ResumeService {
         throw new Error('غير مسموح بتعديل هذه السيرة الذاتية');
       }
 
+      // إزالة القيم undefined قبل التحديث
+      const cleanUpdates = this.removeUndefinedValues(updates);
+
       const updateData = {
-        ...updates,
+        ...cleanUpdates,
         updatedAt: Timestamp.now()
       };
 
@@ -217,8 +220,11 @@ export class ResumeService {
         throw new Error('غير مسموح بتعديل هذه السيرة الذاتية');
       }
 
+      // إزالة القيم undefined قبل الحفظ
+      const cleanSectionData = this.removeUndefinedValues(sectionData);
+
       const updates = {
-        [sectionName]: sectionData,
+        [sectionName]: cleanSectionData,
         updatedAt: Timestamp.now()
       };
 
@@ -280,6 +286,29 @@ export class ResumeService {
     return this.autoSaveSection(resumeId, userId, 'customSections', customSections);
   }
 
+  // إزالة القيم undefined من الكائن
+  private static removeUndefinedValues(obj: any): any {
+    if (obj === null || obj === undefined) {
+      return obj;
+    }
+    
+    if (typeof obj !== 'object') {
+      return obj;
+    }
+    
+    if (Array.isArray(obj)) {
+      return obj.map(item => this.removeUndefinedValues(item));
+    }
+    
+    const cleaned: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value !== undefined) {
+        cleaned[key] = this.removeUndefinedValues(value);
+      }
+    }
+    return cleaned;
+  }
+
   // حفظ متعدد للعديد من الأقسام معاً
   static async saveBatch(resumeId: string, userId: string, sections: Record<string, any>): Promise<void> {
     try {
@@ -297,8 +326,11 @@ export class ResumeService {
         throw new Error('غير مسموح بتعديل هذه السيرة الذاتية');
       }
 
+      // إزالة القيم undefined من جميع الأقسام
+      const cleanSections = this.removeUndefinedValues(sections);
+
       const updates = {
-        ...sections,
+        ...cleanSections,
         updatedAt: Timestamp.now()
       };
 

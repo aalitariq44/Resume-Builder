@@ -254,8 +254,9 @@ export const PersonalInfoStep: React.FC = () => {
   useAutoSave(watchedData, 500); // حفظ بعد 500ms من آخر تغيير
 
   const onImageChange = (imageUrl: string | null) => {
-    setValue('profileImage', imageUrl || undefined);
-    updatePersonalInfo({ profileImage: imageUrl || undefined });
+    const imageValue = imageUrl === null ? undefined : imageUrl;
+    setValue('profileImage', imageValue);
+    updatePersonalInfo({ profileImage: imageValue });
   };
 
   const onSubmit = (data: any) => {
@@ -285,7 +286,8 @@ export const PersonalInfoStep: React.FC = () => {
   };
 
   const handleUpdateCustomField = (id: string, field: string, value: any) => {
-    updateCustomField(id, { [field]: value });
+    const safeValue = value === undefined || value === null ? '' : value;
+    updateCustomField(id, { [field]: safeValue });
   };
 
   const handleRemoveCustomField = (id: string) => {
@@ -307,7 +309,13 @@ export const PersonalInfoStep: React.FC = () => {
   // Watch form changes and update store
   React.useEffect(() => {
     const subscription = watch((value) => {
-      updatePersonalInfo(value as Partial<PersonalInfo>);
+      // Filter out undefined values before updating
+      const cleanValue = Object.fromEntries(
+        Object.entries(value).filter(([_, v]) => v !== undefined)
+      );
+      if (Object.keys(cleanValue).length > 0) {
+        updatePersonalInfo(cleanValue as Partial<PersonalInfo>);
+      }
     });
     return () => subscription.unsubscribe();
   }, [watch, updatePersonalInfo]);

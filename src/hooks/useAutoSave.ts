@@ -14,9 +14,16 @@ export const useAutoSave = (data: any, delay: number = 1000) => {
   const dataRef = useRef(data);
 
   useEffect(() => {
+    // Filter out undefined values from data
+    const cleanData = data && typeof data === 'object' 
+      ? Object.fromEntries(
+          Object.entries(data).filter(([_, v]) => v !== undefined)
+        )
+      : data;
+    
     // مقارنة البيانات الجديدة مع القديمة
-    if (JSON.stringify(data) !== JSON.stringify(dataRef.current)) {
-      dataRef.current = data;
+    if (JSON.stringify(cleanData) !== JSON.stringify(dataRef.current)) {
+      dataRef.current = cleanData;
       
       // تمييز النموذج كمحتوى على تغييرات
       markFormDirty();
