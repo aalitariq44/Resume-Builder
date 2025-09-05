@@ -15,7 +15,7 @@ const cairo = Cairo({
 
 export const metadata: Metadata = {
   title: "بناء السيرة الذاتية | Resume Builder",
-  description: "قم بإنشاء سيرة ذاتية احترافية باللغة العربية والإنجليزية مع تصاميم حديثة وإمكانية التحميل كـ PDF",
+  description: "قم بإنشاء سيرة ذاتية احترافية باللغة العربية والإنجليزية مع تصاميم حديثة",
   keywords: ["سيرة ذاتية", "cv", "resume", "وظائف", "عمل", "احترافي"],
   authors: [{ name: "Resume Builder Team" }],
   creator: "Resume Builder",

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useResumeStore } from '@/store/resumeStore';
 import { PersonalInfoStep } from '@/components/forms/PersonalInfoStep';
@@ -141,130 +141,89 @@ const StepNavigation: React.FC<{
   );
 };
 
-// Resume Preview component (placeholder)
-const ResumePreview: React.FC = () => {
+// Simple Resume Info Display component
+const ResumeInfo: React.FC = () => {
   const { formData } = useResumeStore();
-  const [pdfDataUri, setPdfDataUri] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const generatePreview = async () => {
-    if (!formData.data?.personalInfo?.firstName) {
-      setError('يرجى إدخال المعلومات الشخصية أولاً');
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/preview-pdf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          resumeData: formData.data,
-          options: {
-            format: 'A4',
-            orientation: 'portrait',
-            language: 'ar',
-            template: 'modern'
-          }
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'فشل في إنشاء معاينة PDF');
-      }
-
-      const result = await response.json();
-      setPdfDataUri(result.pdfDataUri);
-    } catch (err) {
-      console.error('Error generating preview:', err);
-      setError(err instanceof Error ? err.message : 'حدث خطأ غير متوقع');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Auto-generate preview when data changes
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (formData.data?.personalInfo?.firstName) {
-        generatePreview();
-      }
-    }, 1000); // Debounce for 1 second
-
-    return () => clearTimeout(timer);
-  }, [formData.data]);
 
   return (
     <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center space-x-2 space-x-reverse">
-          <span>👁️</span>
-          <span>معاينة PDF الحقيقية</span>
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <span>📊</span>
+          <span>ملخص البيانات</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="border rounded-lg overflow-hidden bg-white max-h-[600px]">
-          {isLoading && (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                <p className="text-gray-600">جاري إنشاء معاينة PDF...</p>
-              </div>
-            </div>
-          )}
-
-          {error && (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center text-red-600">
-                <p className="mb-4">❌ {error}</p>
-                <Button onClick={generatePreview} variant="outline" size="sm">
-                  إعادة المحاولة
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {!isLoading && !error && pdfDataUri && (
-            <iframe
-              src={pdfDataUri}
-              className="w-full h-[600px] border-0"
-              title="معاينة السيرة الذاتية PDF"
-            />
-          )}
-
-          {!isLoading && !error && !pdfDataUri && (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center text-gray-500">
-                <p>📄 أدخل معلوماتك لعرض معاينة PDF</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {pdfDataUri && (
-          <div className="mt-4 flex justify-center">
-            <Button
-              onClick={() => {
-                const link = document.createElement('a');
-                link.href = pdfDataUri;
-                link.download = 'resume-preview.pdf';
-                link.click();
-              }}
-              variant="outline"
-              size="sm"
-            >
-              <span className="ml-2">⬇️</span>
-              تحميل المعاينة
-            </Button>
+        <div className="space-y-4">
+          {/* Personal Info */}
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span className="text-sm font-medium">المعلومات الشخصية</span>
+            <span className="text-2xl">
+              {formData.data.personalInfo ? '✅' : '❌'}
+            </span>
           </div>
-        )}
+
+          {/* Experience */}
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span className="text-sm font-medium">الخبرة العملية</span>
+            <span className="text-lg font-bold text-blue-600">
+              {formData.data.experience?.length || 0}
+            </span>
+          </div>
+
+          {/* Education */}
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span className="text-sm font-medium">المؤهلات الدراسية</span>
+            <span className="text-lg font-bold text-green-600">
+              {formData.data.education?.length || 0}
+            </span>
+          </div>
+
+          {/* Skills */}
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span className="text-sm font-medium">المهارات</span>
+            <span className="text-lg font-bold text-purple-600">
+              {formData.data.skills?.length || 0}
+            </span>
+          </div>
+
+          {/* Languages */}
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span className="text-sm font-medium">اللغات</span>
+            <span className="text-lg font-bold text-orange-600">
+              {formData.data.languages?.length || 0}
+            </span>
+          </div>
+
+          {/* Additional sections summary */}
+          <div className="border-t pt-4">
+            <h4 className="font-medium text-sm text-gray-700 mb-3">أقسام إضافية:</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>الهوايات</span>
+                <span>{formData.data.hobbies?.length || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>الدورات التدريبية</span>
+                <span>{formData.data.courses?.length || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>الإنجازات</span>
+                <span>{formData.data.achievements?.length || 0}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Tips */}
+          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+            <h4 className="font-medium text-blue-800 mb-2">💡 نصائح</h4>
+            <ul className="text-xs text-blue-700 space-y-1">
+              <li>• أكمل المعلومات الشخصية أولاً</li>
+              <li>• أضف خبراتك العملية بالتفصيل</li>
+              <li>• لا تنس إضافة مهاراتك</li>
+            </ul>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
@@ -308,9 +267,7 @@ export default function BuilderPage() {
           </div>
 
           <div className="flex items-center space-x-4 space-x-reverse">
-            <Button size="sm">
-              تصدير PDF
-            </Button>
+            <span className="text-sm text-gray-600">معاينة مباشرة للبيانات</span>
           </div>
         </div>
       </header>
@@ -382,9 +339,9 @@ export default function BuilderPage() {
             </Card>
           </div>
 
-          {/* Preview Panel */}
+          {/* Info Panel */}
           <div className="lg:col-span-3 hidden lg:block">
-            <ResumePreview />
+            <ResumeInfo />
           </div>
         </div>
       </div>

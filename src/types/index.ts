@@ -251,21 +251,7 @@ export interface AppState {
   theme: 'light' | 'dark';
 }
 
-// أنواع للـ PDF
-export interface PDFOptions {
-  format: 'A4' | 'Letter';
-  orientation: 'portrait' | 'landscape';
-  quality: 'low' | 'medium' | 'high';
-  includePhotos: boolean;
-  watermark?: string;
-}
 
-export interface ExportResult {
-  success: boolean;
-  data?: Blob;
-  error?: string;
-  fileName?: string;
-}
 
 // أنواع للأخطاء
 export interface ValidationError {

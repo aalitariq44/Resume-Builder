@@ -1,163 +1,12 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useResumeStore } from '@/store/resumeStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { getOptimalSettings, showSuccessMessage, showErrorMessage } from '@/utils/pdfUtils';
 
 export default function ReviewStep() {
   const { formData } = useResumeStore();
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [pdfDataUri, setPdfDataUri] = useState<string | null>(null);
-  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
-  const [previewError, setPreviewError] = useState<string | null>(null);
-
-  // Generate PDF preview on component mount
-  useEffect(() => {
-    generatePreview();
-  }, []);
-
-  const generatePreview = async () => {
-    const personalInfo = formData.data?.personalInfo;
-    
-    if (!personalInfo) {
-      setPreviewError('المعلومات الشخصية مطلوبة. يرجى العودة إلى الخطوة الأولى وإدخال بياناتك');
-      return;
-    }
-
-    const missingFields = [];
-    if (!personalInfo.firstName || personalInfo.firstName.trim() === '') {
-      missingFields.push('الاسم الأول');
-    }
-    if (!personalInfo.lastName || personalInfo.lastName.trim() === '') {
-      missingFields.push('الاسم الأخير');
-    }
-    if (!personalInfo.email || personalInfo.email.trim() === '') {
-      missingFields.push('البريد الإلكتروني');
-    }
-
-    if (missingFields.length > 0) {
-      setPreviewError(`يرجى إدخال المعلومات التالية: ${missingFields.join('، ')}`);
-      return;
-    }
-
-    setIsLoadingPreview(true);
-    setPreviewError(null);
-
-    try {
-      // Use export-pdf endpoint (PDFKit with Arabic support) for preview
-      const response = await fetch('/api/export-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resumeData: formData.data, options: { format: 'A4', orientation: 'portrait', language: 'ar', template: 'modern' } }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'فشل في إنشاء معاينة PDF');
-      }
-
-  // Convert ArrayBuffer to blob URL for iframe
-  const arrayBuffer = await response.arrayBuffer();
-  const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
-  setPdfDataUri(URL.createObjectURL(blob));
-    } catch (err) {
-      console.error('Error generating preview:', err);
-      setPreviewError(err instanceof Error ? err.message : 'حدث خطأ غير متوقع');
-    } finally {
-      setIsLoadingPreview(false);
-    }
-  };
-
-  const generatePDF = async () => {
-    const personalInfo = formData.data?.personalInfo;
-    
-    if (!personalInfo) {
-      showErrorMessage('المعلومات الشخصية مطلوبة. يرجى العودة إلى الخطوة الأولى وإدخال بياناتك');
-      return;
-    }
-
-    const missingFields = [];
-    if (!personalInfo.firstName || personalInfo.firstName.trim() === '') {
-      missingFields.push('الاسم الأول');
-    }
-    if (!personalInfo.lastName || personalInfo.lastName.trim() === '') {
-      missingFields.push('الاسم الأخير');
-    }
-    if (!personalInfo.email || personalInfo.email.trim() === '') {
-      missingFields.push('البريد الإلكتروني');
-    }
-
-    if (missingFields.length > 0) {
-      showErrorMessage(`يرجى إدخال المعلومات التالية: ${missingFields.join('، ')}`);
-      return;
-    }
-
-    setIsGenerating(true);
-    try {
-      // Get optimal settings
-      const settings = getOptimalSettings(formData.data as any);
-      
-      // Call the API to generate PDF
-      const response = await fetch('/api/export-pdf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          resumeData: formData.data,
-          options: settings,
-        }),
-      });
-
-      if (!response.ok) {
-        let errorMessage = 'Failed to generate PDF';
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorMessage;
-          if (errorData.details && Array.isArray(errorData.details)) {
-            console.error('PDF Generation Details:', errorData.details);
-            // Show specific validation errors
-            const validationErrors = errorData.details.join('\n• ');
-            errorMessage += `\n\nالأخطاء:\n• ${validationErrors}`;
-          }
-        } catch (parseError) {
-          // If response is not JSON, get text content
-          const textContent = await response.text();
-          console.error('Non-JSON error response:', textContent);
-          errorMessage = `Server error: ${response.status} ${response.statusText}`;
-        }
-        throw new Error(errorMessage);
-      }
-
-      // Create download link from the response
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = settings.filename || 'resume.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      // Cleanup
-      URL.revokeObjectURL(url);
-      
-      // Show success message
-      showSuccessMessage();
-      
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      // Show detailed error message
-      const errorMessage = error instanceof Error ? error.message : 'حدث خطأ غير متوقع';
-      showErrorMessage(errorMessage);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
 
   const downloadJSON = () => {
     const dataStr = JSON.stringify(formData, null, 2);
@@ -179,80 +28,8 @@ export default function ReviewStep() {
     >
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-bold text-gray-900">مراجعة السيرة الذاتية</h2>
-        <p className="text-gray-600">راجع معلوماتك وقم بتصدير سيرتك الذاتية</p>
+        <p className="text-gray-600">راجع معلوماتك وقم بحفظ البيانات</p>
       </div>
-
-      {/* Live Resume Preview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <span>👁️</span>
-            معاينة PDF الحقيقية
-            <Button
-              onClick={generatePreview}
-              variant="outline"
-              size="sm"
-              disabled={isLoadingPreview}
-            >
-              {isLoadingPreview ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-              ) : (
-                '🔄 تحديث'
-              )}
-            </Button>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="border rounded-lg overflow-hidden bg-white max-h-[800px]">
-            {isLoadingPreview && (
-              <div className="flex items-center justify-center h-64">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                  <p className="text-gray-600">جاري إنشاء معاينة PDF...</p>
-                </div>
-              </div>
-            )}
-
-            {previewError && (
-              <div className="flex items-center justify-center h-64">
-                <div className="text-center text-red-600">
-                  <p className="mb-4">❌ {previewError}</p>
-                  <div className="space-y-2">
-                    <Button onClick={generatePreview} variant="outline" size="sm">
-                      إعادة المحاولة
-                    </Button>
-                    <br />
-                    <Button 
-                      onClick={() => window.location.href = '/builder'} 
-                      variant="outline" 
-                      size="sm"
-                      className="mt-2"
-                    >
-                      العودة لإدخال البيانات
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {!isLoadingPreview && !previewError && pdfDataUri && (
-              <iframe
-                src={pdfDataUri}
-                className="w-full h-[700px] border-0"
-                title="معاينة السيرة الذاتية PDF"
-              />
-            )}
-
-            {!isLoadingPreview && !previewError && !pdfDataUri && (
-              <div className="flex items-center justify-center h-64">
-                <div className="text-center text-gray-500">
-                  <p>📄 أدخل معلوماتك لعرض معاينة PDF</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Quick Summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -353,7 +130,7 @@ export default function ReviewStep() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center space-x-2 space-x-reverse">
-              <span className="text-2xl">�</span>
+              <span className="text-2xl">📚</span>
               <div>
                 <div className="text-2xl font-bold text-gray-900">
                   {formData.data.courses?.length || 0}
@@ -380,40 +157,38 @@ export default function ReviewStep() {
         </Card>
       </div>
 
+      {/* Data Display */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <span>�</span>
+            بيانات السيرة الذاتية
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
+            <pre className="text-sm text-gray-700 whitespace-pre-wrap">
+              {JSON.stringify(formData.data, null, 2)}
+            </pre>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Export Options */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <span>📄</span>
-            تصدير السيرة الذاتية
+            <span>💾</span>
+            حفظ البيانات
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button
-              onClick={generatePDF}
-              disabled={isGenerating}
-              size="lg"
-              className="w-full h-16 text-lg"
-            >
-              {isGenerating ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  جاري إنشاء PDF...
-                </>
-              ) : (
-                <>
-                  <span className="text-2xl mr-2">📄</span>
-                  تحميل PDF عالي الجودة
-                </>
-              )}
-            </Button>
-            
+          <div className="flex justify-center">
             <Button
               onClick={downloadJSON}
               variant="outline"
               size="lg"
-              className="w-full h-16 text-lg"
+              className="w-full max-w-md h-16 text-lg"
             >
               <span className="text-2xl mr-2">💾</span>
               حفظ البيانات (JSON)
@@ -421,7 +196,7 @@ export default function ReviewStep() {
           </div>
           
           <div className="text-sm text-gray-600 text-center p-4 bg-gray-50 rounded-lg">
-            💡 يمكنك تحميل سيرتك الذاتية بصيغة PDF عالية الجودة أو حفظ البيانات لاستخدامها لاحقاً
+            💡 يمكنك حفظ البيانات واستخدامها لاحقاً أو نقلها إلى تطبيقات أخرى
           </div>
         </CardContent>
       </Card>
@@ -436,11 +211,11 @@ export default function ReviewStep() {
         </CardHeader>
         <CardContent>
           <ul className="space-y-2 text-sm text-gray-600">
-            <li>• تأكد من مراجعة جميع المعلومات قبل التصدير</li>
+            <li>• تأكد من مراجعة جميع المعلومات قبل الحفظ</li>
             <li>• يمكنك العودة لأي خطوة لتعديل المعلومات</li>
-            <li>• ملف PDF سيكون بجودة عالية ومناسب للطباعة</li>
             <li>• احفظ نسخة من البيانات لاستخدامها مستقبلاً</li>
-            <li>• يمكنك إنشاء عدة سير ذاتية بقوالب مختلفة</li>
+            <li>• يمكنك إنشاء عدة سير ذاتية بتنسيقات مختلفة</li>
+            <li>• البيانات محفوظة بتنسيق JSON قياسي</li>
           </ul>
         </CardContent>
       </Card>

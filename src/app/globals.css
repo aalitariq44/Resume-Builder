@@ -96,27 +96,6 @@ body {
   font-family: var(--font-english);
 }
 
-/* Print Styles for PDF */
-@media print {
-  body {
-    -webkit-print-color-adjust: exact;
-    color-adjust: exact;
-  }
-  
-  .no-print {
-    display: none !important;
-  }
-  
-  .print-only {
-    display: block !important;
-  }
-  
-  @page {
-    margin: 0.5in;
-    size: A4;
-  }
-}
-
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
