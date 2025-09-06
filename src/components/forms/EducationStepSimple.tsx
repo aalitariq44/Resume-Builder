@@ -60,18 +60,22 @@ export default function EducationStep() {
   });
 
   const watchedEducation = watch('education');
+  const [isResetting, setIsResetting] = useState(false);
 
   // تحديث الـ store عند تغيير البيانات
   useEffect(() => {
+    if (isResetting) return;
     if (watchedEducation && watchedEducation.length > 0) {
       setEducation(watchedEducation);
     }
-  }, [watchedEducation, setEducation]);
+  }, [watchedEducation, setEducation, isResetting]);
 
   // إعادة تهيئة القيم عند تحميل السيرة من Firebase
   useEffect(() => {
     if (formData.data.education) {
+      setIsResetting(true);
       reset({ education: formData.data.education as Education[] });
+      setTimeout(() => setIsResetting(false), 0);
     }
   }, [formData.data.education, reset]);
 

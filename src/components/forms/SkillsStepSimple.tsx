@@ -67,19 +67,23 @@ export default function SkillsStepSimple() {
   });
 
   const watchedSkills = watch('skills');
+  const [isResetting, setIsResetting] = React.useState(false);
 
   // مزامنة بيانات المهارات مع حالة التطبيق حتى تُحفظ عند التنقل
   React.useEffect(() => {
+    if (isResetting) return;
     if (watchedSkills) {
       // تحديث المتجر بالقيم الحالية للنموذج
       setSkills(watchedSkills as any);
     }
-  }, [watchedSkills, setSkills]);
+  }, [watchedSkills, setSkills, isResetting]);
 
   // إعادة تهيئة القيم عند تحميل السيرة من Firebase
   React.useEffect(() => {
     if (formData.data.skills) {
+      setIsResetting(true);
       reset({ skills: formData.data.skills as any });
+      setTimeout(() => setIsResetting(false), 0);
     }
   }, [formData.data.skills, reset]);
 

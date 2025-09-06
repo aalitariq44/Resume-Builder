@@ -25,6 +25,7 @@ export default function ExperienceStep() {
     removeExperience,
     setExperience
   } = useResumeStore();
+  const [isResetting, setIsResetting] = useState(false);
   
   const [newResponsibility, setNewResponsibility] = useState('');
   const [newSkill, setNewSkill] = useState('');
@@ -56,15 +57,18 @@ export default function ExperienceStep() {
 
   // تحديث الـ store عند تغيير البيانات
   useEffect(() => {
+    if (isResetting) return;
     if (watchedExperience && watchedExperience.length > 0) {
       setExperience(watchedExperience);
     }
-  }, [watchedExperience, setExperience]);
+  }, [watchedExperience, setExperience, isResetting]);
 
   // إعادة تهيئة القيم عند تحميل السيرة من Firebase
   useEffect(() => {
     if (formData.data.experience) {
+      setIsResetting(true);
       reset({ experience: formData.data.experience as any });
+      setTimeout(() => setIsResetting(false), 0);
     }
   }, [formData.data.experience, reset]);
 

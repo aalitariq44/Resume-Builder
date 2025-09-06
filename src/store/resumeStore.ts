@@ -368,7 +368,12 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
 
       // Education Actions
       setEducation: (education) => {
-        set({ education });
+            // لا تحدث إذا لم تتغير البيانات فعلاً
+            const current = get().formData.data.education || [];
+            if (deepEqual(current, education)) {
+              return;
+            }
+            set({ education });
         
   // سيتم الحفظ عند الضغط على التالي/السابق
         
@@ -388,6 +393,10 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
       
       // Experience Actions
       setExperience: (experience: Experience[]) => {
+        const current = get().formData.data.experience || [];
+        if (deepEqual(current, experience)) {
+          return;
+        }
         set({ 
           formData: {
             ...get().formData,
@@ -656,6 +665,10 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
       },
 
       setSkills: (skills: Skill[]) => {
+        const current = get().formData.data.skills || [];
+        if (deepEqual(current, skills)) {
+          return;
+        }
         set({ 
           formData: {
             ...get().formData,
