@@ -515,7 +515,6 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
           endDate: '',
           isCurrentJob: false,
           isCurrentlyWorking: false,
-          employmentType: 'full-time',
           responsibilities: [],
           achievements: [],
           skills: []

@@ -253,11 +253,6 @@ function PreviewPageContent() {
                       <div>
                         <strong>تاريخ النهاية:</strong> {exp.endDate || (exp.isCurrentJob ? 'حتى الآن' : 'غير محدد')}
                       </div>
-                      {exp.employmentType && (
-                        <div>
-                          <strong>نوع التوظيف:</strong> {exp.employmentType}
-                        </div>
-                      )}
                     </div>
                     {exp.description && (
                       <div className="mt-2">

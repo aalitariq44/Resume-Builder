@@ -64,7 +64,6 @@ export interface Experience {
   isCurrentJob: boolean;
   isCurrentlyWorking?: boolean;
   description?: string;
-  employmentType?: 'full-time' | 'part-time' | 'freelance' | 'internship' | 'contract';
   responsibilities?: string[];
   achievements?: string[];
   skills?: string[];

@@ -34,7 +34,6 @@ export default function ExperienceStep() {
         endDate: '',
         isCurrentJob: false,
         isCurrentlyWorking: false,
-        employmentType: 'full-time',
         description: '',
         responsibilities: [],
         achievements: [],
@@ -77,7 +76,6 @@ export default function ExperienceStep() {
       endDate: '',
       isCurrentJob: false,
       isCurrentlyWorking: false,
-      employmentType: 'full-time',
       description: '',
       responsibilities: [],
       achievements: [],
@@ -201,27 +199,6 @@ export default function ExperienceStep() {
                         value={experience.location}
                         onChange={(e) => updateField(index, 'location', e.target.value)}
                       />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        نوع العمل
-                      </label>
-                      <Select
-                        value={experience.employmentType}
-                        onValueChange={(value) => updateField(index, 'employmentType', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر نوع العمل" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="full-time">دوام كامل</SelectItem>
-                          <SelectItem value="part-time">دوام جزئي</SelectItem>
-                          <SelectItem value="contract">عقد</SelectItem>
-                          <SelectItem value="freelance">عمل حر</SelectItem>
-                          <SelectItem value="internship">تدريب</SelectItem>
-                        </SelectContent>
-                      </Select>
                     </div>
                   </div>
 
