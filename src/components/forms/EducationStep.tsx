@@ -248,7 +248,7 @@ export default function EducationStep() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         تاريخ البداية *
@@ -352,10 +352,6 @@ export default function EducationStep() {
                           {errors.education[index]?.endYear?.message || errors.education[index]?.endMonth?.message}
                         </p>
                       )}
-                    </div>
-
-                    <div className="md:col-span-1">
-                      {/* Empty column for spacing */}
                     </div>
                   </div>
 
