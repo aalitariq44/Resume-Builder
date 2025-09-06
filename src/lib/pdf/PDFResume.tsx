@@ -134,7 +134,7 @@ const AdditionalPersonalInfoSection: React.FC<{ resume: Resume; styles: any }> =
           <View style={styles.contactInfo}>
             {personalInfo.email && (
               <View style={styles.contactItem}>
-                <Text style={styles.contactText}>البريد: {personalInfo.email}</Text>
+                <Text style={styles.contactText}>{personalInfo.email} :البريد</Text>
               </View>
             )}
             
