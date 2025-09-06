@@ -11,7 +11,10 @@ import {
   orderBy, 
   limit,
   Timestamp,
-  writeBatch
+  writeBatch,
+  setDoc,
+  serverTimestamp,
+  onSnapshot
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { Resume, PersonalInfo, Education, Experience, Skill, Language, Hobby, Course, Reference, Achievement, CustomSection } from '@/types';

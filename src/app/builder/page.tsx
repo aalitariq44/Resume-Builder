@@ -4,9 +4,9 @@ import React, { useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useResumeStore } from '@/store/resumeStore';
-import { useFirebaseStore } from '@/store/firebaseStore';
-import { useFirebaseResumes } from '@/hooks/useFirebaseResumes';
-import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { useResumesManagerStore } from '@/store/resumesManagerStore';
+import { useAuthStore } from '@/store/authStore';
+import AuthProvider from '@/components/auth/AuthProvider';
 import { PersonalInfoStep } from '@/components/forms/PersonalInfoStep';
 import EducationStepSimple from '@/components/forms/EducationStepSimple';
 import ExperienceStep from '@/components/forms/ExperienceStep';
@@ -18,9 +18,7 @@ import ReviewStep from '@/components/forms/ReviewStep';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SaveStatus } from '@/components/ui';
-import { useAutoSaveOnNavigation, usePeriodicAutoSave } from '@/hooks/useAutoSave';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
 
 // Steps configuration
 const STEPS = [
@@ -236,109 +234,74 @@ const ResumeInfo: React.FC = () => {
   );
 };
 
-// BuilderPage Component with Firebase integration
+// BuilderPage Component with new Authentication system
 function BuilderPageContent() {
-  const { formData, setCurrentStep, nextStep, prevStep, autoSave, restoreFromBackup } = useResumeStore();
-  const { currentResumeId, setCurrentResumeId, setUserId } = useFirebaseStore();
-  
-  // استخدام hooks الحفظ التلقائي
-  useAutoSaveOnNavigation(); // حفظ عند التنقل
-  usePeriodicAutoSave(30000); // حفظ كل 30 ثانية
-  
-  // تتبع حالة الاتصال
-  const isOnline = useOnlineStatus();
-  
-  // معرف المستخدم المؤقت - سيتم استبداله بنظام التوثيق الحقيقي
-  const userId = 'temp-user-id';
+  const { formData, setCurrentStep, nextStep, prevStep } = useResumeStore();
+  const { loadResume, currentResume, currentResumeId, isLoading, error } = useResumesManagerStore();
+  const { user } = useAuthStore();
   
   // الحصول على resumeId من URL
   const searchParams = useSearchParams();
   const resumeIdFromURL = searchParams.get('resumeId');
-  
-  // استخدام Firebase hooks
-  const { fetchResume, currentResume } = useFirebaseResumes(userId);
 
   const currentStep = formData.currentStep;
   const totalSteps = STEPS.length;
   const CurrentStepComponent = STEPS[currentStep]?.component;
 
-  // تعيين معرف المستخدم ومعرف السيرة الذاتية عند التحميل
+  // تحميل السيرة الذاتية عند التحميل
   useEffect(() => {
-    setUserId(userId);
-    
-    if (resumeIdFromURL) {
-      setCurrentResumeId(resumeIdFromURL);
-      // جلب السيرة الذاتية من Firebase
-      fetchResume(resumeIdFromURL);
+    if (resumeIdFromURL && user) {
+      loadResume(resumeIdFromURL);
     }
-  }, [setUserId, setCurrentResumeId, resumeIdFromURL, fetchResume, userId]);
+  }, [resumeIdFromURL, user, loadResume]);
 
-  // تحديث store المحلي عند جلب السيرة الذاتية من Firebase
+  // تحديث store المحلي عند جلب السيرة الذاتية
   useEffect(() => {
     if (currentResume) {
-      // هنا يمكنك تحديث الـ store المحلي بالبيانات من Firebase
+      // تحديث formData بالبيانات من Firebase
       console.log('تم جلب السيرة الذاتية من Firebase:', currentResume);
-      // يمكنك إضافة لوجيك تحديث الـ store هنا
     }
   }, [currentResume]);
 
-  // استعادة البيانات عند تحميل الصفحة
-  useEffect(() => {
-    if (!resumeIdFromURL) {
-      const restored = restoreFromBackup();
-      if (restored) {
-        console.log('تم استعادة البيانات من النسخة الاحتياطية');
-      }
-    }
-  }, [restoreFromBackup, resumeIdFromURL]);
-
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
-      // حفظ تلقائي قبل الانتقال
-      autoSave();
       nextStep();
     }
   };
 
   const handlePrev = () => {
     if (currentStep > 0) {
-      // حفظ تلقائي قبل الانتقال
-      autoSave();
       prevStep();
     }
   };
 
   const handleStepChange = (step: number) => {
-    // حفظ تلقائي قبل تغيير الخطوة
-    autoSave();
     setCurrentStep(step);
   };
 
-  // حفظ تلقائي عند إغلاق النافذة أو إعادة التحميل
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      autoSave();
-      const saveStatus = formData.isDirty;
-      if (saveStatus) {
-        e.preventDefault();
-        e.returnValue = 'لديك تغييرات غير محفوظة. هل تريد المغادرة؟';
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [autoSave, formData.isDirty]);
-
-  // عرض رسالة إذا لم يتم العثور على السيرة الذاتية
-  if (resumeIdFromURL && !currentResume) {
+  // عرض شاشة التحميل
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">جارٍ تحميل السيرة الذاتية...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // عرض رسالة خطأ
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-xl font-semibold mb-2">حدث خطأ</h2>
+          <p className="text-muted-foreground mb-4">{error}</p>
+          <Button onClick={() => window.location.href = '/'}>
+            العودة للصفحة الرئيسية
+          </Button>
         </div>
       </div>
     );
@@ -442,18 +405,20 @@ function BuilderPageContent() {
   );
 }
 
-// Main export with Suspense wrapper for useSearchParams
+// Main export with Authentication protection
 export default function BuilderPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">جارٍ تحميل منشئ السيرة الذاتية...</p>
+    <AuthProvider>
+      <Suspense fallback={
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">جارٍ تحميل منشئ السيرة الذاتية...</p>
+          </div>
         </div>
-      </div>
-    }>
-      <BuilderPageContent />
-    </Suspense>
+      }>
+        <BuilderPageContent />
+      </Suspense>
+    </AuthProvider>
   );
 }

@@ -2,11 +2,11 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ResumeService } from '@/lib/firestore';
 import { Resume, PersonalInfo, Education, Experience, Skill, Language, Hobby, Course, Reference, Achievement, CustomSection } from '@/types';
+import { useAuthStore } from './authStore';
 
 interface FirebaseStore {
   // الحالة
   currentResumeId: string | null;
-  userId: string | null;
   isOnline: boolean;
   isSyncing: boolean;
   lastSyncTime: string | null;
@@ -15,12 +15,11 @@ interface FirebaseStore {
 
   // الأفعال
   setCurrentResumeId: (resumeId: string | null) => void;
-  setUserId: (userId: string | null) => void;
   setIsOnline: (isOnline: boolean) => void;
   setIsSyncing: (isSyncing: boolean) => void;
   setSyncError: (error: string | null) => void;
   
-  // حفظ الأقسام في Firebase
+  // حفظ الأقسام في Firebase - يستخدم معرف المستخدم من AuthStore
   savePersonalInfoToFirebase: (personalInfo: PersonalInfo) => Promise<void>;
   saveEducationToFirebase: (education: Education[]) => Promise<void>;
   saveExperienceToFirebase: (experience: Experience[]) => Promise<void>;
@@ -44,7 +43,6 @@ export const useFirebaseStore = create<FirebaseStore>()(
     (set, get) => ({
       // الحالة الأولية
       currentResumeId: null,
-      userId: null,
       isOnline: true,
       isSyncing: false,
       lastSyncTime: null,
@@ -53,7 +51,6 @@ export const useFirebaseStore = create<FirebaseStore>()(
 
       // الأفعال الأساسية
       setCurrentResumeId: (resumeId) => set({ currentResumeId: resumeId }),
-      setUserId: (userId) => set({ userId }),
       setIsOnline: (isOnline) => set({ isOnline }),
       setIsSyncing: (isSyncing) => set({ isSyncing }),
       setSyncError: (error) => set({ syncError: error }),
@@ -61,11 +58,16 @@ export const useFirebaseStore = create<FirebaseStore>()(
       // حفظ المعلومات الشخصية
       savePersonalInfoToFirebase: async (personalInfo: PersonalInfo) => {
         const state = get();
-        if (!state.currentResumeId || !state.userId) return;
+        const authStore = useAuthStore.getState();
+        
+        if (!state.currentResumeId || !authStore.user) {
+          console.warn('معرف السيرة الذاتية أو المستخدم مفقود');
+          return;
+        }
 
         try {
           set({ isSyncing: true, syncError: null });
-          await ResumeService.savePersonalInfo(state.currentResumeId, state.userId, personalInfo);
+          await ResumeService.savePersonalInfo(state.currentResumeId, authStore.user.uid, personalInfo);
           set({ 
             lastSyncTime: new Date().toISOString(),
             isSyncing: false 
@@ -77,7 +79,6 @@ export const useFirebaseStore = create<FirebaseStore>()(
             syncError: 'فشل في حفظ المعلومات الشخصية',
             isSyncing: false 
           });
-          // حفظ التغيير كـ pending في حالة الخطأ
           get().addPendingChange('personalInfo', personalInfo);
         }
       },
@@ -85,11 +86,13 @@ export const useFirebaseStore = create<FirebaseStore>()(
       // حفظ التعليم
       saveEducationToFirebase: async (education: Education[]) => {
         const state = get();
-        if (!state.currentResumeId || !state.userId) return;
+        const authStore = useAuthStore.getState();
+        
+        if (!state.currentResumeId || !authStore.user) return;
 
         try {
           set({ isSyncing: true, syncError: null });
-          await ResumeService.saveEducation(state.currentResumeId, state.userId, education);
+          await ResumeService.saveEducation(state.currentResumeId, authStore.user.uid, education);
           set({ 
             lastSyncTime: new Date().toISOString(),
             isSyncing: false 
@@ -108,11 +111,13 @@ export const useFirebaseStore = create<FirebaseStore>()(
       // حفظ الخبرات
       saveExperienceToFirebase: async (experience: Experience[]) => {
         const state = get();
-        if (!state.currentResumeId || !state.userId) return;
+        const authStore = useAuthStore.getState();
+        
+        if (!state.currentResumeId || !authStore.user) return;
 
         try {
           set({ isSyncing: true, syncError: null });
-          await ResumeService.saveExperience(state.currentResumeId, state.userId, experience);
+          await ResumeService.saveExperience(state.currentResumeId, authStore.user.uid, experience);
           set({ 
             lastSyncTime: new Date().toISOString(),
             isSyncing: false 
@@ -131,11 +136,13 @@ export const useFirebaseStore = create<FirebaseStore>()(
       // حفظ المهارات
       saveSkillsToFirebase: async (skills: Skill[]) => {
         const state = get();
-        if (!state.currentResumeId || !state.userId) return;
+        const authStore = useAuthStore.getState();
+        
+        if (!state.currentResumeId || !authStore.user) return;
 
         try {
           set({ isSyncing: true, syncError: null });
-          await ResumeService.saveSkills(state.currentResumeId, state.userId, skills);
+          await ResumeService.saveSkills(state.currentResumeId, authStore.user.uid, skills);
           set({ 
             lastSyncTime: new Date().toISOString(),
             isSyncing: false 
@@ -154,11 +161,13 @@ export const useFirebaseStore = create<FirebaseStore>()(
       // حفظ اللغات
       saveLanguagesToFirebase: async (languages: Language[]) => {
         const state = get();
-        if (!state.currentResumeId || !state.userId) return;
+        const authStore = useAuthStore.getState();
+        
+        if (!state.currentResumeId || !authStore.user) return;
 
         try {
           set({ isSyncing: true, syncError: null });
-          await ResumeService.saveLanguages(state.currentResumeId, state.userId, languages);
+          await ResumeService.saveLanguages(state.currentResumeId, authStore.user.uid, languages);
           set({ 
             lastSyncTime: new Date().toISOString(),
             isSyncing: false 
@@ -177,11 +186,13 @@ export const useFirebaseStore = create<FirebaseStore>()(
       // حفظ الهوايات
       saveHobbiesToFirebase: async (hobbies: Hobby[]) => {
         const state = get();
-        if (!state.currentResumeId || !state.userId) return;
+        const authStore = useAuthStore.getState();
+        
+        if (!state.currentResumeId || !authStore.user) return;
 
         try {
           set({ isSyncing: true, syncError: null });
-          await ResumeService.saveHobbies(state.currentResumeId, state.userId, hobbies);
+          await ResumeService.saveHobbies(state.currentResumeId, authStore.user.uid, hobbies);
           set({ 
             lastSyncTime: new Date().toISOString(),
             isSyncing: false 
@@ -200,11 +211,13 @@ export const useFirebaseStore = create<FirebaseStore>()(
       // حفظ الدورات
       saveCoursesToFirebase: async (courses: Course[]) => {
         const state = get();
-        if (!state.currentResumeId || !state.userId) return;
+        const authStore = useAuthStore.getState();
+        
+        if (!state.currentResumeId || !authStore.user) return;
 
         try {
           set({ isSyncing: true, syncError: null });
-          await ResumeService.saveCourses(state.currentResumeId, state.userId, courses);
+          await ResumeService.saveCourses(state.currentResumeId, authStore.user.uid, courses);
           set({ 
             lastSyncTime: new Date().toISOString(),
             isSyncing: false 
@@ -223,11 +236,13 @@ export const useFirebaseStore = create<FirebaseStore>()(
       // حفظ المراجع
       saveReferencesToFirebase: async (references: Reference[]) => {
         const state = get();
-        if (!state.currentResumeId || !state.userId) return;
+        const authStore = useAuthStore.getState();
+        
+        if (!state.currentResumeId || !authStore.user) return;
 
         try {
           set({ isSyncing: true, syncError: null });
-          await ResumeService.saveReferences(state.currentResumeId, state.userId, references);
+          await ResumeService.saveReferences(state.currentResumeId, authStore.user.uid, references);
           set({ 
             lastSyncTime: new Date().toISOString(),
             isSyncing: false 
@@ -246,11 +261,13 @@ export const useFirebaseStore = create<FirebaseStore>()(
       // حفظ الإنجازات
       saveAchievementsToFirebase: async (achievements: Achievement[]) => {
         const state = get();
-        if (!state.currentResumeId || !state.userId) return;
+        const authStore = useAuthStore.getState();
+        
+        if (!state.currentResumeId || !authStore.user) return;
 
         try {
           set({ isSyncing: true, syncError: null });
-          await ResumeService.saveAchievements(state.currentResumeId, state.userId, achievements);
+          await ResumeService.saveAchievements(state.currentResumeId, authStore.user.uid, achievements);
           set({ 
             lastSyncTime: new Date().toISOString(),
             isSyncing: false 
@@ -269,11 +286,13 @@ export const useFirebaseStore = create<FirebaseStore>()(
       // حفظ الأقسام المخصصة
       saveCustomSectionsToFirebase: async (customSections: CustomSection[]) => {
         const state = get();
-        if (!state.currentResumeId || !state.userId) return;
+        const authStore = useAuthStore.getState();
+        
+        if (!state.currentResumeId || !authStore.user) return;
 
         try {
           set({ isSyncing: true, syncError: null });
-          await ResumeService.saveCustomSections(state.currentResumeId, state.userId, customSections);
+          await ResumeService.saveCustomSections(state.currentResumeId, authStore.user.uid, customSections);
           set({ 
             lastSyncTime: new Date().toISOString(),
             isSyncing: false 
@@ -311,13 +330,15 @@ export const useFirebaseStore = create<FirebaseStore>()(
       // مزامنة التغييرات المعلقة
       syncPendingChanges: async () => {
         const state = get();
-        if (!state.currentResumeId || !state.userId || Object.keys(state.pendingChanges).length === 0) {
+        const authStore = useAuthStore.getState();
+        
+        if (!state.currentResumeId || !authStore.user || Object.keys(state.pendingChanges).length === 0) {
           return;
         }
 
         try {
           set({ isSyncing: true, syncError: null });
-          await ResumeService.saveBatch(state.currentResumeId, state.userId, state.pendingChanges);
+          await ResumeService.saveBatch(state.currentResumeId, authStore.user.uid, state.pendingChanges);
           set({ 
             pendingChanges: {},
             lastSyncTime: new Date().toISOString(),
@@ -349,7 +370,6 @@ export const useFirebaseStore = create<FirebaseStore>()(
       name: 'firebase-store',
       partialize: (state) => ({
         currentResumeId: state.currentResumeId,
-        userId: state.userId,
         pendingChanges: state.pendingChanges,
         lastSyncTime: state.lastSyncTime
       })

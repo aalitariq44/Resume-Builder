@@ -1,8 +1,8 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import { Resume, FormData, Template, ResumeTheme, AppState, PersonalInfo, Education, Experience, Skill, Language, Hobby, Course, Reference, Achievement, CustomSection } from '@/types';
 import { generateId } from '@/lib/utils';
 import { useFirebaseStore } from './firebaseStore';
+import { ResumeService } from '@/lib/firestore';
 
 // إنشاء قيم افتراضية
 const createDefaultPersonalInfo = (): PersonalInfo => ({
@@ -202,37 +202,35 @@ const reorder = <T>(list: T[], startIndex: number, endIndex: number): T[] => {
   return result;
 };
 
-export const useResumeStore = create<ResumeStore>()(
-  persist(
-    (set, get) => ({
-      // Initial State
-      resume: null,
-      formData: createDefaultFormData(),
-      templates: [],
-      currentTemplate: null,
-      isLoading: false,
-      error: null,
-      language: 'ar',
-      direction: 'rtl',
-      theme: 'light',
-      education: [],
+export const useResumeStore = create<ResumeStore>()((set, get) => ({
+  // Initial State
+  resume: null,
+  formData: createDefaultFormData(),
+  templates: [],
+  currentTemplate: null,
+  isLoading: false,
+  error: null,
+  language: 'ar',
+  direction: 'rtl',
+  theme: 'light',
+  education: [],
 
-      // Resume Actions
-      setResume: (resume) => set({ resume }),
-      
-      updateResume: (updates) => set((state) => ({
-        resume: state.resume ? { ...state.resume, ...updates, updatedAt: new Date().toISOString() } : null,
-        formData: {
-          ...state.formData,
-          data: { ...state.formData.data, ...updates, updatedAt: new Date().toISOString() },
-          isDirty: true
-        }
-      })),
-      
-      resetResume: () => set({
-        resume: createDefaultResume(),
-        formData: createDefaultFormData()
-      }),
+  // Resume Actions
+  setResume: (resume) => set({ resume }),
+  
+  updateResume: (updates) => set((state) => ({
+    resume: state.resume ? { ...state.resume, ...updates, updatedAt: new Date().toISOString() } : null,
+    formData: {
+      ...state.formData,
+      data: { ...state.formData.data, ...updates, updatedAt: new Date().toISOString() },
+      isDirty: true
+    }
+  })),
+  
+  resetResume: () => set({
+    resume: createDefaultResume(),
+    formData: createDefaultFormData()
+  }),
 
   // Personal Info Actions
   updatePersonalInfo: (info) => {
@@ -257,85 +255,120 @@ export const useResumeStore = create<ResumeStore>()(
       } : null
     });
     
+    // حفظ في Firebase فقط
+    const firebaseStore = useFirebaseStore.getState();
+    if (firebaseStore.currentResumeId && firebaseStore.userId) {
+      ResumeService.savePersonalInfo(
+        firebaseStore.currentResumeId, 
+        firebaseStore.userId, 
+        updatedPersonalInfo
+      ).catch(console.error);
+    }
+  },
+
+  addCustomField: () => {
+    const state = get();
+    const newField = {
+      id: generateId(),
+      label: 'حقل جديد',
+      value: '',
+      type: 'text' as const
+    };
+    const currentPersonalInfo = state.formData.data.personalInfo || createDefaultPersonalInfo();
+    const updatedFields = [...(currentPersonalInfo.customFields || []), newField];
+    const updatedPersonalInfo = {
+      ...currentPersonalInfo,
+      customFields: updatedFields
+    };
+    
+    set({
+      formData: {
+        ...state.formData,
+        data: {
+          ...state.formData.data,
+          personalInfo: updatedPersonalInfo
+        },
+        isDirty: true,
+        lastSaved: new Date().toISOString()
+      }
+    });
+    
     // حفظ في Firebase
     const firebaseStore = useFirebaseStore.getState();
-    firebaseStore.savePersonalInfoToFirebase(updatedPersonalInfo).catch(console.error);
+    if (firebaseStore.currentResumeId && firebaseStore.userId) {
+      ResumeService.savePersonalInfo(
+        firebaseStore.currentResumeId, 
+        firebaseStore.userId, 
+        updatedPersonalInfo
+      ).catch(console.error);
+    }
+  },
+
+  updateCustomField: (id, updates) => {
+    const state = get();
+    const currentPersonalInfo = state.formData.data.personalInfo || createDefaultPersonalInfo();
+    const updatedFields = (currentPersonalInfo.customFields || []).map(field =>
+      field.id === id ? { ...field, ...updates } : field
+    );
+    const updatedPersonalInfo = {
+      ...currentPersonalInfo,
+      customFields: updatedFields
+    };
     
-    // حفظ تلقائي محلي عند تحديث المعلومات الشخصية
-    setTimeout(() => state.autoSave(), 100);
-  },      addCustomField: () => {
-        const state = get();
-        const newField = {
-          id: generateId(),
-          label: 'حقل جديد',
-          value: '',
-          type: 'text' as const
-        };
-        const currentPersonalInfo = state.formData.data.personalInfo || createDefaultPersonalInfo();
-        const updatedFields = [...(currentPersonalInfo.customFields || []), newField];
-        set({
-          formData: {
-            ...state.formData,
-            data: {
-              ...state.formData.data,
-              personalInfo: {
-                ...currentPersonalInfo,
-                customFields: updatedFields
-              }
-            },
-            isDirty: true,
-            lastSaved: new Date().toISOString()
-          }
-        });
-        // حفظ تلقائي
-        setTimeout(() => state.autoSave(), 100);
-      },
+    set({
+      formData: {
+        ...state.formData,
+        data: {
+          ...state.formData.data,
+          personalInfo: updatedPersonalInfo
+        },
+        isDirty: true,
+        lastSaved: new Date().toISOString()
+      }
+    });
+    
+    // حفظ في Firebase
+    const firebaseStore = useFirebaseStore.getState();
+    if (firebaseStore.currentResumeId && firebaseStore.userId) {
+      ResumeService.savePersonalInfo(
+        firebaseStore.currentResumeId, 
+        firebaseStore.userId, 
+        updatedPersonalInfo
+      ).catch(console.error);
+    }
+  },
 
-      updateCustomField: (id, updates) => {
-        const state = get();
-        const currentPersonalInfo = state.formData.data.personalInfo || createDefaultPersonalInfo();
-        const updatedFields = (currentPersonalInfo.customFields || []).map(field =>
-          field.id === id ? { ...field, ...updates } : field
-        );
-        set({
-          formData: {
-            ...state.formData,
-            data: {
-              ...state.formData.data,
-              personalInfo: {
-                ...currentPersonalInfo,
-                customFields: updatedFields
-              }
-            },
-            isDirty: true,
-            lastSaved: new Date().toISOString()
-          }
-        });
-        // حفظ تلقائي
-        setTimeout(() => state.autoSave(), 100);
-      },
-
-      removeCustomField: (id) => {
-        const state = get();
-        const currentPersonalInfo = state.formData.data.personalInfo || createDefaultPersonalInfo();
-        const updatedFields = (currentPersonalInfo.customFields || []).filter(field => field.id !== id);
-        set({
-          formData: {
-            ...state.formData,
-            data: {
-              ...state.formData.data,
-              personalInfo: {
-                ...currentPersonalInfo,
-                customFields: updatedFields
-              }
-            },
-            isDirty: true,
-            lastSaved: new Date().toISOString()
-          }
-        });
-        // حفظ تلقائي
-        setTimeout(() => state.autoSave(), 100);
-      },
+  removeCustomField: (id) => {
+    const state = get();
+    const currentPersonalInfo = state.formData.data.personalInfo || createDefaultPersonalInfo();
+    const updatedFields = (currentPersonalInfo.customFields || []).filter(field => field.id !== id);
+    const updatedPersonalInfo = {
+      ...currentPersonalInfo,
+      customFields: updatedFields
+    };
+    
+    set({
+      formData: {
+        ...state.formData,
+        data: {
+          ...state.formData.data,
+          personalInfo: updatedPersonalInfo
+        },
+        isDirty: true,
+        lastSaved: new Date().toISOString()
+      }
+    });
+    
+    // حفظ في Firebase
+    const firebaseStore = useFirebaseStore.getState();
+    if (firebaseStore.currentResumeId && firebaseStore.userId) {
+      ResumeService.savePersonalInfo(
+        firebaseStore.currentResumeId, 
+        firebaseStore.userId, 
+        updatedPersonalInfo
+      ).catch(console.error);
+    }
+  },
 
       // Education Actions
       setEducation: (education) => {
@@ -1144,95 +1177,42 @@ export const useResumeStore = create<ResumeStore>()(
 
   // Utility Actions
   autoSave: () => {
-    const state = get();
-    if (state.formData.isDirty) {
-      try {
-        // تحديث وقت آخر حفظ
-        const now = new Date().toISOString();
-        set({
-          formData: {
-            ...state.formData,
-            lastSaved: now,
-            isDirty: false
-          }
-        });
-        
-        // حفظ في localStorage إضافي للتأكد
-        const dataToSave = {
-          formData: state.formData,
-          timestamp: now,
-          version: '1.0'
-        };
-        
-        localStorage.setItem('resume-backup', JSON.stringify(dataToSave));
-        
-        console.log('تم حفظ البيانات تلقائياً في:', now);
-      } catch (error) {
-        console.error('خطأ في الحفظ التلقائي:', error);
-        set({ error: 'فشل في حفظ البيانات' });
-      }
-    }
+    // لا نحتاج localStorage بعد الآن - سنحفظ في Firebase فقط
+    console.log('حفظ تلقائي: تم تحديث البيانات');
   },
 
-      restoreFromBackup: () => {
-        try {
-          const backup = localStorage.getItem('resume-backup');
-          if (backup) {
-            const parsedBackup = JSON.parse(backup);
-            if (parsedBackup.formData) {
-              set({
-                formData: {
-                  ...parsedBackup.formData,
-                  lastSaved: new Date().toISOString()
-                }
-              });
-              return true;
-            }
-          }
-          return false;
-        } catch (error) {
-          console.error('خطأ في استعادة النسخة الاحتياطية:', error);
-          return false;
-        }
-      },
+  restoreFromBackup: () => {
+    // لا نحتاج استعادة من localStorage
+    console.log('استعادة: لا يوجد نسخ احتياطية محلية');
+    return false;
+  },
 
-      // دالة للتحقق من حالة الحفظ
-      getSaveStatus: () => {
-        const state = get();
-        return {
-          isDirty: state.formData.isDirty,
-          lastSaved: state.formData.lastSaved,
-          hasUnsavedChanges: state.formData.isDirty
-        };
-      },      exportToJSON: () => {
-        const state = get();
-        return JSON.stringify(state.formData.data, null, 2);
-      },
+  getSaveStatus: () => {
+    const state = get();
+    return {
+      isDirty: state.formData.isDirty,
+      lastSaved: state.formData.lastSaved,
+      hasUnsavedChanges: state.formData.isDirty
+    };
+  },
 
-      importFromJSON: (json) => {
-        try {
-          const data = JSON.parse(json);
-          set({
-            formData: {
-              ...get().formData,
-              data,
-              isDirty: true
-            }
-          });
-        } catch (error) {
-          console.error('Failed to import JSON:', error);
+  exportToJSON: () => {
+    const state = get();
+    return JSON.stringify(state.formData.data, null, 2);
+  },
+
+  importFromJSON: (json) => {
+    try {
+      const data = JSON.parse(json);
+      set({
+        formData: {
+          ...get().formData,
+          data,
+          isDirty: true
         }
-      }
-    }),
-    {
-      name: 'resume-store',
-      storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({
-        formData: state.formData,
-        language: state.language,
-        direction: state.direction,
-        theme: state.theme
-      })
+      });
+    } catch (error) {
+      console.error('Failed to import JSON:', error);
     }
-  )
-);
+  }
+}));
