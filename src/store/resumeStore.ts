@@ -282,8 +282,7 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
         updatedAt: new Date().toISOString()
       } : null
     });
-    
-  // لا نحفظ مباشرة في Firebase هنا لتقليل عدد العمليات؛ سيتم الحفظ عند التنقل بين الخطوات
+    // لا نحفظ مباشرة في Firebase هنا لتقليل عدد العمليات؛ سيتم الحفظ عند التنقل بين الخطوات
   },
 
   addCustomField: () => {
@@ -312,8 +311,7 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
         lastSaved: new Date().toISOString()
       }
     });
-    
-  // سيتم الحفظ عند الضغط على التالي/السابق
+    // سيتم الحفظ عند الضغط على التالي/السابق
   },
 
   updateCustomField: (id, updates) => {
@@ -338,8 +336,7 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
         lastSaved: new Date().toISOString()
       }
     });
-    
-  // سيتم الحفظ عند الضغط على التالي/السابق
+    // سيتم الحفظ عند الضغط على التالي/السابق
   },
 
   removeCustomField: (id) => {
@@ -362,8 +359,7 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
         lastSaved: new Date().toISOString()
       }
     });
-    
-  // سيتم الحفظ عند الضغط على التالي/السابق
+    // سيتم الحفظ عند الضغط على التالي/السابق
   },
 
       // Education Actions
@@ -407,8 +403,7 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
             lastSaved: new Date().toISOString()
           }
         });
-        
-  // سيتم الحفظ عند الضغط على التالي/السابق
+        // سيتم الحفظ عند الضغط على التالي/السابق
       },
       
       addEducation: () => {
@@ -461,9 +456,7 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
             lastSaved: new Date().toISOString()
           }
         });
-        
-  // سيتم الحفظ عند الضغط على التالي/السابق
-        
+        // سيتم الحفظ عند الضغط على التالي/السابق
         // حفظ تلقائي
         setTimeout(() => state.autoSave(), 100);
       },
@@ -513,6 +506,10 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
           location: '',
           startDate: '',
           endDate: '',
+          startYear: '',
+          startMonth: '',
+          endYear: '',
+          endMonth: '',
           isCurrentJob: false,
           isCurrentlyWorking: false,
           responsibilities: [],
@@ -550,9 +547,7 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
             lastSaved: new Date().toISOString()
           }
         });
-        
-  // سيتم الحفظ عند الضغط على التالي/السابق
-        
+        // سيتم الحفظ عند الضغط على التالي/السابق
         // حفظ تلقائي
         setTimeout(() => state.autoSave(), 100);
       },
@@ -684,8 +679,7 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
             lastSaved: new Date().toISOString()
           }
         });
-        
-  // سيتم الحفظ عند الضغط على التالي/السابق
+        // سيتم الحفظ عند الضغط على التالي/السابق
       },
 
       // Languages Actions
