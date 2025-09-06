@@ -242,6 +242,20 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
       marginBottom: 4,
     },
 
+    // المعدل التراكمي
+    gpaContainer: {
+      width: '100%',
+      marginTop: 2,
+      marginBottom: 4,
+    },
+
+    gpaText: {
+      fontSize: theme.fonts.size.small,
+      color: theme.colors.secondary,
+      fontFamily,
+      textAlign: textAlign,
+    },
+
     // المهارات
     skillsContainer: {
       flexDirection: 'row',

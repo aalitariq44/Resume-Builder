@@ -183,6 +183,11 @@ const EducationSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, s
                 <Text style={styles.dateText}>{edu.startDate}</Text>
                 <Text style={styles.dateText}>{edu.isCurrentlyStudying ? 'حتى الآن' : edu.endDate}</Text>
               </View>
+              {edu.gpa && (
+                <View style={styles.gpaContainer}>
+                  <Text style={styles.gpaText}>المعدل التراكمي: {edu.gpa}</Text>
+                </View>
+              )}
             </View>
             
             {edu.achievements && edu.achievements.length > 0 && (
