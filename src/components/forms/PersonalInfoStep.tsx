@@ -30,7 +30,7 @@ const personalInfoSchema = yup.object({
   firstName: yup.string().required('الاسم الأول مطلوب'),
   lastName: yup.string().required('اسم العائلة مطلوب'),
   jobTitle: yup.string().required('الوظيفة المطلوبة مطلوبة'),
-  email: yup.string().email('صيغة البريد الإلكتروني غير صحيحة').required('البريد الإلكتروني مطلوب'),
+  email: yup.string().email('صيغة البريد الإلكتروني غير صحيحة'),
   phone: yup.string().required('رقم الهاتف مطلوب').test('valid-phone', 'رقم الهاتف غير صحيح', isValidPhone),
   address: yup.string().required('العنوان مطلوب'),
   city: yup.string().required('المدينة مطلوبة'),

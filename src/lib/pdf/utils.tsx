@@ -102,9 +102,6 @@ export const validateResumeForPDF = (resume: Resume): { isValid: boolean; errors
     errors.push('اسم العائلة مطلوب');
   }
   
-  if (!resume.personalInfo.email) {
-    errors.push('البريد الإلكتروني مطلوب');
-  }
   
   if (!resume.personalInfo.phone) {
     errors.push('رقم الهاتف مطلوب');
