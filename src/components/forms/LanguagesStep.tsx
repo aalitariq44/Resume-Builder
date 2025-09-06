@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectSeparator } from '@/components/ui/select';
 import { Language } from '@/types';
 
 export default function LanguagesStep() {
@@ -106,7 +106,13 @@ export default function LanguagesStep() {
                           <SelectValue placeholder="اختر المستوى" />
                         </SelectTrigger>
                         <SelectContent>
-                          {languageLevelOptions.map((option) => (
+                          {languageLevelOptions.slice(0, 5).map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                          <SelectSeparator className="bg-gray-400 h-0.5 my-2" />
+                          {languageLevelOptions.slice(5).map((option) => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
                             </SelectItem>
