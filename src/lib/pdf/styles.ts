@@ -52,6 +52,7 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
       flexDirection: direction === 'rtl' ? 'row-reverse' : 'row',
       alignItems: 'center',
       gap: 20,
+      direction: direction,
     },
 
     // العمود الأيسر (الصورة)
@@ -63,6 +64,7 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
     // العمود الأيمن (المعلومات)
     headerRight: {
       flex: 1,
+      direction: direction,
     },
 
     // صورة شخصية
@@ -122,9 +124,10 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
     contactInfo: {
       flexDirection: direction === 'rtl' ? 'row-reverse' : 'row',
       flexWrap: 'wrap',
-      justifyContent: direction === 'rtl' ? 'flex-end' : 'flex-start',
+      justifyContent: direction === 'rtl' ? 'flex-start' : 'flex-start',
       gap: 15,
       marginBottom: 10,
+      direction: direction,
     },
 
     contactItem: {
@@ -132,12 +135,14 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
       alignItems: 'center',
       fontSize: theme.fonts.size.small,
       color: theme.colors.text,
+      direction: direction,
     },
 
     contactText: {
       marginRight: direction === 'rtl' ? 0 : 5,
       marginLeft: direction === 'rtl' ? 5 : 0,
       fontFamily,
+      textAlign: textAlign,
     },
 
     // الأقسام
