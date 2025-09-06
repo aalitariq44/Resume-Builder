@@ -364,18 +364,38 @@ const PDFResume: React.FC<PDFResumeProps> = ({ resume }) => {
     >
       <Page size="A4" style={styles.page} wrap={true}>
         <View style={styles.container}>
-          {resume.sectionOrder?.map(renderSection) || [
-            <PersonalInfoSection key="personalInfo" resume={resume} styles={styles} />,
-            <ObjectiveSection key="objective" resume={resume} styles={styles} />,
-            <ExperienceSection key="experience" resume={resume} styles={styles} />,
-            <EducationSection key="education" resume={resume} styles={styles} />,
-            <SkillsSection key="skills" resume={resume} styles={styles} />,
-            <LanguagesSection key="languages" resume={resume} styles={styles} />,
-            <CoursesSection key="courses" resume={resume} styles={styles} />,
-            <AchievementsSection key="achievements" resume={resume} styles={styles} />,
-            <HobbiesSection key="hobbies" resume={resume} styles={styles} />,
-            <ReferencesSection key="references" resume={resume} styles={styles} />,
-          ]}
+          {/* رأس السيرة الذاتية */}
+          <PersonalInfoSection resume={resume} styles={styles} />
+          
+          {/* المحتوى مقسم إلى عمودين */}
+          <View style={styles.twoColumnLayout}>
+            {/* العمود الأيسر - 40% */}
+            <View style={styles.leftColumn}>
+              {resume.sectionOrder?.filter(section => 
+                ['objective', 'experience', 'education', 'skills'].includes(section) && 
+                !resume.hiddenSections?.includes(section)
+              ).map(sectionId => renderSection(sectionId)) || [
+                <ObjectiveSection key="objective" resume={resume} styles={styles} />,
+                <ExperienceSection key="experience" resume={resume} styles={styles} />,
+                <EducationSection key="education" resume={resume} styles={styles} />,
+                <SkillsSection key="skills" resume={resume} styles={styles} />,
+              ]}
+            </View>
+            
+            {/* العمود الأيمن - 60% */}
+            <View style={styles.rightColumn}>
+              {resume.sectionOrder?.filter(section => 
+                ['languages', 'courses', 'achievements', 'hobbies', 'references'].includes(section) && 
+                !resume.hiddenSections?.includes(section)
+              ).map(sectionId => renderSection(sectionId)) || [
+                <LanguagesSection key="languages" resume={resume} styles={styles} />,
+                <CoursesSection key="courses" resume={resume} styles={styles} />,
+                <AchievementsSection key="achievements" resume={resume} styles={styles} />,
+                <HobbiesSection key="hobbies" resume={resume} styles={styles} />,
+                <ReferencesSection key="references" resume={resume} styles={styles} />,
+              ]}
+            </View>
+          </View>
         </View>
       </Page>
     </Document>

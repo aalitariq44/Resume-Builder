@@ -123,6 +123,7 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
     // الأقسام
     section: {
       marginBottom: theme.layout.spacing === 'tight' ? 12 : theme.layout.spacing === 'relaxed' ? 20 : 16,
+      backgroundColor: 'transparent', // إزالة الخلفية لأن الأعمدة لديها خلفيات
     },
 
     sectionTitle: {
@@ -131,9 +132,6 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
       color: theme.colors.primary,
       marginBottom: 8,
       paddingBottom: 4,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.primary,
-      borderBottomStyle: 'solid',
       textAlign: textAlign,
       fontFamily,
     },
@@ -312,11 +310,23 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
     },
 
     leftColumn: {
-      flex: 0.35,
+      flex: 0.4,
+      backgroundColor: '#e3f2fd', // أزرق فاتح
+      borderWidth: 2,
+      borderColor: '#1976d2', // أزرق غامق
+      borderStyle: 'solid',
+      borderRadius: 8,
+      padding: 15,
     },
 
     rightColumn: {
-      flex: 0.65,
+      flex: 0.6,
+      backgroundColor: '#ffffff', // أبيض
+      borderWidth: 2,
+      borderColor: '#1976d2', // أزرق غامق
+      borderStyle: 'solid',
+      borderRadius: 8,
+      padding: 15,
     },
 
     // الهدف المهني
