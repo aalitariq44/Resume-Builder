@@ -6,8 +6,29 @@ import PDFResume from './PDFResume';
 
 // دالة لتوليد PDF من البيانات
 export const generatePDF = async (resume: Resume): Promise<Blob> => {
+  // التحقق من صحة البيانات الأساسية
+  if (!resume || !resume.id || !resume.personalInfo) {
+    throw new Error('البيانات غير صالحة لإنشاء PDF');
+  }
+  
+  // التأكد من وجود القيم الافتراضية للمصفوفات
+  const safeResume: Resume = {
+    ...resume,
+    experience: resume.experience || [],
+    education: resume.education || [],
+    skills: resume.skills || [],
+    languages: resume.languages || [],
+    hobbies: resume.hobbies || [],
+    courses: resume.courses || [],
+    achievements: resume.achievements || [],
+    references: resume.references || [],
+    customSections: resume.customSections || [],
+    sectionOrder: resume.sectionOrder || [],
+    hiddenSections: resume.hiddenSections || [],
+  };
+  
   try {
-    const doc = <PDFResume resume={resume} />;
+    const doc = <PDFResume resume={safeResume} />;
     const blob = await pdf(doc).toBlob();
     return blob;
   } catch (error) {
@@ -93,6 +114,18 @@ export const printPDF = async (resume: Resume): Promise<void> => {
 export const validateResumeForPDF = (resume: Resume): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
   
+  // التحقق من وجود resume
+  if (!resume) {
+    errors.push('البيانات غير موجودة');
+    return { isValid: false, errors };
+  }
+  
+  // التحقق من وجود personalInfo
+  if (!resume.personalInfo) {
+    errors.push('المعلومات الشخصية غير موجودة');
+    return { isValid: false, errors };
+  }
+  
   // التحقق من المعلومات الأساسية
   if (!resume.personalInfo.firstName) {
     errors.push('الاسم الأول مطلوب');
@@ -109,15 +142,15 @@ export const validateResumeForPDF = (resume: Resume): { isValid: boolean; errors
   
   // التحقق من وجود قسم واحد على الأقل
   const hasContent = [
-    resume.experience?.length > 0,
-    resume.education?.length > 0,
-    resume.skills?.length > 0,
-    resume.languages?.length > 0,
-    resume.courses?.length > 0,
-    resume.achievements?.length > 0,
-    resume.hobbies?.length > 0,
-    resume.references?.length > 0,
-    resume.objective?.trim(),
+    (resume.experience && resume.experience.length > 0),
+    (resume.education && resume.education.length > 0),
+    (resume.skills && resume.skills.length > 0),
+    (resume.languages && resume.languages.length > 0),
+    (resume.courses && resume.courses.length > 0),
+    (resume.achievements && resume.achievements.length > 0),
+    (resume.hobbies && resume.hobbies.length > 0),
+    (resume.references && resume.references.length > 0),
+    (resume.objective && resume.objective.trim()),
   ].some(Boolean);
   
   if (!hasContent) {

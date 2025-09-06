@@ -1,6 +1,6 @@
 import React from 'react';
 import { Document, Page, Text, View, Image } from '@react-pdf/renderer';
-import { Resume } from '@/types';
+import { Resume, ResumeTheme } from '@/types';
 import { createStyles, getSkillBarWidth, translateSkillLevel, translateLanguageLevel, translateHobbyLevel } from './styles';
 import { registerFonts } from './fonts';
 
@@ -63,13 +63,18 @@ const ObjectiveSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, s
 
 // مكون الخبرات
 const ExperienceSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, styles }) => {
-  if (!resume.experience || resume.experience.length === 0) return null;
+  const experiences = resume.experience || [];
+  if (experiences.length === 0) return null;
+  
+  const validExperiences = experiences.filter(exp => exp && exp.id);
+  
+  if (validExperiences.length === 0) return null;
   
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>الخبرات المهنية</Text>
       <View style={styles.sectionContent}>
-        {resume.experience.map((exp, index) => (
+        {validExperiences.map((exp, index) => (
           <View key={exp.id} style={styles.item}>
             <View style={styles.educationHeader}>
               <View style={styles.degreeRow}>
@@ -160,13 +165,18 @@ const AdditionalPersonalInfoSection: React.FC<{ resume: Resume; styles: any }> =
 
 // مكون التعليم
 const EducationSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, styles }) => {
-  if (!resume.education || resume.education.length === 0) return null;
+  const educations = resume.education || [];
+  if (educations.length === 0) return null;
+  
+  const validEducations = educations.filter(edu => edu && edu.id);
+  
+  if (validEducations.length === 0) return null;
   
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>التعليم</Text>
       <View style={styles.sectionContent}>
-        {resume.education.map((edu, index) => (
+        {validEducations.map((edu, index) => (
           <View key={edu.id} style={styles.item}>
             <View style={styles.educationHeader}>
               <View style={styles.degreeRow}>
@@ -209,13 +219,18 @@ const EducationSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, s
 
 // مكون المهارات
 const SkillsSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, styles }) => {
-  if (!resume.skills || resume.skills.length === 0) return null;
+  const skills = resume.skills || [];
+  if (skills.length === 0) return null;
+  
+  const validSkills = skills.filter(skill => skill && skill.id);
+  
+  if (validSkills.length === 0) return null;
   
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>المهارات</Text>
       <View style={styles.sectionContent}>
-        {resume.skills.map((skill, index) => (
+        {validSkills.map((skill, index) => (
           <View key={skill.id} style={styles.skillBar}>
             <View style={styles.skillInfo}>
               <Text style={styles.skillName}>{skill.name}</Text>
@@ -236,13 +251,18 @@ const SkillsSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, styl
 
 // مكون اللغات
 const LanguagesSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, styles }) => {
-  if (!resume.languages || resume.languages.length === 0) return null;
+  const languages = resume.languages || [];
+  if (languages.length === 0) return null;
+  
+  const validLanguages = languages.filter(language => language && language.id);
+  
+  if (validLanguages.length === 0) return null;
   
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>اللغات</Text>
       <View style={styles.sectionContent}>
-        {resume.languages.map((language, index) => (
+        {validLanguages.map((language, index) => (
           <View key={language.id} style={styles.languageItem}>
             <Text style={styles.languageName}>{language.name}</Text>
             <Text style={styles.languageLevel}>
@@ -257,13 +277,18 @@ const LanguagesSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, s
 
 // مكون الدورات
 const CoursesSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, styles }) => {
-  if (!resume.courses || resume.courses.length === 0) return null;
+  const courses = resume.courses || [];
+  if (courses.length === 0) return null;
+  
+  const validCourses = courses.filter(course => course && course.id);
+  
+  if (validCourses.length === 0) return null;
   
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>الدورات التدريبية</Text>
       <View style={styles.sectionContent}>
-        {resume.courses.map((course, index) => (
+        {validCourses.map((course, index) => (
           <View key={course.id} style={styles.item}>
             <View style={styles.itemHeader}>
               <View>
@@ -281,13 +306,18 @@ const CoursesSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, sty
 
 // مكون الإنجازات
 const AchievementsSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, styles }) => {
-  if (!resume.achievements || resume.achievements.length === 0) return null;
+  const achievements = resume.achievements || [];
+  if (achievements.length === 0) return null;
+  
+  const validAchievements = achievements.filter(achievement => achievement && achievement.id);
+  
+  if (validAchievements.length === 0) return null;
   
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>الجوائز والإنجازات</Text>
       <View style={styles.sectionContent}>
-        {resume.achievements.map((achievement, index) => (
+        {validAchievements.map((achievement, index) => (
           <View key={achievement.id} style={styles.item}>
             <View style={styles.itemHeader}>
               <View>
@@ -308,13 +338,18 @@ const AchievementsSection: React.FC<{ resume: Resume; styles: any }> = ({ resume
 
 // مكون الهوايات
 const HobbiesSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, styles }) => {
-  if (!resume.hobbies || resume.hobbies.length === 0) return null;
+  const hobbies = resume.hobbies || [];
+  if (hobbies.length === 0) return null;
+  
+  const validHobbies = hobbies.filter(hobby => hobby && hobby.id);
+  
+  if (validHobbies.length === 0) return null;
   
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>الهوايات والاهتمامات</Text>
       <View style={styles.sectionContent}>
-        {resume.hobbies.map((hobby, index) => (
+        {validHobbies.map((hobby, index) => (
           <View key={hobby.id} style={styles.item}>
             <View style={styles.skillInfo}>
               <Text style={styles.skillName}>{hobby.name}</Text>
@@ -332,13 +367,18 @@ const HobbiesSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, sty
 
 // مكون المراجع
 const ReferencesSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, styles }) => {
-  if (!resume.references || resume.references.length === 0) return null;
+  const references = resume.references || [];
+  if (references.length === 0) return null;
+  
+  const validReferences = references.filter(reference => reference && reference.id);
+  
+  if (validReferences.length === 0) return null;
   
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>المراجع</Text>
       <View style={styles.sectionContent}>
-        {resume.references.map((reference, index) => (
+        {validReferences.map((reference, index) => (
           <View key={reference.id} style={styles.item}>
             <Text style={styles.itemTitle}>{reference.name}</Text>
             <Text style={styles.itemSubtitle}>{reference.position}</Text>
@@ -360,11 +400,59 @@ const ReferencesSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, 
 
 // المكون الرئيسي للـ PDF
 const PDFResume: React.FC<PDFResumeProps> = ({ resume }) => {
-  const styles = createStyles(resume.theme, resume.language);
+  // التحقق من صحة البيانات الأساسية
+  if (!resume || !resume.id || !resume.personalInfo) {
+    console.error('البيانات غير صالحة لإنشاء PDF:', resume);
+    return null;
+  }
+  
+  // التحقق من وجود theme افتراضي
+  const defaultTheme: ResumeTheme = {
+    id: 'default',
+    name: 'Default',
+    colors: {
+      primary: '#007bff',
+      secondary: '#6c757d',
+      text: '#212529',
+      background: '#ffffff',
+      border: '#dee2e6',
+      accent: '#007bff',
+    },
+    fonts: {
+      heading: 'Cairo',
+      body: 'Cairo',
+      size: {
+        base: 12,
+        heading: 16,
+        small: 10,
+      },
+    },
+    layout: {
+      columns: 1,
+      spacing: 'normal',
+      margins: {
+        top: 20,
+        right: 20,
+        bottom: 20,
+        left: 20,
+      },
+    },
+    styles: {
+      borderRadius: 4,
+      shadowLevel: 'none',
+      headerStyle: 'minimal',
+    },
+  };
+  
+  const theme = resume.theme || defaultTheme;
+  const language = resume.language || 'ar';
+  const sectionOrder = resume.sectionOrder || [];
+  const hiddenSections = resume.hiddenSections || [];
+  const styles = createStyles(theme, language);
   
   // ترتيب الأقسام حسب sectionOrder
   const renderSection = (sectionId: string) => {
-    if (resume.hiddenSections?.includes(sectionId)) return null;
+    if (hiddenSections.includes(sectionId)) return null;
     
     switch (sectionId) {
       case 'personalInfo':
@@ -401,7 +489,7 @@ const PDFResume: React.FC<PDFResumeProps> = ({ resume }) => {
       subject="السيرة الذاتية"
       creator="منشئ السير الذاتية"
       producer="React PDF"
-      language={resume.language}
+      language={language}
     >
       <Page size="A4" style={styles.page} wrap={true}>
         <View style={styles.container}>
@@ -413,12 +501,12 @@ const PDFResume: React.FC<PDFResumeProps> = ({ resume }) => {
             {/* العمود الأيمن الجديد - 40% */}
             <View style={styles.rightColumn}>
               {/* مكون المعلومات الشخصية الإضافية يظهر دائماً */}
-              {!resume.hiddenSections?.includes('additionalPersonalInfo') && (
+              {!hiddenSections.includes('additionalPersonalInfo') && (
                 <AdditionalPersonalInfoSection resume={resume} styles={styles} />
               )}
-              {resume.sectionOrder?.filter(section => 
+              {sectionOrder.filter(section => 
                 ['objective', 'additionalPersonalInfo', 'education', 'skills', 'languages'].includes(section) && 
-                !resume.hiddenSections?.includes(section)
+                !hiddenSections.includes(section)
               ).map(sectionId => renderSection(sectionId)) || [
                 <ObjectiveSection key="objective" resume={resume} styles={styles} />,
                 <AdditionalPersonalInfoSection key="additionalPersonalInfo" resume={resume} styles={styles} />,
@@ -430,9 +518,9 @@ const PDFResume: React.FC<PDFResumeProps> = ({ resume }) => {
             
             {/* العمود الأيسر الجديد - 60% */}
             <View style={styles.leftColumn}>
-              {resume.sectionOrder?.filter(section => 
+              {sectionOrder.filter(section => 
                 ['experience', 'courses', 'achievements', 'hobbies', 'references'].includes(section) && 
-                !resume.hiddenSections?.includes(section)
+                !hiddenSections.includes(section)
               ).map(sectionId => renderSection(sectionId)) || [
                 <ExperienceSection key="experience" resume={resume} styles={styles} />,
                 <CoursesSection key="courses" resume={resume} styles={styles} />,
