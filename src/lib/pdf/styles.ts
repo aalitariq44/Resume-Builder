@@ -179,10 +179,8 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
     },
 
     itemTitle: {
-      fontSize: theme.fonts.size.base + 1,
-      fontWeight: 'semibold',
+      fontSize: theme.fonts.size.small,
       color: theme.colors.text,
-      textAlign: textAlign,
       fontFamily,
     },
 
@@ -227,8 +225,9 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
 
     degreeRow: {
       flexDirection: direction === 'rtl' ? 'row-reverse' : 'row',
+      justifyContent: 'space-between',
       alignItems: 'center',
-      gap: 10,
+      width: '100%',
       marginBottom: 4,
     },
 
