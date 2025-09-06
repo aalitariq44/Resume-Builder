@@ -146,11 +146,13 @@ const EducationSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, s
       <View style={styles.sectionContent}>
         {resume.education.map((edu, index) => (
           <View key={edu.id} style={styles.item}>
-            <View style={styles.itemHeader}>
-              <View>
+            <View style={styles.educationHeader}>
+              <View style={styles.degreeRow}>
                 <Text style={styles.itemTitle}>{edu.degree}</Text>
                 <Text style={styles.itemSubtitle}>{edu.field}</Text>
-                <Text style={styles.itemSubtitle}>{edu.institution}</Text>
+              </View>
+              <View style={styles.institutionRow}>
+                <Text style={styles.itemSubtitle}>({edu.institution})</Text>
                 {edu.location && (
                   <Text style={styles.itemLocation}>{edu.location}</Text>
                 )}

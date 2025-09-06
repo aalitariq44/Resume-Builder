@@ -218,6 +218,27 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
       fontFamily,
     },
 
+    // التعليم
+    educationHeader: {
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      width: '100%',
+    },
+
+    degreeRow: {
+      flexDirection: direction === 'rtl' ? 'row-reverse' : 'row',
+      alignItems: 'center',
+      gap: 10,
+      marginBottom: 4,
+    },
+
+    institutionRow: {
+      flexDirection: direction === 'rtl' ? 'row-reverse' : 'row',
+      alignItems: 'center',
+      gap: 10,
+      marginBottom: 4,
+    },
+
     // المهارات
     skillsContainer: {
       flexDirection: 'row',
