@@ -61,6 +61,10 @@ export interface Experience {
   city?: string;
   startDate: string;
   endDate: string;
+  startYear: string;
+  startMonth: string;
+  endYear: string;
+  endMonth: string;
   isCurrentJob: boolean;
   isCurrentlyWorking?: boolean;
   description?: string;

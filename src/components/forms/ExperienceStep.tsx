@@ -11,6 +11,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
+const yearOptions = Array.from({ length: 76 }, (_, i) => (2025 - i).toString());
+
+const monthOptions = [
+  { value: '01', label: 'يناير' },
+  { value: '02', label: 'فبراير' },
+  { value: '03', label: 'مارس' },
+  { value: '04', label: 'أبريل' },
+  { value: '05', label: 'مايو' },
+  { value: '06', label: 'يونيو' },
+  { value: '07', label: 'يوليو' },
+  { value: '08', label: 'أغسطس' },
+  { value: '09', label: 'سبتمبر' },
+  { value: '10', label: 'أكتوبر' },
+  { value: '11', label: 'نوفمبر' },
+  { value: '12', label: 'ديسمبر' },
+];
+
 export default function ExperienceStep() {
   const { formData, setExperience } = useResumeStore();
   const [experienceList, setExperienceList] = useState<Experience[]>([]);
@@ -32,6 +49,10 @@ export default function ExperienceStep() {
         location: '',
         startDate: '',
         endDate: '',
+        startYear: '',
+        startMonth: '',
+        endYear: '',
+        endMonth: '',
         isCurrentJob: false,
         isCurrentlyWorking: false,
         description: '',
@@ -55,10 +76,27 @@ export default function ExperienceStep() {
     const updated = [...experienceList];
     updated[index] = { ...updated[index], [field]: value };
     
-    if ((field === 'isCurrentJob' || field === 'isCurrentlyWorking') && value) {
+    // تحديث التواريخ تلقائياً
+    if (field === 'startYear' || field === 'startMonth') {
+      const startMonth = field === 'startMonth' ? value : updated[index].startMonth;
+      const startYear = field === 'startYear' ? value : updated[index].startYear;
+      if (startMonth && startYear) {
+        updated[index].startDate = `${startYear}-${startMonth}`;
+      }
+    }
+    
+    if (field === 'endYear' || field === 'endMonth') {
+      const endMonth = field === 'endMonth' ? value : updated[index].endMonth;
+      const endYear = field === 'endYear' ? value : updated[index].endYear;
+      if (endMonth && endYear && !updated[index].isCurrentJob) {
+        updated[index].endDate = `${endYear}-${endMonth}`;
+      }
+    }
+
+    if (field === 'isCurrentJob' && value) {
       updated[index].endDate = '';
-      updated[index].isCurrentJob = true;
-      updated[index].isCurrentlyWorking = true;
+      updated[index].endYear = '';
+      updated[index].endMonth = '';
     }
     
     saveToStore(updated);
@@ -74,6 +112,10 @@ export default function ExperienceStep() {
       location: '',
       startDate: '',
       endDate: '',
+      startYear: '',
+      startMonth: '',
+      endYear: '',
+      endMonth: '',
       isCurrentJob: false,
       isCurrentlyWorking: false,
       description: '',
@@ -200,19 +242,46 @@ export default function ExperienceStep() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         تاريخ البداية *
                       </label>
-                      <Input
-                        type="date"
-                        value={experience.startDate}
-                        onChange={(e) => updateField(index, 'startDate', e.target.value)}
-                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <Select
+                          value={experience.startMonth}
+                          onValueChange={(value) => updateField(index, 'startMonth', value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="الشهر" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {monthOptions.map((month) => (
+                              <SelectItem key={month.value} value={month.value}>
+                                {month.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Select
+                          value={experience.startYear}
+                          onValueChange={(value) => updateField(index, 'startYear', value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="العام" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {yearOptions.map((year) => (
+                              <SelectItem key={year} value={year}>
+                                {year}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
 
-                    <div>
+                    <div className="md:col-span-2">
                       <div className="flex items-center justify-between mb-2">
                         <label className="block text-sm font-medium text-gray-700">
                           تاريخ النهاية
@@ -233,12 +302,40 @@ export default function ExperienceStep() {
                           </label>
                         </div>
                       </div>
-                      <Input
-                        type="date"
-                        value={experience.endDate}
-                        onChange={(e) => updateField(index, 'endDate', e.target.value)}
-                        disabled={experience.isCurrentJob}
-                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <Select
+                          value={experience.endMonth}
+                          onValueChange={(value) => updateField(index, 'endMonth', value)}
+                          disabled={experience.isCurrentJob}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="الشهر" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {monthOptions.map((month) => (
+                              <SelectItem key={month.value} value={month.value}>
+                                {month.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Select
+                          value={experience.endYear}
+                          onValueChange={(value) => updateField(index, 'endYear', value)}
+                          disabled={experience.isCurrentJob}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="العام" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {yearOptions.map((year) => (
+                              <SelectItem key={year} value={year}>
+                                {year}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
 
