@@ -187,9 +187,10 @@ const SkillsSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, styl
       <View style={styles.sectionContent}>
         {resume.skills.map((skill, index) => (
           <View key={skill.id} style={styles.skillBar}>
-            <Text style={styles.skillBarLabel}>
-              {skill.name} ({translateSkillLevel(skill.level, resume.language)})
-            </Text>
+            <View style={styles.skillInfo}>
+              <Text style={styles.skillName}>{skill.name}</Text>
+              <Text style={styles.skillLevel}>{translateSkillLevel(skill.level, resume.language)}</Text>
+            </View>
             <View style={styles.skillBarContainer}>
               <View style={[
                 styles.skillBarFill,

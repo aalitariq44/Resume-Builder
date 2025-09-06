@@ -251,9 +251,15 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
 
     // شريط المهارة
     skillBar: {
-      flexDirection: direction === 'rtl' ? 'row-reverse' : 'row',
-      alignItems: 'center',
+      flexDirection: 'column',
+      alignItems: 'flex-start',
       marginBottom: 6,
+    },
+
+    skillInfo: {
+      flexDirection: 'column',
+      marginBottom: 4,
+      width: '100%',
     },
 
     skillBarLabel: {
@@ -265,12 +271,11 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
     },
 
     skillBarContainer: {
-      width: 80,
+      width: '100%',
       height: 6,
       backgroundColor: theme.colors.border,
       borderRadius: 3,
-      marginRight: direction === 'rtl' ? 0 : 10,
-      marginLeft: direction === 'rtl' ? 10 : 0,
+      marginTop: 4,
     },
 
     skillBarFill: {
