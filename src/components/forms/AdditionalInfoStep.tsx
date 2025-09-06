@@ -173,25 +173,6 @@ export default function AdditionalInfoStep() {
                       <div className="space-y-2">
                         <Label>تاريخ الإنجاز *</Label>
                         <div className="grid grid-cols-2 gap-2">
-                          {/* Year Select */}
-                          <Select
-                            value={course.dateCompleted.split('-')[0] || ''}
-                            onValueChange={(value) => {
-                              const month = course.dateCompleted.split('-')[1] || '';
-                              handleUpdateCourse(course.id, 'dateCompleted', `${value}-${month}`);
-                            }}
-                          >
-                            <SelectTrigger id={`course-date-year-${course.id}`}> 
-                              <SelectValue placeholder="السنة" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {yearOptions.map((year) => (
-                                <SelectItem key={year} value={year}>
-                                  {year}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
                           {/* Month Select */}
                           <Select
                             value={course.dateCompleted.split('-')[1] || ''}
@@ -207,6 +188,25 @@ export default function AdditionalInfoStep() {
                               {monthOptions.map((m) => (
                                 <SelectItem key={m.value} value={m.value}>
                                   {m.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {/* Year Select */}
+                          <Select
+                            value={course.dateCompleted.split('-')[0] || ''}
+                            onValueChange={(value) => {
+                              const month = course.dateCompleted.split('-')[1] || '';
+                              handleUpdateCourse(course.id, 'dateCompleted', `${value}-${month}`);
+                            }}
+                          >
+                            <SelectTrigger id={`course-date-year-${course.id}`}> 
+                              <SelectValue placeholder="السنة" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {yearOptions.map((year) => (
+                                <SelectItem key={year} value={year}>
+                                  {year}
                                 </SelectItem>
                               ))}
                             </SelectContent>
