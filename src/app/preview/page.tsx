@@ -379,15 +379,15 @@ function PreviewPageContent() {
                       <div>
                         <strong>تاريخ الإكمال:</strong> {course.dateCompleted}
                       </div>
-                      {course.certificateNumber && (
-                        <div>
-                          <strong>رقم الشهادة:</strong> {course.certificateNumber}
-                        </div>
-                      )}
                     </div>
                     {course.verificationUrl && (
                       <div className="mt-2">
                         <strong>رابط التحقق:</strong> <a href={course.verificationUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{course.verificationUrl}</a>
+                      </div>
+                    )}
+                    {course.description && (
+                      <div className="mt-2">
+                        <strong>الوصف:</strong> {course.description}
                       </div>
                     )}
                   </div>

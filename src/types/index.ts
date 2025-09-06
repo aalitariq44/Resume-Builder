@@ -106,6 +106,7 @@ export interface Course {
   dateCompleted: string;
   certificateNumber?: string;
   verificationUrl?: string;
+  description?: string;
 }
 
 export interface Reference {

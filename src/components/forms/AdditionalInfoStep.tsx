@@ -153,26 +153,27 @@ export default function AdditionalInfoStep() {
                         />
                       </div>
 
-                      {/* Certificate Number */}
+                      {/* Verification URL */}
                       <div className="space-y-2">
-                        <Label htmlFor={`course-certificate-${course.id}`}>رقم الشهادة (اختياري)</Label>
+                        <Label htmlFor={`course-url-${course.id}`}>رابط التحقق</Label>
                         <Input
-                          id={`course-certificate-${course.id}`}
-                          value={course.certificateNumber || ''}
-                          onChange={(e) => handleUpdateCourse(course.id, 'certificateNumber', e.target.value)}
-                          placeholder="رقم الشهادة إن وجد"
+                          id={`course-url-${course.id}`}
+                          value={course.verificationUrl || ''}
+                          onChange={(e) => handleUpdateCourse(course.id, 'verificationUrl', e.target.value)}
+                          placeholder="https://..."
                         />
                       </div>
                     </div>
 
-                    {/* Verification URL */}
+                    {/* Description */}
                     <div className="space-y-2">
-                      <Label htmlFor={`course-url-${course.id}`}>رابط التحقق (اختياري)</Label>
-                      <Input
-                        id={`course-url-${course.id}`}
-                        value={course.verificationUrl || ''}
-                        onChange={(e) => handleUpdateCourse(course.id, 'verificationUrl', e.target.value)}
-                        placeholder="https://example.com/verify"
+                      <Label htmlFor={`course-description-${course.id}`}>الوصف (اختياري)</Label>
+                      <Textarea
+                        id={`course-description-${course.id}`}
+                        value={course.description || ''}
+                        onChange={(e) => handleUpdateCourse(course.id, 'description', e.target.value)}
+                        placeholder="اكتب وصفاً موجزاً عن الدورة التدريبية..."
+                        rows={3}
                       />
                     </div>
                   </CardContent>
