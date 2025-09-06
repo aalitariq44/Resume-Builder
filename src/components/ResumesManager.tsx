@@ -99,7 +99,7 @@ export default function ResumesManager() {
             <div className="flex gap-4">
               <Button
                 onClick={() => setShowCreateForm(true)}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 إنشاء سيرة ذاتية جديدة
               </Button>
