@@ -368,22 +368,21 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
 
       // Education Actions
       setEducation: (education) => {
-            // لا تحدث إذا لم تتغير البيانات فعلاً
-            const current = get().formData.data.education || [];
-            if (deepEqual(current, education)) {
-              return;
-            }
-            set({ education });
+        // لا تحدث إذا لم تتغير البيانات فعلاً
+        const current = get().formData.data.education || [];
+        if (deepEqual(current, education)) {
+          return;
+        }
         
-  // سيتم الحفظ عند الضغط على التالي/السابق
-        
-        // تحديث البيانات في formData
+        // تحديث البيانات في education و formData
         set((state) => ({
+          education: education,
           formData: {
             ...state.formData,
             data: {
               ...state.formData.data,
-              education: education
+              education: education,
+              updatedAt: new Date().toISOString()
             },
             isDirty: true,
             lastSaved: new Date().toISOString()
@@ -422,7 +421,13 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
           location: '',
           startDate: '',
           endDate: '',
+          startYear: '',
+          startMonth: '',
+          endYear: '',
+          endMonth: '',
           isCurrentlyStudying: false,
+          gpa: '',
+          coursework: '',
           achievements: []
         };
         set({
