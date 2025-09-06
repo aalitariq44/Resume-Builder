@@ -48,7 +48,7 @@ export interface Education {
   endMonth: string;
   isCurrentlyStudying: boolean;
   gpa?: string;
-  coursework?: string;
+  description?: string;
   achievements?: string[];
 }
 

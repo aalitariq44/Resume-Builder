@@ -63,8 +63,8 @@ export default function EducationStep() {
         endMonth: '',
         isCurrentlyStudying: false,
         gpa: '',
-        coursework: '',
-        achievements: [],
+        description: '',
+        achievements: []
       };
       setEducationList([defaultEducation]);
     }
@@ -124,7 +124,7 @@ export default function EducationStep() {
       endMonth: '',
       isCurrentlyStudying: false,
       gpa: '',
-      coursework: '',
+      description: '',
       achievements: [],
     };
     const updated = [...educationList, newEducation];
@@ -363,12 +363,12 @@ export default function EducationStep() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        المواد الدراسية المهمة (اختياري)
+                        الوصف
                       </label>
                       <Textarea
-                        placeholder="اذكر المواد المتعلقة بمجال عملك"
-                        value={education.coursework}
-                        onChange={(e) => updateField(index, 'coursework', e.target.value)}
+                        placeholder="أضف وصفاً للتعليم"
+                        value={education.description}
+                        onChange={(e) => updateField(index, 'description', e.target.value)}
                         rows={2}
                       />
                     </div>

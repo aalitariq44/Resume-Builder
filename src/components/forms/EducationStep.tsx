@@ -30,7 +30,7 @@ const educationSchema = yup.object().shape({
       endMonth: yup.string().required('شهر النهاية مطلوب'),
       isCurrentlyStudying: yup.boolean().required(),
       gpa: yup.string(),
-      coursework: yup.string(),
+      description: yup.string(),
       achievements: yup.array().of(yup.string().required()),
     })
   ).required(),
@@ -93,7 +93,7 @@ export default function EducationStep() {
         endMonth: '',
         isCurrentlyStudying: false,
         gpa: '',
-        coursework: '',
+        description: '',
         achievements: [],
       }],
     },
@@ -121,7 +121,7 @@ export default function EducationStep() {
       endMonth: '',
       isCurrentlyStudying: false,
       gpa: '',
-      coursework: '',
+      description: '',
       achievements: [],
     });
   };
@@ -364,9 +364,9 @@ export default function EducationStep() {
 
                     <div>
                       <Textarea
-                        label="المواد الدراسية المهمة (اختياري)"
-                        placeholder="اذكر المواد المتعلقة بمجال عملك"
-                        {...register(`education.${index}.coursework`)}
+                        label="الوصف"
+                        placeholder="أضف وصفاً للتعليم"
+                        {...register(`education.${index}.description`)}
                         rows={2}
                       />
                     </div>

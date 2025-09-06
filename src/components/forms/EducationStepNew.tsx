@@ -63,7 +63,7 @@ export default function EducationStep() {
         endMonth: '',
         isCurrentlyStudying: false,
         gpa: '',
-        coursework: '',
+        description: '',
         achievements: [],
       };
       setEducationList([defaultEducation]);
@@ -124,7 +124,7 @@ export default function EducationStep() {
       endMonth: '',
       isCurrentlyStudying: false,
       gpa: '',
-      coursework: '',
+      description: '',
       achievements: [],
     };
     const updated = [...educationList, newEducation];
@@ -367,8 +367,8 @@ export default function EducationStep() {
                       </label>
                       <Textarea
                         placeholder="اذكر المواد المتعلقة بمجال عملك"
-                        value={education.coursework}
-                        onChange={(e) => updateField(index, 'coursework', e.target.value)}
+                        value={education.description}
+                        onChange={(e) => updateField(index, 'description', e.target.value)}
                         rows={2}
                       />
                     </div>

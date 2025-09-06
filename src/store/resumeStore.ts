@@ -427,7 +427,7 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
           endMonth: '',
           isCurrentlyStudying: false,
           gpa: '',
-          coursework: '',
+          description: '',
           achievements: []
         };
         set({

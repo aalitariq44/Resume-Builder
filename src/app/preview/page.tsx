@@ -202,9 +202,9 @@ function PreviewPageContent() {
                         </div>
                       )}
                     </div>
-                    {edu.coursework && (
+                    {edu.description && (
                       <div className="mt-2">
-                        <strong>المواد الدراسية:</strong> {edu.coursework}
+                        <strong>الوصف:</strong> {edu.description}
                       </div>
                     )}
                     {edu.achievements && edu.achievements.length > 0 && (
