@@ -6,11 +6,27 @@ import { useResumeStore } from '@/store/resumeStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Course, Achievement, Reference } from '@/types';
 
+const yearOptions = Array.from({ length: 76 }, (_, i) => (new Date().getFullYear() - i).toString());
+const monthOptions = [
+  { value: '01', label: 'يناير' },
+  { value: '02', label: 'فبراير' },
+  { value: '03', label: 'مارس' },
+  { value: '04', label: 'أبريل' },
+  { value: '05', label: 'مايو' },
+  { value: '06', label: 'يونيو' },
+  { value: '07', label: 'يوليو' },
+  { value: '08', label: 'أغسطس' },
+  { value: '09', label: 'سبتمبر' },
+  { value: '10', label: 'أكتوبر' },
+  { value: '11', label: 'نوفمبر' },
+  { value: '12', label: 'ديسمبر' },
+];
 export default function AdditionalInfoStep() {
   const { 
     formData, 
@@ -142,15 +158,49 @@ export default function AdditionalInfoStep() {
                         />
                       </div>
 
-                      {/* Date Completed */}
+                      {/* Date Completed (Year and Month) */}
                       <div className="space-y-2">
-                        <Label htmlFor={`course-date-${course.id}`}>تاريخ الإنجاز *</Label>
-                        <Input
-                          id={`course-date-${course.id}`}
-                          type="date"
-                          value={course.dateCompleted}
-                          onChange={(e) => handleUpdateCourse(course.id, 'dateCompleted', e.target.value)}
-                        />
+                        <Label>تاريخ الإنجاز *</Label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {/* Year Select */}
+                          <Select
+                            value={course.dateCompleted.split('-')[0] || ''}
+                            onValueChange={(value) => {
+                              const month = course.dateCompleted.split('-')[1] || '';
+                              handleUpdateCourse(course.id, 'dateCompleted', `${value}-${month}`);
+                            }}
+                          >
+                            <SelectTrigger id={`course-date-year-${course.id}`}> 
+                              <SelectValue placeholder="السنة" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {yearOptions.map((year) => (
+                                <SelectItem key={year} value={year}>
+                                  {year}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {/* Month Select */}
+                          <Select
+                            value={course.dateCompleted.split('-')[1] || ''}
+                            onValueChange={(value) => {
+                              const year = course.dateCompleted.split('-')[0] || '';
+                              handleUpdateCourse(course.id, 'dateCompleted', `${year}-${value}`);
+                            }}
+                          >
+                            <SelectTrigger id={`course-date-month-${course.id}`}> 
+                              <SelectValue placeholder="الشهر" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {monthOptions.map((m) => (
+                                <SelectItem key={m.value} value={m.value}>
+                                  {m.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
 
                       {/* Verification URL */}
