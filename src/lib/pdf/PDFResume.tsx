@@ -41,25 +41,6 @@ const PersonalInfoSection: React.FC<{ resume: Resume; styles: any }> = ({ resume
             <Text style={styles.jobTitle}>{personalInfo.jobTitle}</Text>
           )}
           
-          <View style={styles.contactInfo}>
-            {personalInfo.email && (
-              <View style={styles.contactItem}>
-                <Text style={styles.contactText}> {personalInfo.email}</Text>
-              </View>
-            )}
-            
-            {personalInfo.phone && (
-              <View style={styles.contactItem}>
-                <Text style={styles.contactText}> {personalInfo.phone}</Text>
-              </View>
-            )}
-            
-            {personalInfo.address && (
-              <View style={styles.contactItem}>
-                <Text style={styles.contactText}> {personalInfo.address}</Text>
-              </View>
-            )}
-          </View>
         </View>
       </View>
     </View>
@@ -138,6 +119,8 @@ const ExperienceSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, 
 
 // مكون المعلومات الشخصية الإضافية
 const AdditionalPersonalInfoSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, styles }) => {
+  const { personalInfo } = resume;
+  
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>المعلومات الشخصية</Text>
@@ -145,28 +128,27 @@ const AdditionalPersonalInfoSection: React.FC<{ resume: Resume; styles: any }> =
         <View style={styles.item}>
           <View style={styles.educationHeader}>
             <View style={styles.degreeRow}>
-              <Text style={styles.itemTitle}>الاسم الكامل: أحمد محمد علي</Text>
-            </View>
-            <View style={styles.institutionRow}>
-              <Text style={styles.itemSubtitle}>العنوان: القاهرة، مصر</Text>
-            </View>
-            <View style={styles.itemDate}>
-              <Text style={styles.dateText}>الهاتف: +20 123 456 7890</Text>
+              <Text style={styles.itemTitle}>الاسم الكامل: {personalInfo.firstName} {personalInfo.lastName}</Text>
             </View>
           </View>
-          <View style={styles.list}>
-            <View style={styles.listItem}>
-              <Text style={styles.listBullet}>•</Text>
-              <Text style={styles.listText}>البريد الإلكتروني: ahmed@example.com</Text>
-            </View>
-            <View style={styles.listItem}>
-              <Text style={styles.listBullet}>•</Text>
-              <Text style={styles.listText}>تاريخ الميلاد: 1 يناير 1990</Text>
-            </View>
-            <View style={styles.listItem}>
-              <Text style={styles.listBullet}>•</Text>
-              <Text style={styles.listText}>الجنسية: مصري</Text>
-            </View>
+          <View style={styles.contactInfo}>
+            {personalInfo.email && (
+              <View style={styles.contactItem}>
+                <Text style={styles.contactText}>البريد: {personalInfo.email}</Text>
+              </View>
+            )}
+            
+            {personalInfo.phone && (
+              <View style={styles.contactItem}>
+                <Text style={styles.contactText}>الهاتف: {personalInfo.phone}</Text>
+              </View>
+            )}
+            
+            {personalInfo.address && (
+              <View style={styles.contactItem}>
+                <Text style={styles.contactText}>العنوان: {personalInfo.address}</Text>
+              </View>
+            )}
           </View>
         </View>
       </View>
