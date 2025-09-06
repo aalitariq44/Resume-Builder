@@ -125,7 +125,7 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
       flexDirection: direction === 'rtl' ? 'row-reverse' : 'row',
       flexWrap: 'wrap',
       justifyContent: direction === 'rtl' ? 'flex-start' : 'flex-start',
-      gap: 15,
+      gap: 5,
       marginBottom: 10,
       direction: direction,
     },
