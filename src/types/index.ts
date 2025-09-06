@@ -42,6 +42,10 @@ export interface Education {
   location: string;
   startDate: string;
   endDate: string;
+  startYear: string;
+  startMonth: string;
+  endYear: string;
+  endMonth: string;
   isCurrentlyStudying: boolean;
   gpa?: string;
   coursework?: string;

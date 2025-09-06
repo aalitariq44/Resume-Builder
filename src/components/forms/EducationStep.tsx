@@ -22,8 +22,12 @@ const educationSchema = yup.object().shape({
       field: yup.string().required('مجال الدراسة مطلوب'),
       institution: yup.string().required('اسم المؤسسة التعليمية مطلوب'),
       location: yup.string().required('الموقع مطلوب'),
-      startDate: yup.string().required('تاريخ البداية مطلوب'),
-      endDate: yup.string().required('تاريخ النهاية مطلوب'),
+      startDate: yup.string().required(),
+      endDate: yup.string().required(),
+      startYear: yup.string().required('عام البداية مطلوب'),
+      startMonth: yup.string().required('شهر البداية مطلوب'),
+      endYear: yup.string().required('عام النهاية مطلوب'),
+      endMonth: yup.string().required('شهر النهاية مطلوب'),
       isCurrentlyStudying: yup.boolean().required(),
       gpa: yup.string(),
       coursework: yup.string(),
@@ -45,6 +49,23 @@ const degreeOptions = [
   'دورة تدريبية',
 ];
 
+const yearOptions = Array.from({ length: 75 }, (_, i) => (1950 + i).toString());
+
+const monthOptions = [
+  { value: '01', label: 'يناير' },
+  { value: '02', label: 'فبراير' },
+  { value: '03', label: 'مارس' },
+  { value: '04', label: 'أبريل' },
+  { value: '05', label: 'مايو' },
+  { value: '06', label: 'يونيو' },
+  { value: '07', label: 'يوليو' },
+  { value: '08', label: 'أغسطس' },
+  { value: '09', label: 'سبتمبر' },
+  { value: '10', label: 'أكتوبر' },
+  { value: '11', label: 'نوفمبر' },
+  { value: '12', label: 'ديسمبر' },
+];
+
 export default function EducationStep() {
   const { education, setEducation } = useResumeStore();
   const [newAchievement, setNewAchievement] = useState('');
@@ -52,7 +73,13 @@ export default function EducationStep() {
   const { register, control, handleSubmit, watch, setValue, formState: { errors } } = useForm<EducationFormData>({
     resolver: yupResolver(educationSchema),
     defaultValues: {
-      education: education.length > 0 ? education : [{
+      education: education.length > 0 ? education.map(edu => ({
+        ...edu,
+        startYear: edu.startYear || (edu.startDate ? edu.startDate.split('-')[0] : ''),
+        startMonth: edu.startMonth || (edu.startDate ? edu.startDate.split('-')[1] : ''),
+        endYear: edu.endYear || (edu.endDate ? edu.endDate.split('-')[0] : ''),
+        endMonth: edu.endMonth || (edu.endDate ? edu.endDate.split('-')[1] : ''),
+      })) : [{
         id: Date.now().toString(),
         degree: '',
         field: '',
@@ -60,6 +87,10 @@ export default function EducationStep() {
         location: '',
         startDate: '',
         endDate: '',
+        startYear: '',
+        startMonth: '',
+        endYear: '',
+        endMonth: '',
         isCurrentlyStudying: false,
         gpa: '',
         coursework: '',
@@ -84,6 +115,10 @@ export default function EducationStep() {
       location: '',
       startDate: '',
       endDate: '',
+      startYear: '',
+      startMonth: '',
+      endYear: '',
+      endMonth: '',
       isCurrentlyStudying: false,
       gpa: '',
       coursework: '',
@@ -106,13 +141,19 @@ export default function EducationStep() {
   };
 
   const onSubmit = (data: EducationFormData) => {
-    setEducation(data.education);
+    const updatedEducation = data.education.map(edu => ({
+      ...edu,
+      startDate: edu.startMonth && edu.startYear ? `${edu.startYear}-${edu.startMonth}` : '',
+      endDate: edu.endMonth && edu.endYear ? `${edu.endYear}-${edu.endMonth}` : '',
+    }));
+    setEducation(updatedEducation);
   };
 
   const handleCurrentlyStudyingChange = (index: number, isStudying: boolean) => {
     setValue(`education.${index}.isCurrentlyStudying`, isStudying);
     if (isStudying) {
-      setValue(`education.${index}.endDate`, '');
+      setValue(`education.${index}.endYear`, '');
+      setValue(`education.${index}.endMonth`, '');
     }
   };
 
@@ -207,22 +248,93 @@ export default function EducationStep() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Input
-                      label="تاريخ البداية *"
-                      type="month"
-                      {...register(`education.${index}.startDate`)}
-                      error={errors.education?.[index]?.startDate?.message}
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        تاريخ البداية *
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Select
+                          value={watchedEducation[index]?.startMonth}
+                          onValueChange={(value) => setValue(`education.${index}.startMonth`, value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="الشهر" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {monthOptions.map((month) => (
+                              <SelectItem key={month.value} value={month.value}>
+                                {month.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Select
+                          value={watchedEducation[index]?.startYear}
+                          onValueChange={(value) => setValue(`education.${index}.startYear`, value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="العام" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {yearOptions.map((year) => (
+                              <SelectItem key={year} value={year}>
+                                {year}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {(errors.education?.[index]?.startYear || errors.education?.[index]?.startMonth) && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.education[index]?.startYear?.message || errors.education[index]?.startMonth?.message}
+                        </p>
+                      )}
+                    </div>
 
-                    <div>
-                      <Input
-                        label="تاريخ النهاية"
-                        type="month"
-                        disabled={watchedEducation[index]?.isCurrentlyStudying}
-                        {...register(`education.${index}.endDate`)}
-                        error={errors.education?.[index]?.endDate?.message}
-                      />
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        تاريخ النهاية
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Select
+                          value={watchedEducation[index]?.endMonth}
+                          onValueChange={(value) => setValue(`education.${index}.endMonth`, value)}
+                          disabled={watchedEducation[index]?.isCurrentlyStudying}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="الشهر" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {monthOptions.map((month) => (
+                              <SelectItem key={month.value} value={month.value}>
+                                {month.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Select
+                          value={watchedEducation[index]?.endYear}
+                          onValueChange={(value) => setValue(`education.${index}.endYear`, value)}
+                          disabled={watchedEducation[index]?.isCurrentlyStudying}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="العام" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {yearOptions.map((year) => (
+                              <SelectItem key={year} value={year}>
+                                {year}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {(errors.education?.[index]?.endYear || errors.education?.[index]?.endMonth) && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.education[index]?.endYear?.message || errors.education[index]?.endMonth?.message}
+                        </p>
+                      )}
                     </div>
 
                     <div className="flex items-center space-x-2 pt-8">
