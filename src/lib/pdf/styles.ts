@@ -185,10 +185,8 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
     },
 
     itemSubtitle: {
-      fontSize: theme.fonts.size.base,
-      fontWeight: 'medium',
-      color: theme.colors.secondary,
-      textAlign: textAlign,
+      fontSize: theme.fonts.size.small,
+      color: theme.colors.text,
       fontFamily,
     },
 
@@ -201,9 +199,7 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
 
     itemLocation: {
       fontSize: theme.fonts.size.small,
-      color: theme.colors.secondary,
-      textAlign: textAlign,
-      marginBottom: 2,
+      color: theme.colors.text,
       fontFamily,
     },
 
@@ -233,8 +229,9 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
 
     institutionRow: {
       flexDirection: direction === 'rtl' ? 'row-reverse' : 'row',
+      justifyContent: 'space-between',
       alignItems: 'center',
-      gap: 10,
+      width: '100%',
       marginBottom: 4,
     },
 

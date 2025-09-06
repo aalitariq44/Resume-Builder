@@ -152,10 +152,10 @@ const EducationSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, s
                 <Text style={styles.itemSubtitle}>{edu.field}</Text>
               </View>
               <View style={styles.institutionRow}>
-                <Text style={styles.itemSubtitle}>({edu.institution})</Text>
                 {edu.location && (
                   <Text style={styles.itemLocation}>{edu.location}</Text>
                 )}
+                <Text style={styles.itemSubtitle}>({edu.institution})</Text>
               </View>
               <Text style={styles.itemDate}>
                 {edu.startDate} - {edu.isCurrentlyStudying ? 'حتى الآن' : edu.endDate}
