@@ -373,8 +373,8 @@ const PDFResume: React.FC<PDFResumeProps> = ({ resume }) => {
           
           {/* المحتوى مقسم إلى عمودين */}
           <View style={styles.twoColumnLayout}>
-            {/* العمود الأيسر - 40% */}
-            <View style={styles.leftColumn}>
+            {/* العمود الأيمن الجديد - 60% */}
+            <View style={styles.rightColumn}>
               {resume.sectionOrder?.filter(section => 
                 ['objective', 'experience', 'education', 'skills'].includes(section) && 
                 !resume.hiddenSections?.includes(section)
@@ -386,8 +386,8 @@ const PDFResume: React.FC<PDFResumeProps> = ({ resume }) => {
               ]}
             </View>
             
-            {/* العمود الأيمن - 60% */}
-            <View style={styles.rightColumn}>
+            {/* العمود الأيسر الجديد - 40% */}
+            <View style={styles.leftColumn}>
               {resume.sectionOrder?.filter(section => 
                 ['languages', 'courses', 'achievements', 'hobbies', 'references'].includes(section) && 
                 !resume.hiddenSections?.includes(section)

@@ -325,13 +325,13 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
 
     // التخطيط ذو العمودين
     twoColumnLayout: {
-      flexDirection: 'row',
+      flexDirection: 'row-reverse',
       gap: 20,
     },
 
     leftColumn: {
-      flex: 0.4,
-      backgroundColor: '#e3f2fd', // أزرق فاتح
+      flex: 0.6,
+      backgroundColor: '#ffffff', // أبيض
       borderWidth: 2,
       borderColor: '#1976d2', // أزرق غامق
       borderStyle: 'solid',
@@ -340,8 +340,8 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
     },
 
     rightColumn: {
-      flex: 0.6,
-      backgroundColor: '#ffffff', // أبيض
+      flex: 0.4,
+      backgroundColor: '#e3f2fd', // أزرق فاتح
       borderWidth: 2,
       borderColor: '#1976d2', // أزرق غامق
       borderStyle: 'solid',
