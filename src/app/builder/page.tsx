@@ -391,7 +391,6 @@ function BuilderPageContent() {
 
           <div className="flex items-center space-x-4 space-x-reverse">
             <SaveStatus />
-            <span className="text-sm text-gray-600">معاينة مباشرة للبيانات</span>
           </div>
         </div>
       </header>
