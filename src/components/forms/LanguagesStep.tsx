@@ -36,11 +36,16 @@ export default function LanguagesStep() {
   };
 
   const handleAddCommonLanguage = (name: string, level: string) => {
+    const existingLanguage = languages.find(lang => lang.name.toLowerCase() === name.toLowerCase());
+    if (existingLanguage) {
+      alert(`اللغة ${name} موجودة بالفعل في القائمة`);
+      return;
+    }
     handleAddLanguage();
     setTimeout(() => {
       const state = useResumeStore.getState();
-      const languages = state.formData.data.languages || [];
-      const lastLanguage = languages[languages.length - 1];
+      const currentLanguages = state.formData.data.languages || [];
+      const lastLanguage = currentLanguages[currentLanguages.length - 1];
       if (lastLanguage) {
         handleUpdateLanguage(lastLanguage.id, 'name', name);
         handleUpdateLanguage(lastLanguage.id, 'level', level);
@@ -49,6 +54,13 @@ export default function LanguagesStep() {
   };
 
   const handleUpdateLanguage = (id: string, field: keyof Language, value: any) => {
+    if (field === 'name') {
+      const existingLanguage = languages.find(lang => lang.id !== id && lang.name.toLowerCase() === value.toLowerCase());
+      if (existingLanguage) {
+        alert(`اللغة ${value} موجودة بالفعل في القائمة`);
+        return;
+      }
+    }
     updateLanguage(id, { [field]: value });
   };
 
