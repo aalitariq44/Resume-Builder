@@ -506,8 +506,8 @@ export const translateLanguageLevel = (level: string, language: 'ar' | 'en' = 'a
 export const translateHobbyLevel = (level: string, language: 'ar' | 'en' = 'ar'): string => {
   const translations: Record<string, Record<string, string>> = {
     ar: {
-      'hobby': 'هواية',
-      'professional': 'مهني',
+      'hobby': 'هواية شخصية',
+      'professional': 'مستوى احترافي',
     },
     en: {
       'hobby': 'Hobby',
