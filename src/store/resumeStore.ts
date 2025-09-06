@@ -256,16 +256,7 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
       } : null
     });
     
-    // حفظ في Firebase فقط
-    const firebaseStore = useFirebaseStore.getState();
-    const authStore = useAuthStore.getState();
-    if (firebaseStore.currentResumeId && authStore.user) {
-      ResumeService.savePersonalInfo(
-        firebaseStore.currentResumeId, 
-        authStore.user.uid, 
-        updatedPersonalInfo
-      ).catch(console.error);
-    }
+  // لا نحفظ مباشرة في Firebase هنا لتقليل عدد العمليات؛ سيتم الحفظ عند التنقل بين الخطوات
   },
 
   addCustomField: () => {
@@ -295,16 +286,7 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
       }
     });
     
-    // حفظ في Firebase
-    const firebaseStore = useFirebaseStore.getState();
-    const authStore = useAuthStore.getState();
-    if (firebaseStore.currentResumeId && authStore.user) {
-      ResumeService.savePersonalInfo(
-        firebaseStore.currentResumeId, 
-        authStore.user.uid, 
-        updatedPersonalInfo
-      ).catch(console.error);
-    }
+  // سيتم الحفظ عند الضغط على التالي/السابق
   },
 
   updateCustomField: (id, updates) => {
@@ -330,16 +312,7 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
       }
     });
     
-    // حفظ في Firebase
-    const firebaseStore = useFirebaseStore.getState();
-    const authStore = useAuthStore.getState();
-    if (firebaseStore.currentResumeId && authStore.user) {
-      ResumeService.savePersonalInfo(
-        firebaseStore.currentResumeId, 
-        authStore.user.uid, 
-        updatedPersonalInfo
-      ).catch(console.error);
-    }
+  // سيتم الحفظ عند الضغط على التالي/السابق
   },
 
   removeCustomField: (id) => {
@@ -363,25 +336,14 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
       }
     });
     
-    // حفظ في Firebase
-    const firebaseStore = useFirebaseStore.getState();
-    const authStore = useAuthStore.getState();
-    if (firebaseStore.currentResumeId && authStore.user) {
-      ResumeService.savePersonalInfo(
-        firebaseStore.currentResumeId, 
-        authStore.user.uid, 
-        updatedPersonalInfo
-      ).catch(console.error);
-    }
+  // سيتم الحفظ عند الضغط على التالي/السابق
   },
 
       // Education Actions
       setEducation: (education) => {
         set({ education });
         
-        // حفظ في Firebase
-        const firebaseStore = useFirebaseStore.getState();
-        firebaseStore.saveEducationToFirebase(education).catch(console.error);
+  // سيتم الحفظ عند الضغط على التالي/السابق
         
         // تحديث البيانات في formData
         set((state) => ({
@@ -411,9 +373,7 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
           }
         });
         
-        // حفظ في Firebase
-        const firebaseStore = useFirebaseStore.getState();
-        firebaseStore.saveExperienceToFirebase(experience).catch(console.error);
+  // سيتم الحفظ عند الضغط على التالي/السابق
       },
       
       addEducation: () => {
@@ -461,9 +421,7 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
           }
         });
         
-        // حفظ في Firebase
-        const firebaseStore = useFirebaseStore.getState();
-        firebaseStore.saveEducationToFirebase(updatedEducation).catch(console.error);
+  // سيتم الحفظ عند الضغط على التالي/السابق
         
         // حفظ تلقائي
         setTimeout(() => state.autoSave(), 100);
@@ -553,9 +511,7 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
           }
         });
         
-        // حفظ في Firebase
-        const firebaseStore = useFirebaseStore.getState();
-        firebaseStore.saveExperienceToFirebase(updatedExperience).catch(console.error);
+  // سيتم الحفظ عند الضغط على التالي/السابق
         
         // حفظ تلقائي
         setTimeout(() => state.autoSave(), 100);
@@ -685,9 +641,7 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
           }
         });
         
-        // حفظ في Firebase
-        const firebaseStore = useFirebaseStore.getState();
-        firebaseStore.saveSkillsToFirebase(skills).catch(console.error);
+  // سيتم الحفظ عند الضغط على التالي/السابق
       },
 
       // Languages Actions

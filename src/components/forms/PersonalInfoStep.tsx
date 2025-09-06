@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn, isValidEmail, isValidPhone, compressImage, createImageUrl, generateId } from '@/lib/utils';
 import { ImageCropModal } from './ImageCropModal';
-import { useAutoSave } from '@/hooks/useAutoSave';
+// تمت إزالة الحفظ التلقائي لتقليل عمليات الكتابة على Firebase
 
 // قائمة الحقول المخصصة الشائعة
 const COMMON_CUSTOM_FIELDS = [
@@ -249,9 +249,8 @@ export const PersonalInfoStep: React.FC = () => {
 
   const watchedImage = watch('profileImage');
 
-  // حفظ تلقائي للتغييرات
+  // لم يعد هناك حفظ تلقائي للتغييرات هنا لتقليل استهلاك Firebase
   const watchedData = watch();
-  useAutoSave(watchedData, 500); // حفظ بعد 500ms من آخر تغيير
 
   const onImageChange = (imageUrl: string | null) => {
     const imageValue = imageUrl === null ? undefined : imageUrl;

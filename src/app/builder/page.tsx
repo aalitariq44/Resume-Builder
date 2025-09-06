@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SaveStatus } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import { useFirebaseStore } from '@/store/firebaseStore';
 
 // Steps configuration
 const STEPS = [
@@ -236,9 +237,10 @@ const ResumeInfo: React.FC = () => {
 
 // BuilderPage Component with new Authentication system
 function BuilderPageContent() {
-  const { formData, setCurrentStep, nextStep, prevStep } = useResumeStore();
+  const { formData, setCurrentStep, nextStep, prevStep, markFormClean } = useResumeStore();
   const { loadResume, currentResume, currentResumeId, isLoading, error } = useResumesManagerStore();
   const { user } = useAuthStore();
+  const firebaseStore = useFirebaseStore();
   
   // الحصول على resumeId من URL
   const searchParams = useSearchParams();
@@ -271,14 +273,57 @@ function BuilderPageContent() {
     }
   }, [currentResumeId]);
 
-  const handleNext = () => {
+  const saveCurrentStepToFirebase = async () => {
+    const data = formData.data;
+    const stepId = STEPS[currentStep]?.id;
+    if (!stepId) return;
+    if (!formData.isDirty) return;
+    try {
+      switch (stepId) {
+        case 'personal-info':
+          await firebaseStore.savePersonalInfoToFirebase(data.personalInfo!);
+          break;
+        case 'education':
+          await firebaseStore.saveEducationToFirebase(data.education || []);
+          break;
+        case 'experience':
+          await firebaseStore.saveExperienceToFirebase(data.experience || []);
+          break;
+        case 'skills':
+          await firebaseStore.saveSkillsToFirebase(data.skills || []);
+          break;
+        case 'languages':
+          await firebaseStore.saveLanguagesToFirebase(data.languages || []);
+          break;
+        case 'hobbies':
+          await firebaseStore.saveHobbiesToFirebase(data.hobbies || []);
+          break;
+        case 'additional':
+          await firebaseStore.saveCoursesToFirebase(data.courses || []);
+          await firebaseStore.saveAchievementsToFirebase(data.achievements || []);
+          await firebaseStore.saveReferencesToFirebase(data.references || []);
+          await firebaseStore.saveCustomSectionsToFirebase(data.customSections || []);
+          break;
+        default:
+          break;
+  }
+  // بعد الحفظ بنجاح اعتبر النموذج نظيفاً
+  markFormClean();
+    } catch (e) {
+      console.error('فشل الحفظ قبل التنقل:', e);
+    }
+  };
+
+  const handleNext = async () => {
     if (currentStep < totalSteps - 1) {
+      await saveCurrentStepToFirebase();
       nextStep();
     }
   };
 
-  const handlePrev = () => {
+  const handlePrev = async () => {
     if (currentStep > 0) {
+      await saveCurrentStepToFirebase();
       prevStep();
     }
   };

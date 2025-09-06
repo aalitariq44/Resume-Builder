@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useAutoSave } from '@/hooks/useAutoSave';
+// تمت إزالة الحفظ التلقائي لتقليل عمليات الكتابة على Firebase
 
 type EducationFormData = {
   education: Education[];
@@ -60,9 +60,6 @@ export default function EducationStep() {
   });
 
   const watchedEducation = watch('education');
-
-  // حفظ تلقائي للتغييرات
-  useAutoSave(watchedEducation, 500);
 
   // تحديث الـ store عند تغيير البيانات
   useEffect(() => {

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAutoSave } from '@/hooks/useAutoSave';
+// تمت إزالة الحفظ التلقائي لتقليل عمليات الكتابة على Firebase
 
 type SimpleSkill = {
   id: string;
@@ -64,9 +64,6 @@ export default function SkillsStepSimple() {
   });
 
   const watchedSkills = watch('skills');
-
-  // حفظ تلقائي للتغييرات
-  useAutoSave(watchedSkills, 500);
 
   const handleAddSkill = () => {
     const newSkill = {
