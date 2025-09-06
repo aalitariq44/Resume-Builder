@@ -26,7 +26,7 @@ const degreeOptions = [
   'دورة تدريبية',
 ];
 
-const yearOptions = Array.from({ length: 75 }, (_, i) => (1950 + i).toString());
+const yearOptions = Array.from({ length: 76 }, (_, i) => (2025 - i).toString());
 
 const monthOptions = [
   { value: '01', label: 'يناير' },
