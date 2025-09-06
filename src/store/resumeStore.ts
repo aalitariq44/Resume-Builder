@@ -46,9 +46,9 @@ const createDefaultResume = (): Resume => ({
       heading: 'Cairo',
       body: 'Cairo',
       size: {
-        base: 14,
-        heading: 18,
-        small: 12
+        base: 12,
+        heading: 16,
+        small: 10
       }
     },
     layout: {

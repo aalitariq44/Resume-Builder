@@ -47,10 +47,27 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
       backgroundColor: theme.colors.background,
     },
 
+    // محتوى الرأس (تخطيط أفقي)
+    headerContent: {
+      flexDirection: direction === 'rtl' ? 'row-reverse' : 'row',
+      alignItems: 'center',
+      gap: 20,
+    },
+
+    // العمود الأيسر (الصورة)
+    headerLeft: {
+      width: 100,
+      alignItems: 'center',
+    },
+
+    // العمود الأيمن (المعلومات)
+    headerRight: {
+      flex: 1,
+    },
+
     // صورة شخصية
     profileImageContainer: {
       alignItems: 'center',
-      marginBottom: 15,
     },
 
     profileImage: {
@@ -65,7 +82,7 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
       fontSize: theme.fonts.size.heading + 6,
       fontWeight: 'bold',
       color: theme.colors.primary,
-      textAlign: 'center',
+      textAlign: textAlign,
       marginBottom: 5,
       fontFamily,
     },
@@ -75,7 +92,7 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
       fontSize: theme.fonts.size.base + 2,
       fontWeight: 'medium',
       color: theme.colors.secondary,
-      textAlign: 'center',
+      textAlign: textAlign,
       marginBottom: 15,
       marginTop: 10,
       fontFamily,
@@ -85,7 +102,7 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
     contactInfo: {
       flexDirection: direction === 'rtl' ? 'row-reverse' : 'row',
       flexWrap: 'wrap',
-      justifyContent: 'center',
+      justifyContent: direction === 'rtl' ? 'flex-end' : 'flex-start',
       gap: 15,
       marginBottom: 10,
     },

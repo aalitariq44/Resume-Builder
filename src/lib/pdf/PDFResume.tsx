@@ -17,38 +17,46 @@ const PersonalInfoSection: React.FC<{ resume: Resume; styles: any }> = ({ resume
   
   return (
     <View style={styles.header}>
-      {personalInfo.profileImage && (
-        <View style={styles.profileImageContainer}>
-          <Image style={styles.profileImage} src={personalInfo.profileImage} />
+      <View style={styles.headerContent}>
+        {/* الصورة على اليسار */}
+        {personalInfo.profileImage && (
+          <View style={styles.headerLeft}>
+            <View style={styles.profileImageContainer}>
+              <Image style={styles.profileImage} src={personalInfo.profileImage} />
+            </View>
+          </View>
+        )}
+        
+        {/* المعلومات على اليمين */}
+        <View style={styles.headerRight}>
+          <Text style={styles.fullName}>
+            {personalInfo.firstName} {personalInfo.lastName}
+          </Text>
+          
+          {personalInfo.jobTitle && (
+            <Text style={styles.jobTitle}>{personalInfo.jobTitle}</Text>
+          )}
+          
+          <View style={styles.contactInfo}>
+            {personalInfo.email && (
+              <View style={styles.contactItem}>
+                <Text style={styles.contactText}> {personalInfo.email}</Text>
+              </View>
+            )}
+            
+            {personalInfo.phone && (
+              <View style={styles.contactItem}>
+                <Text style={styles.contactText}> {personalInfo.phone}</Text>
+              </View>
+            )}
+            
+            {personalInfo.address && (
+              <View style={styles.contactItem}>
+                <Text style={styles.contactText}> {personalInfo.address}</Text>
+              </View>
+            )}
+          </View>
         </View>
-      )}
-      
-      <Text style={styles.fullName}>
-        {personalInfo.firstName} {personalInfo.lastName}
-      </Text>
-      
-      {personalInfo.jobTitle && (
-        <Text style={styles.jobTitle}>{personalInfo.jobTitle}</Text>
-      )}
-      
-      <View style={styles.contactInfo}>
-        {personalInfo.email && (
-          <View style={styles.contactItem}>
-            <Text style={styles.contactText}> {personalInfo.email}</Text>
-          </View>
-        )}
-        
-        {personalInfo.phone && (
-          <View style={styles.contactItem}>
-            <Text style={styles.contactText}> {personalInfo.phone}</Text>
-          </View>
-        )}
-        
-        {personalInfo.address && (
-          <View style={styles.contactItem}>
-            <Text style={styles.contactText}> {personalInfo.address}</Text>
-          </View>
-        )}
       </View>
     </View>
   );
