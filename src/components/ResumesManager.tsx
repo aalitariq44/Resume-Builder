@@ -139,7 +139,7 @@ export default function ResumesManager() {
                 />
               </div>
               <div className="flex gap-2">
-                <Button onClick={handleCreateResume}>
+                <Button onClick={handleCreateResume} className="bg-blue-600 hover:bg-blue-700 text-white">
                   إنشاء
                 </Button>
                 <Button 
@@ -208,7 +208,7 @@ export default function ResumesManager() {
                     <Button
                       size="sm"
                       onClick={() => handleEditResume(resume.id)}
-                      className="flex-1"
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
                     >
                       تحرير
                     </Button>
@@ -223,7 +223,6 @@ export default function ResumesManager() {
                       size="sm"
                       variant="outline"
                       onClick={() => handleDeleteResume(resume.id, resume.title)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
                     >
                       حذف
                     </Button>
