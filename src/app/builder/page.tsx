@@ -263,6 +263,14 @@ function BuilderPageContent() {
     }
   }, [currentResume]);
 
+  // مزامنة currentResumeId مع firebaseStore
+  useEffect(() => {
+    if (currentResumeId) {
+      const { setCurrentResumeId } = require('@/store/firebaseStore').useFirebaseStore.getState();
+      setCurrentResumeId(currentResumeId);
+    }
+  }, [currentResumeId]);
+
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
       nextStep();

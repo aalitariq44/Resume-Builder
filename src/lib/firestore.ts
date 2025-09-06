@@ -69,7 +69,18 @@ export class ResumeService {
       // التحقق من وجود السيرة الذاتية والصلاحية
       const resumeSnap = await getDoc(resumeRef);
       if (!resumeSnap.exists()) {
-        throw new Error('السيرة الذاتية غير موجودة');
+        // السيرة الذاتية غير موجودة - مسح المعرف من الـ store
+        console.warn(`السيرة الذاتية ${resumeId} غير موجودة، جارٍ مسح المعرف`);
+        
+        // مسح currentResumeId من firebaseStore
+        const { useFirebaseStore } = await import('@/store/firebaseStore');
+        useFirebaseStore.getState().setCurrentResumeId(null);
+        
+        // مسح currentResumeId من resumesManagerStore
+        const { useResumesManagerStore } = await import('@/store/resumesManagerStore');
+        useResumesManagerStore.getState().setCurrentResumeId(null);
+        
+        throw new Error('السيرة الذاتية غير موجودة - تم مسح المعرف');
       }
 
       const resumeData = resumeSnap.data() as FirestoreResume;
@@ -101,7 +112,9 @@ export class ResumeService {
       // التحقق من الصلاحية
       const resumeSnap = await getDoc(resumeRef);
       if (!resumeSnap.exists()) {
-        throw new Error('السيرة الذاتية غير موجودة');
+        // السيرة الذاتية غير موجودة - لا نحتاج لرمي خطأ
+        console.warn(`السيرة الذاتية ${resumeId} غير موجودة بالفعل`);
+        return;
       }
 
       const resumeData = resumeSnap.data() as FirestoreResume;
@@ -215,7 +228,18 @@ export class ResumeService {
       // التحقق من وجود السيرة الذاتية والصلاحية
       const resumeSnap = await getDoc(resumeRef);
       if (!resumeSnap.exists()) {
-        throw new Error('السيرة الذاتية غير موجودة');
+        // السيرة الذاتية غير موجودة - مسح المعرف من الـ store
+        console.warn(`السيرة الذاتية ${resumeId} غير موجودة، جارٍ مسح المعرف`);
+        
+        // مسح currentResumeId من firebaseStore
+        const { useFirebaseStore } = await import('@/store/firebaseStore');
+        useFirebaseStore.getState().setCurrentResumeId(null);
+        
+        // مسح currentResumeId من resumesManagerStore
+        const { useResumesManagerStore } = await import('@/store/resumesManagerStore');
+        useResumesManagerStore.getState().setCurrentResumeId(null);
+        
+        throw new Error('السيرة الذاتية غير موجودة - تم مسح المعرف');
       }
 
       const resumeData = resumeSnap.data() as FirestoreResume;
@@ -321,7 +345,18 @@ export class ResumeService {
       // التحقق من الصلاحية أولاً
       const resumeSnap = await getDoc(resumeRef);
       if (!resumeSnap.exists()) {
-        throw new Error('السيرة الذاتية غير موجودة');
+        // السيرة الذاتية غير موجودة - مسح المعرف من الـ store
+        console.warn(`السيرة الذاتية ${resumeId} غير موجودة، جارٍ مسح المعرف`);
+        
+        // مسح currentResumeId من firebaseStore
+        const { useFirebaseStore } = await import('@/store/firebaseStore');
+        useFirebaseStore.getState().setCurrentResumeId(null);
+        
+        // مسح currentResumeId من resumesManagerStore
+        const { useResumesManagerStore } = await import('@/store/resumesManagerStore');
+        useResumesManagerStore.getState().setCurrentResumeId(null);
+        
+        throw new Error('السيرة الذاتية غير موجودة - تم مسح المعرف');
       }
 
       const resumeData = resumeSnap.data() as FirestoreResume;

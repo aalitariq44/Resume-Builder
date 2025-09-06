@@ -167,6 +167,19 @@ export const useResumesManagerStore = create<ResumesManagerStore>((set, get) => 
       set({ currentResume: resume, currentResumeId: resumeId, isLoading: false });
       return resume;
     } catch (error: any) {
+      console.error('خطأ في تحميل السيرة الذاتية:', error);
+      
+      // التحقق من خطأ السيرة الذاتية غير موجودة
+      if (error.message?.includes('السيرة الذاتية غير موجودة')) {
+        set({ 
+          currentResume: null, 
+          currentResumeId: null, 
+          error: 'السيرة الذاتية غير موجودة - تم مسح المعرف',
+          isLoading: false 
+        });
+        return null;
+      }
+      
       set({ 
         error: error.message || 'فشل في تحميل السيرة الذاتية',
         isLoading: false 
@@ -197,6 +210,18 @@ export const useResumesManagerStore = create<ResumesManagerStore>((set, get) => 
       // تحديث قائمة السير الذاتية
       await get().refreshResumes();
     } catch (error: any) {
+      console.error('خطأ في تحديث السيرة الذاتية:', error);
+      
+      // التحقق من خطأ السيرة الذاتية غير موجودة
+      if (error.message?.includes('السيرة الذاتية غير موجودة')) {
+        set({ 
+          currentResume: null, 
+          currentResumeId: null, 
+          error: 'السيرة الذاتية غير موجودة - تم مسح المعرف' 
+        });
+        return;
+      }
+      
       set({ error: error.message || 'فشل في تحديث السيرة الذاتية' });
     }
   },
@@ -225,6 +250,19 @@ export const useResumesManagerStore = create<ResumesManagerStore>((set, get) => 
       
       set({ isLoading: false });
     } catch (error: any) {
+      console.error('خطأ في حذف السيرة الذاتية:', error);
+      
+      // التحقق من خطأ السيرة الذاتية غير موجودة
+      if (error.message?.includes('السيرة الذاتية غير موجودة')) {
+        set({ 
+          currentResume: null, 
+          currentResumeId: null, 
+          error: 'السيرة الذاتية غير موجودة بالفعل',
+          isLoading: false 
+        });
+        return;
+      }
+      
       set({ 
         error: error.message || 'فشل في حذف السيرة الذاتية',
         isLoading: false 
@@ -255,6 +293,19 @@ export const useResumesManagerStore = create<ResumesManagerStore>((set, get) => 
       set({ isLoading: false });
       return newResumeId;
     } catch (error: any) {
+      console.error('خطأ في نسخ السيرة الذاتية:', error);
+      
+      // التحقق من خطأ السيرة الذاتية غير موجودة
+      if (error.message?.includes('السيرة الذاتية غير موجودة')) {
+        set({ 
+          currentResume: null, 
+          currentResumeId: null, 
+          error: 'السيرة الذاتية الأصلية غير موجودة - تم مسح المعرف',
+          isLoading: false 
+        });
+        return null;
+      }
+      
       set({ 
         error: error.message || 'فشل في نسخ السيرة الذاتية',
         isLoading: false 

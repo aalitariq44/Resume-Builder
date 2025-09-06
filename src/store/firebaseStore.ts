@@ -73,8 +73,20 @@ export const useFirebaseStore = create<FirebaseStore>()(
             isSyncing: false 
           });
           get().removePendingChange('personalInfo');
-        } catch (error) {
+        } catch (error: any) {
           console.error('خطأ في حفظ المعلومات الشخصية:', error);
+          
+          // التحقق من خطأ السيرة الذاتية غير موجودة
+          if (error.message?.includes('السيرة الذاتية غير موجودة')) {
+            set({ 
+              currentResumeId: null,
+              syncError: 'السيرة الذاتية غير موجودة - تم مسح المعرف',
+              isSyncing: false 
+            });
+            get().removePendingChange('personalInfo');
+            return;
+          }
+          
           set({ 
             syncError: 'فشل في حفظ المعلومات الشخصية',
             isSyncing: false 
@@ -98,8 +110,20 @@ export const useFirebaseStore = create<FirebaseStore>()(
             isSyncing: false 
           });
           get().removePendingChange('education');
-        } catch (error) {
+        } catch (error: any) {
           console.error('خطأ في حفظ التعليم:', error);
+          
+          // التحقق من خطأ السيرة الذاتية غير موجودة
+          if (error.message?.includes('السيرة الذاتية غير موجودة')) {
+            set({ 
+              currentResumeId: null,
+              syncError: 'السيرة الذاتية غير موجودة - تم مسح المعرف',
+              isSyncing: false 
+            });
+            get().removePendingChange('education');
+            return;
+          }
+          
           set({ 
             syncError: 'فشل في حفظ التعليم',
             isSyncing: false 
@@ -123,8 +147,20 @@ export const useFirebaseStore = create<FirebaseStore>()(
             isSyncing: false 
           });
           get().removePendingChange('experience');
-        } catch (error) {
+        } catch (error: any) {
           console.error('خطأ في حفظ الخبرات:', error);
+          
+          // التحقق من خطأ السيرة الذاتية غير موجودة
+          if (error.message?.includes('السيرة الذاتية غير موجودة')) {
+            set({ 
+              currentResumeId: null,
+              syncError: 'السيرة الذاتية غير موجودة - تم مسح المعرف',
+              isSyncing: false 
+            });
+            get().removePendingChange('experience');
+            return;
+          }
+          
           set({ 
             syncError: 'فشل في حفظ الخبرات',
             isSyncing: false 
@@ -148,8 +184,20 @@ export const useFirebaseStore = create<FirebaseStore>()(
             isSyncing: false 
           });
           get().removePendingChange('skills');
-        } catch (error) {
+        } catch (error: any) {
           console.error('خطأ في حفظ المهارات:', error);
+          
+          // التحقق من خطأ السيرة الذاتية غير موجودة
+          if (error.message?.includes('السيرة الذاتية غير موجودة')) {
+            set({ 
+              currentResumeId: null,
+              syncError: 'السيرة الذاتية غير موجودة - تم مسح المعرف',
+              isSyncing: false 
+            });
+            get().removePendingChange('skills');
+            return;
+          }
+          
           set({ 
             syncError: 'فشل في حفظ المهارات',
             isSyncing: false 
@@ -173,8 +221,20 @@ export const useFirebaseStore = create<FirebaseStore>()(
             isSyncing: false 
           });
           get().removePendingChange('languages');
-        } catch (error) {
+        } catch (error: any) {
           console.error('خطأ في حفظ اللغات:', error);
+          
+          // التحقق من خطأ السيرة الذاتية غير موجودة
+          if (error.message?.includes('السيرة الذاتية غير موجودة')) {
+            set({ 
+              currentResumeId: null,
+              syncError: 'السيرة الذاتية غير موجودة - تم مسح المعرف',
+              isSyncing: false 
+            });
+            get().removePendingChange('languages');
+            return;
+          }
+          
           set({ 
             syncError: 'فشل في حفظ اللغات',
             isSyncing: false 
@@ -198,8 +258,20 @@ export const useFirebaseStore = create<FirebaseStore>()(
             isSyncing: false 
           });
           get().removePendingChange('hobbies');
-        } catch (error) {
+        } catch (error: any) {
           console.error('خطأ في حفظ الهوايات:', error);
+          
+          // التحقق من خطأ السيرة الذاتية غير موجودة
+          if (error.message?.includes('السيرة الذاتية غير موجودة')) {
+            set({ 
+              currentResumeId: null,
+              syncError: 'السيرة الذاتية غير موجودة - تم مسح المعرف',
+              isSyncing: false 
+            });
+            get().removePendingChange('hobbies');
+            return;
+          }
+          
           set({ 
             syncError: 'فشل في حفظ الهوايات',
             isSyncing: false 
@@ -223,8 +295,20 @@ export const useFirebaseStore = create<FirebaseStore>()(
             isSyncing: false 
           });
           get().removePendingChange('courses');
-        } catch (error) {
+        } catch (error: any) {
           console.error('خطأ في حفظ الدورات:', error);
+          
+          // التحقق من خطأ السيرة الذاتية غير موجودة
+          if (error.message?.includes('السيرة الذاتية غير موجودة')) {
+            set({ 
+              currentResumeId: null,
+              syncError: 'السيرة الذاتية غير موجودة - تم مسح المعرف',
+              isSyncing: false 
+            });
+            get().removePendingChange('courses');
+            return;
+          }
+          
           set({ 
             syncError: 'فشل في حفظ الدورات',
             isSyncing: false 
@@ -248,8 +332,20 @@ export const useFirebaseStore = create<FirebaseStore>()(
             isSyncing: false 
           });
           get().removePendingChange('references');
-        } catch (error) {
+        } catch (error: any) {
           console.error('خطأ في حفظ المراجع:', error);
+          
+          // التحقق من خطأ السيرة الذاتية غير موجودة
+          if (error.message?.includes('السيرة الذاتية غير موجودة')) {
+            set({ 
+              currentResumeId: null,
+              syncError: 'السيرة الذاتية غير موجودة - تم مسح المعرف',
+              isSyncing: false 
+            });
+            get().removePendingChange('references');
+            return;
+          }
+          
           set({ 
             syncError: 'فشل في حفظ المراجع',
             isSyncing: false 
@@ -273,8 +369,20 @@ export const useFirebaseStore = create<FirebaseStore>()(
             isSyncing: false 
           });
           get().removePendingChange('achievements');
-        } catch (error) {
+        } catch (error: any) {
           console.error('خطأ في حفظ الإنجازات:', error);
+          
+          // التحقق من خطأ السيرة الذاتية غير موجودة
+          if (error.message?.includes('السيرة الذاتية غير موجودة')) {
+            set({ 
+              currentResumeId: null,
+              syncError: 'السيرة الذاتية غير موجودة - تم مسح المعرف',
+              isSyncing: false 
+            });
+            get().removePendingChange('achievements');
+            return;
+          }
+          
           set({ 
             syncError: 'فشل في حفظ الإنجازات',
             isSyncing: false 
@@ -298,8 +406,20 @@ export const useFirebaseStore = create<FirebaseStore>()(
             isSyncing: false 
           });
           get().removePendingChange('customSections');
-        } catch (error) {
+        } catch (error: any) {
           console.error('خطأ في حفظ الأقسام المخصصة:', error);
+          
+          // التحقق من خطأ السيرة الذاتية غير موجودة
+          if (error.message?.includes('السيرة الذاتية غير موجودة')) {
+            set({ 
+              currentResumeId: null,
+              syncError: 'السيرة الذاتية غير موجودة - تم مسح المعرف',
+              isSyncing: false 
+            });
+            get().removePendingChange('customSections');
+            return;
+          }
+          
           set({ 
             syncError: 'فشل في حفظ الأقسام المخصصة',
             isSyncing: false 
@@ -345,8 +465,20 @@ export const useFirebaseStore = create<FirebaseStore>()(
             isSyncing: false 
           });
           console.log('تم مزامنة التغييرات المعلقة بنجاح');
-        } catch (error) {
+        } catch (error: any) {
           console.error('خطأ في مزامنة التغييرات المعلقة:', error);
+          
+          // التحقق من خطأ السيرة الذاتية غير موجودة
+          if (error.message?.includes('السيرة الذاتية غير موجودة')) {
+            set({ 
+              currentResumeId: null,
+              pendingChanges: {},
+              syncError: 'السيرة الذاتية غير موجودة - تم مسح المعرف والتغييرات المعلقة',
+              isSyncing: false 
+            });
+            return;
+          }
+          
           set({ 
             syncError: 'فشل في المزامنة',
             isSyncing: false 
