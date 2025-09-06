@@ -57,6 +57,16 @@ export default function AdditionalInfoStep() {
     updateCourse(id, { [field]: value });
   };
 
+  const handleDescriptionChange = (id: string, value: string) => {
+    const lines = value.split('\n');
+    const formattedLines = lines.map(line => {
+      if (line.trim() === '') return '';
+      return line.startsWith('• ') ? line : '• ' + line;
+    });
+    const formattedValue = formattedLines.join('\n');
+    handleUpdateCourse(id, 'description', formattedValue);
+  };
+
   const handleRemoveCourse = (id: string) => {
     removeCourse(id);
   };
@@ -134,7 +144,7 @@ export default function AdditionalInfoStep() {
                       </Button>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-4" dir="rtl">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Course Name */}
                       <div className="space-y-2">
@@ -221,8 +231,8 @@ export default function AdditionalInfoStep() {
                       <Textarea
                         id={`course-description-${course.id}`}
                         value={course.description || ''}
-                        onChange={(e) => handleUpdateCourse(course.id, 'description', e.target.value)}
-                        placeholder="اكتب وصفاً موجزاً عن الدورة التدريبية..."
+                        onChange={(e) => handleDescriptionChange(course.id, e.target.value)}
+                        placeholder="اكتب وصفاً موجزاً عن الدورة التدريبية (كل سطر سيظهر بنقطة)..."
                         rows={3}
                       />
                     </div>
