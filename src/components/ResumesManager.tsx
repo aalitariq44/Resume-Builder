@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { EyeIcon } from 'lucide-react';
 
 export default function ResumesManager() {
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -46,6 +47,10 @@ export default function ResumesManager() {
 
   const handleEditResume = (resumeId: string) => {
     window.location.href = `/builder?resumeId=${resumeId}`;
+  };
+
+  const handlePreviewResume = (resumeId: string) => {
+    window.location.href = `/preview?resumeId=${resumeId}`;
   };
 
   const handleDuplicateResume = async (resumeId: string, title: string) => {
@@ -190,6 +195,15 @@ export default function ResumesManager() {
                   </div>
                   
                   <div className="flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => handlePreviewResume(resume.id)}
+                      variant="outline"
+                      className="flex items-center gap-1"
+                    >
+                      <EyeIcon className="w-4 h-4" />
+                      معاينة
+                    </Button>
                     <Button
                       size="sm"
                       onClick={() => handleEditResume(resume.id)}

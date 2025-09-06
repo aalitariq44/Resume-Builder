@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useFirebaseResumes } from '@/hooks/useFirebaseResumes';
+import { useAuthStore } from '@/store/authStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,32 +11,41 @@ import { ArrowLeftIcon, RefreshCwIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import AuthProvider from '@/components/auth/AuthProvider';
 
 export default function PreviewPage() {
+  return (
+    <AuthProvider>
+      <PreviewPageContent />
+    </AuthProvider>
+  );
+}
+
+function PreviewPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const resumeId = searchParams.get('resumeId');
 
-  // استخدام userId مؤقت - في التطبيق الحقيقي سيأتي من نظام التوثيق
-  const userId = 'temp-user-id';
+  // استخدام نظام المصادقة الحقيقي
+  const { user, isAuthenticated } = useAuthStore();
 
   const {
     currentResume,
     loading,
     error,
     subscribeToResume
-  } = useFirebaseResumes(userId);
+  } = useFirebaseResumes(user?.uid);
 
   // جلب البيانات عند التحميل
   useEffect(() => {
-    if (resumeId) {
+    if (resumeId && user?.uid) {
       subscribeToResume(resumeId);
     }
-  }, [resumeId, subscribeToResume]);
+  }, [resumeId, user?.uid, subscribeToResume]);
 
   // إعادة جلب البيانات
   const handleRefresh = () => {
-    if (resumeId) {
+    if (resumeId && user?.uid) {
       subscribeToResume(resumeId);
     }
   };
@@ -67,7 +77,7 @@ export default function PreviewPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600 mb-4">لم يتم العثور على السيرة الذاتية</p>
-          <Button onClick={() => router.push('/resumes')}>العودة للسير الذاتية</Button>
+          <Button onClick={() => router.push('/')}>العودة للسير الذاتية</Button>
         </div>
       </div>
     );
@@ -83,7 +93,7 @@ export default function PreviewPage() {
           <div className="flex items-center gap-4 mb-4">
             <Button
               variant="outline"
-              onClick={() => router.push('/resumes')}
+              onClick={() => router.push('/')}
               className="flex items-center gap-2"
             >
               <ArrowLeftIcon className="w-4 h-4" />
