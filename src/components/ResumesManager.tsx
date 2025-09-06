@@ -70,7 +70,7 @@ export default function ResumesManager() {
   const formatDate = (timestamp: any) => {
     if (!timestamp) return '';
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleDateString('ar-SA');
+    return date.toLocaleDateString('en-US');
   };
 
   if (isLoading) {
