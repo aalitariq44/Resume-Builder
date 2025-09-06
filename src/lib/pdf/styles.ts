@@ -265,6 +265,7 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
       fontSize: theme.fonts.size.small,
       color: theme.colors.text,
       fontFamily,
+      textAlign: 'right',
     },
 
     skillLevel: {
@@ -495,6 +496,22 @@ export const translateLanguageLevel = (level: string, language: 'ar' | 'en' = 'a
       'B2': 'B2 - Upper Intermediate',
       'C1': 'C1 - Advanced',
       'C2': 'C2 - Proficiency',
+    },
+  };
+  
+  return translations[language][level] || level;
+};
+
+// دالة لترجمة مستويات الهوايات
+export const translateHobbyLevel = (level: string, language: 'ar' | 'en' = 'ar'): string => {
+  const translations: Record<string, Record<string, string>> = {
+    ar: {
+      'hobby': 'هواية',
+      'professional': 'مهني',
+    },
+    en: {
+      'hobby': 'Hobby',
+      'professional': 'Professional',
     },
   };
   

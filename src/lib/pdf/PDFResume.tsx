@@ -1,7 +1,7 @@
 import React from 'react';
 import { Document, Page, Text, View, Image } from '@react-pdf/renderer';
 import { Resume } from '@/types';
-import { createStyles, getSkillBarWidth, translateSkillLevel, translateLanguageLevel } from './styles';
+import { createStyles, getSkillBarWidth, translateSkillLevel, translateLanguageLevel, translateHobbyLevel } from './styles';
 import { registerFonts } from './fonts';
 
 // تسجيل الخطوط عند تحميل المكون
@@ -309,13 +309,17 @@ const HobbiesSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, sty
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>الهوايات والاهتمامات</Text>
       <View style={styles.sectionContent}>
-        <View style={styles.skillsContainer}>
-          {resume.hobbies.map((hobby, index) => (
-            <View key={hobby.id} style={styles.skillItem}>
+        {resume.hobbies.map((hobby, index) => (
+          <View key={hobby.id} style={styles.item}>
+            <View style={styles.skillInfo}>
               <Text style={styles.skillName}>{hobby.name}</Text>
+              <Text style={styles.skillLevel}>{translateHobbyLevel(hobby.level, resume.language)}</Text>
             </View>
-          ))}
-        </View>
+            {hobby.description && (
+              <Text style={styles.itemDescription}>{hobby.description}</Text>
+            )}
+          </View>
+        ))}
       </View>
     </View>
   );
