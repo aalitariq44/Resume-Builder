@@ -17,14 +17,6 @@ const skillLevels = [
   { value: 'excellent', label: 'ممتاز' }
 ];
 
-const skillCategories = [
-  { value: 'technical', label: 'مهارات تقنية' },
-  { value: 'communication', label: 'مهارات التواصل' },
-  { value: 'leadership', label: 'مهارات القيادة' },
-  { value: 'personal', label: 'مهارات شخصية' },
-  { value: 'custom', label: 'أخرى' }
-];
-
 export default function SkillsStepSimple() {
   const { formData, setSkills } = useResumeStore();
   const [skillsList, setSkillsList] = useState<Skill[]>([]);
@@ -39,8 +31,7 @@ export default function SkillsStepSimple() {
       const defaultSkill: Skill = {
         id: Date.now().toString(),
         name: '',
-        level: 'intermediate',
-        category: 'technical'
+        level: 'intermediate'
       };
       setSkillsList([defaultSkill]);
     }
@@ -65,8 +56,7 @@ export default function SkillsStepSimple() {
     const newSkill: Skill = {
       id: Date.now().toString(),
       name: '',
-      level: 'intermediate',
-      category: 'technical'
+      level: 'intermediate'
     };
     const updated = [...skillsList, newSkill];
     saveToStore(updated);
@@ -118,7 +108,7 @@ export default function SkillsStepSimple() {
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         اسم المهارة *
@@ -145,27 +135,6 @@ export default function SkillsStepSimple() {
                           {skillLevels.map((level) => (
                             <SelectItem key={level.value} value={level.value}>
                               {level.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        فئة المهارة *
-                      </label>
-                      <Select
-                        value={skill.category}
-                        onValueChange={(value) => updateField(index, 'category', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر فئة المهارة" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {skillCategories.map((category) => (
-                            <SelectItem key={category.value} value={category.value}>
-                              {category.label}
                             </SelectItem>
                           ))}
                         </SelectContent>

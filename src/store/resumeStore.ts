@@ -592,8 +592,7 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
         const newSkill: Skill = {
           id: generateId(),
           name: '',
-          level: 'intermediate',
-          category: 'technical'
+          level: 'intermediate'
         };
         set({
           formData: {

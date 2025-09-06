@@ -77,8 +77,6 @@ export interface Skill {
   id: string;
   name: string;
   level: 'beginner' | 'intermediate' | 'good' | 'very-good' | 'excellent';
-  category: 'technical' | 'communication' | 'time-management' | 'problem-solving' | 'critical-thinking' | 'leadership' | 'personal' | 'custom';
-  customCategory?: string;
   yearsOfExperience?: number;
 }
 

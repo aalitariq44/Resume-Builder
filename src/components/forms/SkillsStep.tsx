@@ -16,17 +16,6 @@ type SkillsFormData = {
   skills: Skill[];
 };
 
-const skillCategories = [
-  { value: 'technical', label: 'تقنية' },
-  { value: 'communication', label: 'تواصل' },
-  { value: 'time-management', label: 'إدارة الوقت' },
-  { value: 'problem-solving', label: 'حل المشكلات' },
-  { value: 'critical-thinking', label: 'التفكير النقدي' },
-  { value: 'leadership', label: 'قيادة' },
-  { value: 'personal', label: 'شخصية' },
-  { value: 'custom', label: 'أخرى' }
-];
-
 const skillLevels = [
   { value: 'beginner', label: 'مبتدئ' },
   { value: 'intermediate', label: 'متوسط' },
@@ -62,7 +51,6 @@ export default function SkillsStep() {
     const newSkill = {
       id: Date.now().toString(),
       name: '',
-      category: 'technical' as const,
       level: 'intermediate' as const,
       yearsOfExperience: 1,
     };
@@ -125,19 +113,19 @@ export default function SkillsStep() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        الفئة *
+                        مستوى الإتقان *
                       </label>
                       <Select
-                        value={watchedSkills[index]?.category}
-                        onValueChange={(value) => setValue(`skills.${index}.category`, value as Skill['category'])}
+                        value={watchedSkills[index]?.level}
+                        onValueChange={(value) => setValue(`skills.${index}.level`, value as Skill['level'])}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="اختر فئة المهارة" />
+                          <SelectValue placeholder="اختر مستوى الإتقان" />
                         </SelectTrigger>
                         <SelectContent>
-                          {skillCategories.map((category) => (
-                            <SelectItem key={category.value} value={category.value}>
-                              {category.label}
+                          {skillLevels.map((level) => (
+                            <SelectItem key={level.value} value={level.value}>
+                              {level.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
