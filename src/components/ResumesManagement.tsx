@@ -228,13 +228,13 @@ export default function ResumesManagementPage() {
     duplicateResume,
     fetchResumes 
   } = useFirebaseResumes(userId);
-  
-  const { setCurrentResumeId, setUserId } = useFirebaseStore();
+
+  const { setCurrentResumeId } = useFirebaseStore();
 
   // تعيين معرف المستخدم عند التحميل
   useEffect(() => {
-    setUserId(userId);
-  }, [setUserId, userId]);
+    // User ID is managed by the authentication system
+  }, [userId]);
 
   // فلترة السير الذاتية حسب البحث
   const filteredResumes = resumes.filter(resume =>
