@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { SaveStatus } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { useFirebaseStore } from '@/store/firebaseStore';
+import { ResumeService } from '@/lib/firestore';
 
 // Steps configuration
 const STEPS = [
@@ -277,39 +278,48 @@ function BuilderPageContent() {
   const saveCurrentStepToFirebase = async () => {
     const data = formData.data;
     const stepId = STEPS[currentStep]?.id;
-    if (!stepId) return;
-    if (!formData.isDirty) return;
+    if (!stepId || !currentResumeId || !user) return;
+
     try {
+      // Build a minimal sections object for the current step and save in one batch
+      const sections: Record<string, any> = {};
       switch (stepId) {
         case 'personal-info':
-          await firebaseStore.savePersonalInfoToFirebase(data.personalInfo!);
+          sections.personalInfo = data.personalInfo || {};
           break;
         case 'education':
-          await firebaseStore.saveEducationToFirebase(data.education || []);
+          sections.education = data.education || [];
           break;
         case 'experience':
-          await firebaseStore.saveExperienceToFirebase(data.experience || []);
+          sections.experience = data.experience || [];
           break;
         case 'skills':
-          await firebaseStore.saveSkillsToFirebase(data.skills || []);
+          sections.skills = data.skills || [];
           break;
         case 'languages':
-          await firebaseStore.saveLanguagesToFirebase(data.languages || []);
+          sections.languages = data.languages || [];
           break;
         case 'hobbies':
-          await firebaseStore.saveHobbiesToFirebase(data.hobbies || []);
+          sections.hobbies = data.hobbies || [];
           break;
         case 'additional':
-          await firebaseStore.saveCoursesToFirebase(data.courses || []);
-          await firebaseStore.saveAchievementsToFirebase(data.achievements || []);
-          await firebaseStore.saveReferencesToFirebase(data.references || []);
-          await firebaseStore.saveCustomSectionsToFirebase(data.customSections || []);
+          sections.courses = data.courses || [];
+          sections.achievements = data.achievements || [];
+          sections.references = data.references || [];
+          sections.customSections = data.customSections || [];
+          break;
+        case 'preview':
+          // لا حاجة لتحديث شيء في خطوة المعاينة
           break;
         default:
           break;
-  }
-  // بعد الحفظ بنجاح اعتبر النموذج نظيفاً
-  markFormClean();
+      }
+
+      if (Object.keys(sections).length > 0) {
+        await ResumeService.saveBatch(currentResumeId, user.uid, sections);
+        // بعد الحفظ بنجاح اعتبر النموذج نظيفاً
+        markFormClean();
+      }
     } catch (e) {
       console.error('فشل الحفظ قبل التنقل:', e);
     }
@@ -329,8 +339,12 @@ function BuilderPageContent() {
     }
   };
 
-  const handleStepChange = (step: number) => {
-    setCurrentStep(step);
+  const handleStepClick = (step: number) => {
+    // حفظ دائماً قبل تغيير الخطوة
+    (async () => {
+      await saveCurrentStepToFirebase();
+      setCurrentStep(step);
+    })();
   };
 
   // عرض شاشة التحميل
@@ -395,7 +409,7 @@ function BuilderPageContent() {
                 <StepNavigation
                   currentStep={currentStep}
                   totalSteps={totalSteps}
-                  onStepChange={handleStepChange}
+                  onStepChange={handleStepClick}
                 />
               </CardContent>
             </Card>
