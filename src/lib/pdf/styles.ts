@@ -244,7 +244,7 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
     },
 
     skillLevel: {
-      fontSize: theme.fonts.size.small - 1,
+      fontSize: theme.fonts.size.small,
       color: theme.colors.secondary,
       fontFamily,
     },
@@ -257,9 +257,11 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
     },
 
     skillInfo: {
-      flexDirection: 'column',
-      marginBottom: 4,
+      flexDirection: direction === 'rtl' ? 'row-reverse' : 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
       width: '100%',
+      marginBottom: 4,
     },
 
     skillBarLabel: {
