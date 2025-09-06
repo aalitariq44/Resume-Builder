@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { EyeIcon } from 'lucide-react';
+import { EyeIcon, LogOutIcon } from 'lucide-react';
 
 export default function ResumesManager() {
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -106,8 +106,9 @@ export default function ResumesManager() {
               <Button
                 variant="outline"
                 onClick={signOut}
+                className="p-2"
               >
-                تسجيل خروج
+                <LogOutIcon className="w-4 h-4" />
               </Button>
             </div>
           </div>
