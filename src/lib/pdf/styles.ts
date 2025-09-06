@@ -319,7 +319,7 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
     },
 
     languageName: {
-      fontSize: theme.fonts.size.base,
+      fontSize: theme.fonts.size.small,
       color: theme.colors.text,
       fontFamily,
     },
