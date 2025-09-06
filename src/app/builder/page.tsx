@@ -237,7 +237,7 @@ const ResumeInfo: React.FC = () => {
 
 // BuilderPage Component with new Authentication system
 function BuilderPageContent() {
-  const { formData, setCurrentStep, nextStep, prevStep, markFormClean } = useResumeStore();
+  const { formData, setCurrentStep, nextStep, prevStep, markFormClean, hydrateFromResume } = useResumeStore();
   const { loadResume, currentResume, currentResumeId, isLoading, error } = useResumesManagerStore();
   const { user } = useAuthStore();
   const firebaseStore = useFirebaseStore();
@@ -260,10 +260,11 @@ function BuilderPageContent() {
   // تحديث store المحلي عند جلب السيرة الذاتية
   useEffect(() => {
     if (currentResume) {
-      // تحديث formData بالبيانات من Firebase
-      console.log('تم جلب السيرة الذاتية من Firebase:', currentResume);
+      // مزامنة بيانات النموذج مع السيرة الذاتية من Firebase
+      hydrateFromResume(currentResume as any);
+      console.log('تم جلب السيرة الذاتية من Firebase وتم تهيئة الحقول:', currentResume?.id);
     }
-  }, [currentResume]);
+  }, [currentResume, hydrateFromResume]);
 
   // مزامنة currentResumeId مع firebaseStore
   useEffect(() => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useResumeStore } from '@/store/resumeStore';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,11 @@ import { Hobby } from '@/types';
 export default function HobbiesStep() {
   const { formData, addHobby, updateHobby, removeHobby } = useResumeStore();
   const hobbies = formData.data.hobbies || [];
+
+  // إعادة التصيير عند تحديث البيانات من Firebase
+  useEffect(() => {
+    // لا شيء هنا؛ مجرد الاعتماد على حالة المتجر
+  }, [formData.data.hobbies]);
 
   const hobbyLevelOptions = [
     { value: 'hobby', label: 'هواية شخصية' },

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useResumeStore } from '@/store/resumeStore';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,11 @@ import { Language } from '@/types';
 export default function LanguagesStep() {
   const { formData, addLanguage, updateLanguage, removeLanguage } = useResumeStore();
   const languages = formData.data.languages || [];
+
+  // لا تستخدم react-hook-form هنا، لكن نحتاج إلى إعادة التصيير عند التحميل
+  useEffect(() => {
+    // مجرد إجبار على إعادة التصيير عبر قراءة formData، اللغات تأتي من المتجر مباشرة
+  }, [formData.data.languages]);
 
   const languageLevelOptions = [
     { value: 'beginner', label: 'مبتدئ' },

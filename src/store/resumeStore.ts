@@ -98,6 +98,8 @@ interface ResumeStore extends AppState {
   setResume: (resume: Resume) => void;
   updateResume: (updates: Partial<Resume>) => void;
   resetResume: () => void;
+  // Hydration from Firebase
+  hydrateFromResume: (resume: Resume) => void;
   
   // Actions for Personal Info
   updatePersonalInfo: (info: Partial<PersonalInfo>) => void;
@@ -203,6 +205,15 @@ const reorder = <T>(list: T[], startIndex: number, endIndex: number): T[] => {
   return result;
 };
 
+// موازنة بسيطة لمقارنة عمق الكائنات لتجنب تحديثات غير ضرورية (تكفي لحالتنا هنا)
+const deepEqual = (a: any, b: any): boolean => {
+  try {
+    return JSON.stringify(a) === JSON.stringify(b);
+  } catch {
+    return a === b;
+  }
+};
+
 export const useResumeStore = create<ResumeStore>()((set, get) => ({
   // Initial State
   resume: null,
@@ -233,11 +244,27 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
     formData: createDefaultFormData()
   }),
 
+  // Hydration from Firebase (used when loading an existing resume)
+  hydrateFromResume: (resume) => set((state) => ({
+    resume,
+    formData: {
+      ...state.formData,
+      data: resume,
+      isDirty: false,
+      lastSaved: new Date().toISOString()
+    },
+    education: resume.education || []
+  })),
+
   // Personal Info Actions
   updatePersonalInfo: (info) => {
     const state = get();
     const currentPersonalInfo = state.formData.data.personalInfo || createDefaultPersonalInfo();
     const updatedPersonalInfo = { ...currentPersonalInfo, ...info };
+    // لا تحدّث الحالة إن لم تتغير القيم فعلاً لتجنب حلقات إعادة التهيئة
+    if (deepEqual(currentPersonalInfo, updatedPersonalInfo)) {
+      return;
+    }
     set({
       formData: {
         ...state.formData,

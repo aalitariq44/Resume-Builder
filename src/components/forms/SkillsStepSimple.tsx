@@ -47,7 +47,7 @@ export default function SkillsStepSimple() {
     setSkills
   } = useResumeStore();
 
-  const { register, control, handleSubmit, watch, setValue } = useForm<SkillsFormData>({
+  const { register, control, handleSubmit, watch, setValue, reset } = useForm<SkillsFormData>({
     defaultValues: {
       skills: (formData.data.skills && formData.data.skills.length > 0)
         ? (formData.data.skills as any)
@@ -75,6 +75,13 @@ export default function SkillsStepSimple() {
       setSkills(watchedSkills as any);
     }
   }, [watchedSkills, setSkills]);
+
+  // إعادة تهيئة القيم عند تحميل السيرة من Firebase
+  React.useEffect(() => {
+    if (formData.data.skills) {
+      reset({ skills: formData.data.skills as any });
+    }
+  }, [formData.data.skills, reset]);
 
   const handleAddSkill = () => {
     const newSkill = {

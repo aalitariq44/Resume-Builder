@@ -29,7 +29,7 @@ export default function ExperienceStep() {
   const [newResponsibility, setNewResponsibility] = useState('');
   const [newSkill, setNewSkill] = useState('');
 
-  const { register, control, handleSubmit, watch, setValue } = useForm<ExperienceFormData>({
+  const { register, control, handleSubmit, watch, setValue, reset } = useForm<ExperienceFormData>({
     defaultValues: {
       experience: (formData.data.experience && formData.data.experience.length > 0) ? formData.data.experience : [{
         id: Date.now().toString(),
@@ -60,6 +60,13 @@ export default function ExperienceStep() {
       setExperience(watchedExperience);
     }
   }, [watchedExperience, setExperience]);
+
+  // إعادة تهيئة القيم عند تحميل السيرة من Firebase
+  useEffect(() => {
+    if (formData.data.experience) {
+      reset({ experience: formData.data.experience as any });
+    }
+  }, [formData.data.experience, reset]);
 
   const addExperienceItem = () => {
     append({

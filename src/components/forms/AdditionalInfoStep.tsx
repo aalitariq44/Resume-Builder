@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useResumeStore } from '@/store/resumeStore';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,9 @@ export default function AdditionalInfoStep() {
   const courses = formData.data.courses || [];
   const achievements = formData.data.achievements || [];
   const references = formData.data.references || [];
+
+  // إعادة التصيير عند التهيئة من Firebase
+  useEffect(() => {}, [formData.data.courses, formData.data.achievements, formData.data.references]);
 
   // Course Handlers
   const handleAddCourse = () => {

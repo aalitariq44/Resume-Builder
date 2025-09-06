@@ -236,12 +236,14 @@ export const PersonalInfoStep: React.FC = () => {
   const { formData, updatePersonalInfo, addCustomField, updateCustomField, removeCustomField } = useResumeStore();
   const personalInfo = formData.data.personalInfo!;
   const [selectedField, setSelectedField] = useState<string>('');
+  const [isResetting, setIsResetting] = useState(false);
 
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors }
   } = useForm({
     defaultValues: personalInfo
@@ -308,6 +310,7 @@ export const PersonalInfoStep: React.FC = () => {
   // Watch form changes and update store
   React.useEffect(() => {
     const subscription = watch((value) => {
+      if (isResetting) return; // لا تحدث أثناء reset لتجنب الحلقة
       // Filter out undefined values before updating
       const cleanValue = Object.fromEntries(
         Object.entries(value).filter(([_, v]) => v !== undefined)
@@ -317,7 +320,17 @@ export const PersonalInfoStep: React.FC = () => {
       }
     });
     return () => subscription.unsubscribe();
-  }, [watch, updatePersonalInfo]);
+  }, [watch, updatePersonalInfo, isResetting]);
+
+  // إعادة تهيئة النموذج عند تغيير البيانات القادمة من المتجر (عند التحميل من Firebase)
+  React.useEffect(() => {
+    if (personalInfo) {
+      setIsResetting(true);
+      reset(personalInfo as any);
+      // امنح RHF دورة حدث واحدة قبل إلغاء العلم
+      setTimeout(() => setIsResetting(false), 0);
+    }
+  }, [personalInfo, reset]);
 
   return (
     <div className="space-y-6">

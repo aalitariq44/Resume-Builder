@@ -36,7 +36,7 @@ export default function EducationStep() {
   } = useResumeStore();
   const [newAchievement, setNewAchievement] = useState('');
 
-  const { register, control, handleSubmit, watch, setValue, formState: { errors } } = useForm<EducationFormData>({
+  const { register, control, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<EducationFormData>({
     defaultValues: {
       education: (formData.data.education && formData.data.education.length > 0) ? formData.data.education : [{
         id: Date.now().toString(),
@@ -67,6 +67,13 @@ export default function EducationStep() {
       setEducation(watchedEducation);
     }
   }, [watchedEducation, setEducation]);
+
+  // إعادة تهيئة القيم عند تحميل السيرة من Firebase
+  useEffect(() => {
+    if (formData.data.education) {
+      reset({ education: formData.data.education as Education[] });
+    }
+  }, [formData.data.education, reset]);
 
   const handleAddEducation = () => {
     const newEdu = {
