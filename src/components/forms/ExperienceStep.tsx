@@ -165,18 +165,18 @@ export default function ExperienceStep() {
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        المسمى الوظيفي *
-                      </label>
-                      <Input
-                        placeholder="مثل: مطور ويب، مهندس برمجيات"
-                        value={experience.jobTitle}
-                        onChange={(e) => updateField(index, 'jobTitle', e.target.value)}
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      المسمى الوظيفي *
+                    </label>
+                    <Input
+                      placeholder="مثل: مطور ويب، مهندس برمجيات"
+                      value={experience.jobTitle}
+                      onChange={(e) => updateField(index, 'jobTitle', e.target.value)}
+                    />
+                  </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         اسم الشركة *
@@ -187,9 +187,7 @@ export default function ExperienceStep() {
                         onChange={(e) => updateField(index, 'company', e.target.value)}
                       />
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         الموقع *
