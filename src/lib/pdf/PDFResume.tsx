@@ -71,17 +71,19 @@ const ExperienceSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, 
       <View style={styles.sectionContent}>
         {resume.experience.map((exp, index) => (
           <View key={exp.id} style={styles.item}>
-            <View style={styles.itemHeader}>
-              <View>
+            <View style={styles.educationHeader}>
+              <View style={styles.degreeRow}>
                 <Text style={styles.itemTitle}>{exp.jobTitle}</Text>
-                <Text style={styles.itemSubtitle}>{exp.company}</Text>
-                {exp.location && (
-                  <Text style={styles.itemLocation}>{exp.location}</Text>
-                )}
+                {exp.position && <Text style={styles.itemSubtitle}>{exp.position}</Text>}
               </View>
-              <Text style={styles.itemDate}>
-                {exp.startDate} - {exp.isCurrentJob ? 'حتى الآن' : exp.endDate}
-              </Text>
+              <View style={styles.institutionRow}>
+                <Text style={styles.itemSubtitle}>{exp.company}</Text>
+                {exp.location && <Text style={styles.itemLocation}>({exp.location})</Text>}
+              </View>
+              <View style={styles.itemDate}>
+                <Text style={styles.dateText}>{exp.startDate}</Text>
+                <Text style={styles.dateText}>{exp.isCurrentJob ? 'حتى الآن' : exp.endDate}</Text>
+              </View>
             </View>
             
             {exp.description && (
