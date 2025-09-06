@@ -157,9 +157,10 @@ const EducationSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, s
                 )}
                 <Text style={styles.itemSubtitle}>({edu.institution})</Text>
               </View>
-              <Text style={styles.itemDate}>
-                {edu.startDate} - {edu.isCurrentlyStudying ? 'حتى الآن' : edu.endDate}
-              </Text>
+              <View style={styles.itemDate}>
+                <Text style={styles.dateText}>{edu.startDate}</Text>
+                <Text style={styles.dateText}>{edu.isCurrentlyStudying ? 'حتى الآن' : edu.endDate}</Text>
+              </View>
             </View>
             
             {edu.achievements && edu.achievements.length > 0 && (

@@ -191,9 +191,16 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
     },
 
     itemDate: {
+      flexDirection: direction === 'rtl' ? 'row-reverse' : 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      width: '100%',
+      marginBottom: 4,
+    },
+
+    dateText: {
       fontSize: theme.fonts.size.small,
       color: theme.colors.secondary,
-      textAlign: direction === 'rtl' ? 'left' : 'right',
       fontFamily,
     },
 
