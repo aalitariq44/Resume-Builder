@@ -136,6 +136,44 @@ const ExperienceSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, 
   );
 };
 
+// مكون المعلومات الشخصية الإضافية
+const AdditionalPersonalInfoSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, styles }) => {
+  return (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>المعلومات الشخصية</Text>
+      <View style={styles.sectionContent}>
+        <View style={styles.item}>
+          <View style={styles.educationHeader}>
+            <View style={styles.degreeRow}>
+              <Text style={styles.itemTitle}>الاسم الكامل: أحمد محمد علي</Text>
+            </View>
+            <View style={styles.institutionRow}>
+              <Text style={styles.itemSubtitle}>العنوان: القاهرة، مصر</Text>
+            </View>
+            <View style={styles.itemDate}>
+              <Text style={styles.dateText}>الهاتف: +20 123 456 7890</Text>
+            </View>
+          </View>
+          <View style={styles.list}>
+            <View style={styles.listItem}>
+              <Text style={styles.listBullet}>•</Text>
+              <Text style={styles.listText}>البريد الإلكتروني: ahmed@example.com</Text>
+            </View>
+            <View style={styles.listItem}>
+              <Text style={styles.listBullet}>•</Text>
+              <Text style={styles.listText}>تاريخ الميلاد: 1 يناير 1990</Text>
+            </View>
+            <View style={styles.listItem}>
+              <Text style={styles.listBullet}>•</Text>
+              <Text style={styles.listText}>الجنسية: مصري</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+};
+
 // مكون التعليم
 const EducationSection: React.FC<{ resume: Resume; styles: any }> = ({ resume, styles }) => {
   if (!resume.education || resume.education.length === 0) return null;
@@ -338,6 +376,8 @@ const PDFResume: React.FC<PDFResumeProps> = ({ resume }) => {
     switch (sectionId) {
       case 'personalInfo':
         return <PersonalInfoSection key={sectionId} resume={resume} styles={styles} />;
+      case 'additionalPersonalInfo':
+        return <AdditionalPersonalInfoSection key={sectionId} resume={resume} styles={styles} />;
       case 'objective':
         return <ObjectiveSection key={sectionId} resume={resume} styles={styles} />;
       case 'experience':
@@ -379,11 +419,16 @@ const PDFResume: React.FC<PDFResumeProps> = ({ resume }) => {
           <View style={styles.twoColumnLayout}>
             {/* العمود الأيمن الجديد - 40% */}
             <View style={styles.rightColumn}>
+              {/* مكون المعلومات الشخصية الإضافية يظهر دائماً */}
+              {!resume.hiddenSections?.includes('additionalPersonalInfo') && (
+                <AdditionalPersonalInfoSection resume={resume} styles={styles} />
+              )}
               {resume.sectionOrder?.filter(section => 
-                ['objective', 'education', 'skills', 'languages'].includes(section) && 
+                ['objective', 'additionalPersonalInfo', 'education', 'skills', 'languages'].includes(section) && 
                 !resume.hiddenSections?.includes(section)
               ).map(sectionId => renderSection(sectionId)) || [
                 <ObjectiveSection key="objective" resume={resume} styles={styles} />,
+                <AdditionalPersonalInfoSection key="additionalPersonalInfo" resume={resume} styles={styles} />,
                 <EducationSection key="education" resume={resume} styles={styles} />,
                 <SkillsSection key="skills" resume={resume} styles={styles} />,
                 <LanguagesSection key="languages" resume={resume} styles={styles} />,
