@@ -293,9 +293,26 @@ export default function EducationStep() {
                     </div>
 
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        تاريخ النهاية
-                      </label>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-sm font-medium text-gray-700">
+                          تاريخ النهاية
+                        </label>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id={`isCurrentlyStudying-${index}`}
+                            checked={watchedEducation[index]?.isCurrentlyStudying || false}
+                            onChange={(e) => handleCurrentlyStudyingChange(index, e.target.checked)}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                          <label
+                            htmlFor={`isCurrentlyStudying-${index}`}
+                            className="text-sm text-gray-700"
+                          >
+                            أدرس حالياً
+                          </label>
+                        </div>
+                      </div>
                       <div className="grid grid-cols-2 gap-2">
                         <Select
                           value={watchedEducation[index]?.endMonth}
@@ -337,20 +354,8 @@ export default function EducationStep() {
                       )}
                     </div>
 
-                    <div className="flex items-center space-x-2 pt-8">
-                      <input
-                        type="checkbox"
-                        id={`isCurrentlyStudying-${index}`}
-                        checked={watchedEducation[index]?.isCurrentlyStudying || false}
-                        onChange={(e) => handleCurrentlyStudyingChange(index, e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <label
-                        htmlFor={`isCurrentlyStudying-${index}`}
-                        className="text-sm text-gray-700"
-                      >
-                        أدرس حالياً
-                      </label>
+                    <div className="md:col-span-1">
+                      {/* Empty column for spacing */}
                     </div>
                   </div>
 
