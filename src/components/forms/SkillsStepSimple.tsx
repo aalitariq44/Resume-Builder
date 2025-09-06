@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useResumeStore } from '@/store/resumeStore';
@@ -43,18 +43,21 @@ export default function SkillsStepSimple() {
     formData, 
     addSkill, 
     updateSkill, 
-    removeSkill 
+    removeSkill,
+    setSkills
   } = useResumeStore();
 
   const { register, control, handleSubmit, watch, setValue } = useForm<SkillsFormData>({
     defaultValues: {
-      skills: [{
-        id: Date.now().toString(),
-        name: '',
-        category: 'technical',
-        level: 'intermediate',
-        yearsOfExperience: 1,
-      }],
+      skills: (formData.data.skills && formData.data.skills.length > 0)
+        ? (formData.data.skills as any)
+        : [{
+            id: Date.now().toString(),
+            name: '',
+            category: 'technical',
+            level: 'intermediate',
+            yearsOfExperience: 1,
+          }],
     },
   });
 
@@ -64,6 +67,14 @@ export default function SkillsStepSimple() {
   });
 
   const watchedSkills = watch('skills');
+
+  // مزامنة بيانات المهارات مع حالة التطبيق حتى تُحفظ عند التنقل
+  React.useEffect(() => {
+    if (watchedSkills) {
+      // تحديث المتجر بالقيم الحالية للنموذج
+      setSkills(watchedSkills as any);
+    }
+  }, [watchedSkills, setSkills]);
 
   const handleAddSkill = () => {
     const newSkill = {
@@ -223,7 +234,7 @@ export default function SkillsStepSimple() {
           <Button
             type="button"
             variant="outline"
-            onClick={addSkill}
+            onClick={handleAddSkill}
             className="border-dashed border-2 border-gray-300 hover:border-blue-400 text-gray-600 hover:text-blue-600"
           >
             إضافة مهارة أخرى

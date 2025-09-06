@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useResumeStore } from '@/store/resumeStore';
@@ -40,7 +40,7 @@ export default function SkillsStep() {
 
   const { register, control, handleSubmit, watch, setValue } = useForm<SkillsFormData>({
     defaultValues: {
-      skills: formData.data.skills || [],
+      skills: (formData.data.skills && formData.data.skills.length > 0) ? (formData.data.skills as any) : [],
     },
   });
 
@@ -51,21 +51,23 @@ export default function SkillsStep() {
 
   const watchedSkills = watch('skills');
 
-  // تحديث الـ store عند تغيير البيانات
+  // مزامنة المتجر دائماً بالقيم الحالية لكي تُحفظ عند التنقل
   useEffect(() => {
-    if (watchedSkills && watchedSkills.length > 0) {
-      setSkills(watchedSkills);
+    if (watchedSkills) {
+      setSkills(watchedSkills as any);
     }
   }, [watchedSkills, setSkills]);
 
   const addSkill = () => {
-    append({
+    const newSkill = {
       id: Date.now().toString(),
       name: '',
-      category: 'technical',
-      level: 'intermediate',
+      category: 'technical' as const,
+      level: 'intermediate' as const,
       yearsOfExperience: 1,
-    });
+    };
+    append(newSkill as any);
+    // ملاحظة: يتم تحديث المتجر عبر useEffect بناءً على watch
   };
 
   const onSubmit = (data: SkillsFormData) => {
