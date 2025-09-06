@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Resume, FormData, Template, ResumeTheme, AppState, PersonalInfo, Education, Experience, Skill, Language, Hobby, Course, Reference, Achievement, CustomSection } from '@/types';
 import { generateId } from '@/lib/utils';
 import { useFirebaseStore } from './firebaseStore';
+import { useAuthStore } from './authStore';
 import { ResumeService } from '@/lib/firestore';
 
 // إنشاء قيم افتراضية
@@ -257,10 +258,11 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
     
     // حفظ في Firebase فقط
     const firebaseStore = useFirebaseStore.getState();
-    if (firebaseStore.currentResumeId && firebaseStore.userId) {
+    const authStore = useAuthStore.getState();
+    if (firebaseStore.currentResumeId && authStore.user) {
       ResumeService.savePersonalInfo(
         firebaseStore.currentResumeId, 
-        firebaseStore.userId, 
+        authStore.user.uid, 
         updatedPersonalInfo
       ).catch(console.error);
     }
@@ -295,10 +297,11 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
     
     // حفظ في Firebase
     const firebaseStore = useFirebaseStore.getState();
-    if (firebaseStore.currentResumeId && firebaseStore.userId) {
+    const authStore = useAuthStore.getState();
+    if (firebaseStore.currentResumeId && authStore.user) {
       ResumeService.savePersonalInfo(
         firebaseStore.currentResumeId, 
-        firebaseStore.userId, 
+        authStore.user.uid, 
         updatedPersonalInfo
       ).catch(console.error);
     }
@@ -329,10 +332,11 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
     
     // حفظ في Firebase
     const firebaseStore = useFirebaseStore.getState();
-    if (firebaseStore.currentResumeId && firebaseStore.userId) {
+    const authStore = useAuthStore.getState();
+    if (firebaseStore.currentResumeId && authStore.user) {
       ResumeService.savePersonalInfo(
         firebaseStore.currentResumeId, 
-        firebaseStore.userId, 
+        authStore.user.uid, 
         updatedPersonalInfo
       ).catch(console.error);
     }
@@ -361,10 +365,11 @@ export const useResumeStore = create<ResumeStore>()((set, get) => ({
     
     // حفظ في Firebase
     const firebaseStore = useFirebaseStore.getState();
-    if (firebaseStore.currentResumeId && firebaseStore.userId) {
+    const authStore = useAuthStore.getState();
+    if (firebaseStore.currentResumeId && authStore.user) {
       ResumeService.savePersonalInfo(
         firebaseStore.currentResumeId, 
-        firebaseStore.userId, 
+        authStore.user.uid, 
         updatedPersonalInfo
       ).catch(console.error);
     }
