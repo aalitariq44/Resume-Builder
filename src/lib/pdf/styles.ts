@@ -56,7 +56,7 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
 
     // العمود الأيسر (الصورة)
     headerLeft: {
-      width: 100,
+      width: 140,
       alignItems: 'center',
     },
 
@@ -71,8 +71,8 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
     },
 
     profileImage: {
-      width: 80,
-      height: 80,
+      width: 120,
+      height: 120,
       borderRadius: theme.styles.borderRadius,
       objectFit: 'cover',
     },
