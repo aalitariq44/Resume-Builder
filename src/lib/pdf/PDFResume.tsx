@@ -19,13 +19,17 @@ const PersonalInfoSection: React.FC<{ resume: Resume; styles: any }> = ({ resume
     <View style={styles.header}>
       <View style={styles.headerContent}>
         {/* الصورة على اليسار */}
-        {personalInfo.profileImage && (
-          <View style={styles.headerLeft}>
+        <View style={styles.headerLeft}>
+          {personalInfo.profileImage ? (
             <View style={styles.profileImageContainer}>
               <Image style={styles.profileImage} src={personalInfo.profileImage} />
             </View>
-          </View>
-        )}
+          ) : (
+            <View style={styles.profileImagePlaceholder}>
+              <Text style={styles.placeholderText}>صورة شخصية</Text>
+            </View>
+          )}
+        </View>
         
         {/* المعلومات على اليمين */}
         <View style={styles.headerRight}>

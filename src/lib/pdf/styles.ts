@@ -77,6 +77,26 @@ export const createStyles = (theme: ResumeTheme, language: 'ar' | 'en' = 'ar') =
       objectFit: 'cover',
     },
 
+    // Placeholder للصورة الشخصية
+    profileImagePlaceholder: {
+      width: 120,
+      height: 120,
+      borderRadius: theme.styles.borderRadius,
+      borderWidth: 2,
+      borderColor: theme.colors.border,
+      borderStyle: 'dashed',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.colors.background,
+    },
+
+    placeholderText: {
+      fontSize: theme.fonts.size.small,
+      color: theme.colors.secondary,
+      textAlign: 'center',
+      fontFamily,
+    },
+
     // الاسم
     fullName: {
       fontSize: theme.fonts.size.heading + 6,
