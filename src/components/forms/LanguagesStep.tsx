@@ -35,6 +35,19 @@ export default function LanguagesStep() {
     addLanguage();
   };
 
+  const handleAddCommonLanguage = (name: string, level: string) => {
+    handleAddLanguage();
+    setTimeout(() => {
+      const state = useResumeStore.getState();
+      const languages = state.formData.data.languages || [];
+      const lastLanguage = languages[languages.length - 1];
+      if (lastLanguage) {
+        handleUpdateLanguage(lastLanguage.id, 'name', name);
+        handleUpdateLanguage(lastLanguage.id, 'level', level);
+      }
+    }, 0);
+  };
+
   const handleUpdateLanguage = (id: string, field: keyof Language, value: any) => {
     updateLanguage(id, { [field]: value });
   };
@@ -140,6 +153,45 @@ export default function LanguagesStep() {
               </svg>
               <span>إضافة لغة جديدة</span>
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* Quick Add Common Languages */}
+        <Card className="bg-gray-50 border-gray-200">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg text-gray-800">إضافة سريعة للغات الشائعة</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Button
+                onClick={() => handleAddCommonLanguage('العربية', 'fluent')}
+                variant="outline"
+                className="flex items-center justify-center py-3"
+              >
+                العربية
+              </Button>
+              <Button
+                onClick={() => handleAddCommonLanguage('الإنجليزية', 'intermediate')}
+                variant="outline"
+                className="flex items-center justify-center py-3"
+              >
+                الإنجليزية
+              </Button>
+              <Button
+                onClick={() => handleAddCommonLanguage('الفرنسية', 'B1')}
+                variant="outline"
+                className="flex items-center justify-center py-3"
+              >
+                الفرنسية
+              </Button>
+              <Button
+                onClick={() => handleAddCommonLanguage('الإسبانية', 'B1')}
+                variant="outline"
+                className="flex items-center justify-center py-3"
+              >
+                الإسبانية
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
