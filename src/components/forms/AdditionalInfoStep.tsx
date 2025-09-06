@@ -60,8 +60,9 @@ export default function AdditionalInfoStep() {
   const handleDescriptionChange = (id: string, value: string) => {
     const lines = value.split('\n');
     const formattedLines = lines.map(line => {
-      if (line.trim() === '') return '';
-      return line.startsWith('• ') ? line : '• ' + line;
+      const trimmed = line.replace(/^•\s*/, '').trim();
+      if (trimmed === '') return '';
+      return '• ' + trimmed;
     });
     const formattedValue = formattedLines.join('\n');
     handleUpdateCourse(id, 'description', formattedValue);
